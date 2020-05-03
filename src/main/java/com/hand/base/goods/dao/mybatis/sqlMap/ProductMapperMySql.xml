@@ -12,27 +12,32 @@
 		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
 		T.LAST_UPD_BY as lastUpdatedBy,
 		T.product_name as productName,
-		T.province as province,
-		T.city as city,
-		T.district as district,
+		T.province_id as provinceId,
+		t2.name as province,
+		T.city_id as cityId,
+		t3.name as city,
+		T.district_id as districtId,
+		t4.name as district,
 		T.price as price,
 		T.comments as comments
 	</sql>
 
 	<sql id="fromSql">
-	from lnk_product T
+	from lnk_product T left join cx_o_area t2 on t.province_id = t2.row_id
+		  left join cx_o_area t3 on t.city_id = t3.row_id
+		  left join cx_o_area t4 on t.district_id = t4.row_id
   	</sql>
 
   	<sql id="whereAllSql">
   		where 1 = 1
-		<if test="province != null and province != '' ">
-			and T.province = #{province}
+		<if test="provinceId != null and provinceId != '' ">
+			and T.province_id = #{provinceId}
 		 </if>
-		<if test="city != null and city != '' ">
-			and T.city = #{city}
+		<if test="cityId != null and cityId != '' ">
+			and T.city_id = #{cityId}
 		</if>
-		<if test="district != null and district != '' ">
-			and T.district = #{district}
+		<if test="districtId != null and districtId != '' ">
+			and T.district_id = #{districtId}
 		</if>
 		<if test="productName != null and productName != '' ">
 			and T.product_name = #{productName}
@@ -55,14 +60,14 @@
 
 	<insert id="insert" parameterType="com.hand.base.goods.model.Product">
 		insert into lnk_product
-		  (ROW_ID, product_name, province, city,district, price,comments)
+		  (ROW_ID, product_name, province_id, city_id,district_id, price,comments)
 		values
-		  (#{id},#{productName},#{province},#{city},#{district},#{price},#{comments})
+		  (#{id},#{productName},#{provinceId},#{cityId},#{districtId},#{price},#{comments})
 	</insert>
 
 	<update id="update" parameterType="com.hand.base.goods.model.Product">
 		update lnk_product t
-		   set t.product_name = #{productName}, t.province = #{province},t.city=#{city}, t.district = #{district}, t.price = #{price}, t.comments = #{comments}
+		   set t.product_name = #{productName}, t.province_id = #{provinceId},t.city_id=#{cityId}, t.district_id = #{districtId}, t.price = #{price}, t.comments = #{comments}
 		 where t.row_id = #{id}
 	</update>
 	

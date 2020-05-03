@@ -1,7 +1,6 @@
 package com.hand.base.goods.model;
 
 import com.hand.base.basic.model.BasicModel;
-import com.hand.core.util.AppConstants;
 
 import java.math.BigDecimal;
 
@@ -22,6 +21,18 @@ public class Product extends BasicModel {
 	 * 商品名称
 	 */
 	private String productName;
+	/**
+	 * 省
+	 */
+	private String provinceId;
+	/**
+	 * 市
+	 */
+	private String cityId;
+	/**
+	 * 县
+	 */
+	private String districtId;
 	/**
 	 * 省
 	 */
@@ -98,5 +109,29 @@ public class Product extends BasicModel {
 
 	public void setProductId(String productId) {
 		this.productId = productId;
+	}
+
+	public String getProvinceId() {
+		return provinceId;
+	}
+
+	public void setProvinceId(String provinceId) {
+		this.provinceId = provinceId;
+	}
+
+	public String getCityId() {
+		return cityId;
+	}
+
+	public void setCityId(String cityId) {
+		this.cityId = cityId;
+	}
+
+	public String getDistrictId() {
+		return districtId;
+	}
+
+	public void setDistrictId(String districtId) {
+		this.districtId = districtId;
 	}
 }

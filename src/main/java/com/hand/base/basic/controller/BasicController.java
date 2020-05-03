@@ -1,34 +1,5 @@
 package com.hand.base.basic.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -49,8 +20,29 @@ import com.hand.core.modules.imports.ImportsFactory;
 import com.hand.core.util.RedisUtil;
 import com.hand.core.util.StringUtils;
 import com.hand.core.util.UserUtil;
-
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import redis.clients.jedis.Jedis;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping("/action/portal/base")
@@ -100,14 +92,8 @@ public class BasicController<T extends BasicModel> {
 			T t = (T)BasicModel.transformClass(entity, qps);
 			beforQueryAllOrExample(t,request);
 			beforQueryExample(t,request);
-			//t.setCorpid(UserUtil.getUser(session).getUsercorpid());
-			//t.setUsercorpid(UserUtil.getUser(session).getUsercorpid());
-			List<T> list = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				list = getBasicService().queryByExamplePage(t);
-			}else{
-				list = getBasicService().brandQueryByExamplePage(t);
-			}
+
+			List<T> list = getBasicService().queryByExamplePage(t);
 			result.put("success", true);
 			result.put("rows", list);
 			if(!t.getOnlyCountFlag()){
@@ -138,12 +124,6 @@ public class BasicController<T extends BasicModel> {
 		Gson gson = new GsonBuilder().setExclusionStrategies(new ExclusionStrategy() {
 			@Override
 			public boolean shouldSkipField(FieldAttributes f) {
-				 //过滤掉字段名包含
-//				for(int i=0; i<skips.length; i++){
-//					if(f.getName().equals(skips[i])){
-//						return true;
-//					}
-//				}
 				for(int i=0; i<stays.length; i++){
 					if(f.getName().equals(stays[i])){
 						return false;
@@ -220,12 +200,7 @@ public class BasicController<T extends BasicModel> {
 			beforQueryExample(t,request);
 			//导出全部 不分页
 			t.setPageFlag(false);
-			List<T> list = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				list = getBasicService().queryByExamplePage(t);
-			}else{
-				list = getBasicService().brandQueryByExamplePage(t);
-			}
+			List<T> list = getBasicService().queryByExamplePage(t);
 			while(!qps.stopExport){
 				exportWriter.wirteData(list);
 			}
@@ -370,19 +345,11 @@ public class BasicController<T extends BasicModel> {
 		Map<String, Object> result = new HashMap<String, Object>();
 		User user = UserUtil.getUser(session);
 		try{
-			T newEntry = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandInsert())){
-				beforInsert(entity, request);
-				beforUpsert(entity, request);
-				getBasicService().insert(entity);
-				newEntry = getBasicService().queryById(entity);
-			}else{
-				beforBrandInsert(entity, request);
-				beforBrandUpsert(entity, request);
-				getBasicService().brandInsert(entity);
-				newEntry = getBasicService().brandQueryById(entity);
-			}
-			
+			beforInsert(entity, request);
+			beforUpsert(entity, request);
+			getBasicService().insert(entity);
+			T newEntry = getBasicService().queryById(entity);
+
 			auditTrailInsert(entity,request,session,"N");    //审计追踪新建记录
 			
 			result.put("newRow", newEntry);
@@ -485,12 +452,7 @@ public class BasicController<T extends BasicModel> {
 		Map<String, Object> result = new HashMap<String, Object>();
 		User user = UserUtil.getUser(session);
 		try{
-			T record = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				record = getBasicService().queryById(entity);
-			}else{
-				record = getBasicService().brandQueryById(entity);
-			}
+			T record = getBasicService().queryById(entity);
 			List<T> list = new ArrayList<T>();
 			list.add(record);
 			this.pushCurrentDataCache(list, session.getId(), "base", false);
@@ -514,24 +476,13 @@ public class BasicController<T extends BasicModel> {
 		Map<String, Object> result = new HashMap<String, Object>();
 		User user = UserUtil.getUser(session);
 		try{
-			T newEntry = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandUpsert())){
-				beforUpsert(entity, request);
-				checkData(entity, request);
-				/*if(!getBasicService().isInsertFlag(entity) && !checkExistDataCache("base", session, entity)){
-					throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
-				}*/
-				getBasicService().upsert(entity);
-				newEntry = getBasicService().queryById(entity);
-			}else{
-				beforBrandUpsert(entity, request);
-				checkData(entity, request);
-				/*if(!getBasicService().isInsertFlag(entity) && !checkExistDataCache("base", session, entity)){
-					throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
-				}*/
-				getBasicService().brandUpsert(entity);
-				newEntry = getBasicService().brandQueryById(entity);
-			}
+			beforUpsert(entity, request);
+			checkData(entity, request);
+			/*if(!getBasicService().isInsertFlag(entity) && !checkExistDataCache("base", session, entity)){
+				throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
+			}*/
+			getBasicService().upsert(entity);
+			T newEntry = getBasicService().queryById(entity);
 
 			auditTrailInsert(entity,request,session,"US");    //审计追踪新建记录
 
@@ -556,25 +507,15 @@ public class BasicController<T extends BasicModel> {
 		User user = UserUtil.getUser(session);
 		try{
 			T newEntry = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandUpdate())){
-				beforUpdate(entity, request);
-				beforUpsert(entity, request);
-				checkData(entity, request);
-				/*if(!checkExistDataCache("base", session, entity)){
-					throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
-				}*/
-				getBasicService().update(entity);
-				newEntry = getBasicService().queryById(entity);
-			}else{
-				beforBrandUpdate(entity, request);
-				beforBrandUpsert(entity, request);
-				checkData(entity, request);
-				/*if(!checkExistDataCache("base", session, entity)){
-					throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
-				}*/
-				getBasicService().brandUpdate(entity);
-				newEntry = getBasicService().brandQueryById(entity);
-			}
+			beforUpdate(entity, request);
+			beforUpsert(entity, request);
+			checkData(entity, request);
+			/*if(!checkExistDataCache("base", session, entity)){
+				throw new BasicServiceException("您操作太快了，请点击下方刷新按钮后再修改记录！");
+			}*/
+			getBasicService().update(entity);
+			newEntry = getBasicService().queryById(entity);
+
 
 			auditTrailInsert(entity,request,session,"U");    //审计追踪新建记录
 			

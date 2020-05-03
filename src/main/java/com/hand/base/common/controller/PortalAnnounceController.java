@@ -1,29 +1,5 @@
 package com.hand.base.common.controller;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import com.hand.base.user.model.User;
-import com.hand.core.util.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hand.base.basic.controller.BasicController;
@@ -39,11 +15,33 @@ import com.hand.base.common.service.AnnounceService;
 import com.hand.base.common.service.AttachmentService;
 import com.hand.base.common.service.InterObjectService;
 import com.hand.base.orgnization.model.Orgnization;
+import com.hand.base.user.model.User;
 import com.hand.core.basic.query.Filter;
 import com.hand.core.basic.query.QueryParams;
 import com.hand.core.basic.query.Sorter;
 import com.hand.core.modules.export.ExportFactory;
 import com.hand.core.modules.export.ExportWriter;
+import com.hand.core.util.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/action/portal/announce")
@@ -115,20 +113,8 @@ public class PortalAnnounceController extends BasicController<Announce>{
 	@ResponseBody
 	public Map<String, Object> manageList(QueryParams qps, Announce entity,HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<String, Object>();
-		List<Announce> list = new ArrayList<Announce>();
-		qps.addSorter(new Sorter("lastUpdated",Sorter.DIR_DESC));
 		try{
-			qps.preDealSecurity(request);
-			Announce t = (Announce)BasicModel.transformClass(entity.getClass(), qps);
-			beforQueryAllOrExample(t,request);
-			beforQueryExample(t,request);
-			t.setAnneStatus(entity.getAnneStatus());
-			t.setAttr1(entity.getAttr1());
-			list = announceService.queryByExamplePage(t);
 			result.put("success", true);
-			result.put("rows", list);
-			this.pushCurrentDataCache(list, session.getId(), "base", false);
-			result.put("total", getCount(((BasicModel)t), list.size()));
 		}catch(Exception e){
 			e.printStackTrace();
 			result.put("success", false);

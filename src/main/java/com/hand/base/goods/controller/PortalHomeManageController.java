@@ -9,8 +9,8 @@ import com.hand.base.basic.service.KeyGenerateService;
 import com.hand.base.common.model.Image;
 import com.hand.base.common.service.MyFileService;
 import com.hand.base.goods.model.Goods;
-import com.hand.base.goods.model.Product;
-import com.hand.base.goods.service.ProductService;
+import com.hand.base.goods.model.HomeManage;
+import com.hand.base.goods.service.HomeManageService;
 import com.hand.core.util.FileUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +33,11 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/action/portal/product")
-public class PortalProductController extends BasicController<Product> {
-	private static final Logger logger = LogManager.getLogger(PortalProductController.class);
+@RequestMapping("/action/portal/homeManage")
+public class PortalHomeManageController extends BasicController<HomeManage> {
+	private static final Logger logger = LogManager.getLogger(PortalHomeManageController.class);
 	@Autowired
-	private ProductService productService;
+	private HomeManageService homeManageService;
 	
 	@Resource
 	private MyFileService myFileService;
@@ -46,23 +46,24 @@ public class PortalProductController extends BasicController<Product> {
 	private KeyGenerateService keyGenerateService;
 	
 	@Override
-	public BasicService<Product> getBasicService() throws Exception {
-		return productService;
+	public BasicService<HomeManage> getBasicService() throws Exception {
+		return homeManageService;
 	}
 
-
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	@RequestMapping(value = "/smsHomeLogo", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> list(Product record, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+	public Map<String, Object> smsHomeLogo(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		try{
-
-
+			HomeManage homeManage = new HomeManage();
+			homeManage.setId("123");
+			homeManage.setPic("http://img.zcool.cn/community/01d56b5542d8bc0000019ae98da289.jpg@1280w_1l_2o_100sh.png");
+			homeManage.setType("PC");
 
 			result.put("success", 1);
 			result.put("code", "");
 			result.put("msg", "");
-			result.put("data", record);
+			result.put("data", homeManage);
 		}catch(Exception e){
 			e.printStackTrace();
 			result.put("success", false);
@@ -70,7 +71,8 @@ public class PortalProductController extends BasicController<Product> {
 		}
 		return result;
 	}
-	
+
+
 	@RequestMapping(value = "/getNewId", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> getNewId(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
@@ -87,22 +89,10 @@ public class PortalProductController extends BasicController<Product> {
 		return result;
 	}
 	
-	//处理文件上传
-    /*@RequestMapping(value="/uploadImg", method = RequestMethod.POST)
-    public @ResponseBody String uploadImg(@RequestParam("myfiles") MultipartFile file,
-            HttpServletRequest request) {
-        String contentType = file.getContentType();
-        String fileName = file.getOriginalFilename();
-        System.out.println("fileName-->" + fileName);
-        System.out.println("getContentType-->" + contentType);
-        String filePath = request.getSession().getServletContext().getRealPath("imgupload/");
-       
-        return "uploadimg success";
-    }*/
 
 	@RequestMapping(value = "/uploadImg", method = RequestMethod.POST)
 	@ResponseBody
-	public void uploadImg(Goods record, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+	public void uploadImg(HomeManage record, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request; 
 		List<MultipartFile> myfiles=multipartRequest.getFiles("myfiles");

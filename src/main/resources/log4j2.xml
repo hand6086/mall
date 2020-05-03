@@ -70,6 +70,8 @@
 		<logger name="org.apache.ibatis" level="INFO"/>
 		<logger name="com.hand.cloud" level="INFO"/>
 		<logger name="org.springframework" level="INFO"/>
+		<logger name="org.mybatis.spring.SqlSessionFactoryBean" level="INFO"/>
+
 		
 		<!--建立一个默认的root的logger，需要在root的level中指定输出的级别， -->
 		<Root level="${LOG_LEVEL}">

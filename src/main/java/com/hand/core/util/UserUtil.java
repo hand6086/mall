@@ -39,6 +39,9 @@ public class UserUtil {
 				logger.debug("获取不到登录用户信息");
 				return null;
 			}
+			if(null == auth.getPrincipal()) {
+				return null;
+			}
 			user = (User) auth.getPrincipal();
 		} catch (Exception e) {
 			logger.error("获取登录用户失败", e);

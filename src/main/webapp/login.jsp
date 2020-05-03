@@ -2,7 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-<c:set var="appQrCodeImg" value="<%=com.hand.core.util.AppConstants.appQrCodeImg%>" />
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -51,12 +50,8 @@
 				var pass = $('#password').val();
 				var verifyCode = $('#verifyCode').val();
 				if(user != "" && pass != "" ){
-					if(verifyCode != "" && verifyFlag == true){
-						document.loginForm.submit();
-					} else{
-						$('#errorMessage').html('请输入正确验证码');
-					}
-				}	
+					document.loginForm.submit();
+				}
 			}
 		}); 
 		$('#username').keydown(function(e){
@@ -65,11 +60,7 @@
 				var pass = $('#password').val();
 				var verifyCode = $('#verifyCode').val();
 				if(user != "" && pass != ""){
-					if(verifyCode != "" && verifyFlag == true){
-						document.loginForm.submit();
-					} else{
-						$('#errorMessage').html('请输入正确验证码');
-					}
+					document.loginForm.submit();
 				}
 			}
 		}); 
@@ -80,11 +71,7 @@
 				var pass = $('#password').val();
 				var verifyCode = $('#verifyCode').val();
 				if(user != "" && pass != "" ){
-					if(verifyCode != "" && verifyFlag == true){
-						document.loginForm.submit();
-					} else{
-						$('#errorMessage').html('请输入正确验证码');
-					}
+					document.loginForm.submit();
 				}
 			}
 		}); 		
@@ -94,11 +81,7 @@
 				var pass = $('#password').val();
 				var verifyCode = $('#verifyCode').val();
 				if(user != "" && pass != ""){
-					if(verifyCode != "" && verifyFlag == true){
-						document.loginForm.submit();
-					} else{
-						$('#errorMessage').html('请输入正确验证码');
-					}
+					document.loginForm.submit();
 				}
 			}
 		}); 		
@@ -107,12 +90,8 @@
 			var pass = $('#password').val();
 			var verifyCode = $('#verifyCode').val();
 			if(user != "" && pass != ""){
-				if(verifyCode != "" && verifyFlag == true){
-					document.loginForm.submit();
-				} else{
-					$('#errorMessage').html('请输入正确验证码');
-				}
-			} 
+				document.loginForm.submit();
+			}
 		});
 				
 		var username = $.cookie('username');
@@ -164,11 +143,7 @@
 		var pass = $('#password').val();
 		var verifyCode = $('#verifyCode').val();
 		if(user != "" && pass != ""){
-			if(verifyCode != "" && verifyFlag == true){
-				document.loginForm.submit();
-			} else{
-				$('#errorMessage').html('请输入正确验证码');
-			}
+			document.loginForm.submit();
 		}
 	}
 </script>
@@ -208,10 +183,6 @@
 					    <a class="shuru">
 					    <div class="shuru_left"><img src="<%=ctxPath%>/static/css/img/login_14.png"></div>
 					    <div class="shuru_right"><input   type="password" class="input" id='password' name="password" value="" onclick="JavaScript:this.value=''"></div>
-					    </a>
-					    <a class="shuru">
-					    <div style="width:150px; float:left;"><input style="outline:none;border-right: 1px solid #ddd;" type="text" class="input" id='verifyCode' name="verifyCode" value="" maxlength="6" onclick="JavaScript:this.value=''"/></div>
-					    <object><a href="javascript:void(0)" ><img src="" id="randomImg" style="width:100px;height:45px"/></a></object>
 					    </a>
 					<!--
 					    <a class="shuru">

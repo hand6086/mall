@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.HomeManageMapper">
+	<resultMap type="com.hand.base.goods.model.HomeManage" id="homeManage"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+		T.ROW_ID as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY as lastUpdatedBy,
+		T.pic_id as picId,
+		T2.path as pic,
+		T.type as type,
+		T.comments as comments
+	</sql>
+
+	<sql id="fromSql">
+	from lnk_home_manage T left join cx_o_img t2 on t.pic_id = t2.row_id
+  	</sql>
+
+  	<sql id="whereAllSql">
+  		where 1 = 1
+		<if test="picId != null and picId != '' ">
+			and T.pic_id = #{picId}
+		 </if>
+		<if test="type != null and type != '' ">
+			and T.type = #{type}
+		</if>
+		<if test="comments != null and comments != '' ">
+			and T.comments = #{comments}
+		</if>
+  	</sql>
+
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.HomeManage" resultMap="homeManage">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+
+  	<select id="queryById" resultType="com.hand.base.goods.model.HomeManage"
+		parameterType="com.hand.base.goods.model.HomeManage">
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.goods.model.HomeManage">
+		insert into lnk_home_manage
+		  (ROW_ID, pic_id, type, comments)
+		values
+		  (#{id},#{picId},#{type},#{comments})
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.goods.model.HomeManage">
+		update lnk_home_manage t
+		   set t.pic_id = #{picId}, t.type = #{type},t.comments=#{comments}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.HomeManage">
+		DELETE FROM lnk_home_manage WHERE ROW_ID = #{id}
+	</delete>
+
+</mapper>

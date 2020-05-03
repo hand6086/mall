@@ -1,7 +1,6 @@
 # 默认的profile为dev，其他环境通过指定启动参数使用不同的profile，比如：  
 #   测试环境：java -jar my-spring-boot.jar --spring.profiles.active=test  
-#   生产环境：java -jar my-spring-boot.jar --spring.profiles.active=prod  
-spring:  
+spring:
   profiles:  
     active: dev
   datasource:
@@ -30,7 +29,7 @@ spring:
       enabled: true
       force: true
   application:
-    name: lnkcrm-core
+    name: mall
 
 server:
   port: 8082

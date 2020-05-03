@@ -1,19 +1,5 @@
 package com.hand.base.basic.model;
 
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.BeanUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hand.base.basic.service.BasicServiceException;
 import com.hand.base.user.model.User;
@@ -24,6 +10,18 @@ import com.hand.core.basic.query.Sorter;
 import com.hand.core.util.AppConstants;
 import com.hand.core.util.DateUtil;
 import com.hand.core.util.UserUtil;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BasicModel implements Serializable{
 	/**
@@ -354,14 +352,7 @@ public class BasicModel implements Serializable{
 	}
 	
 	public String getUsercorpid() {
-		if (usercorpid != null && !"".equals(usercorpid)) {
-			return usercorpid;
-		} else {
-			if("Y".equals(this.anonymousFlag) && UserUtil.getUser(null) == null){
-				return "100";
-			}
-			return UserUtil.getUser(null).getCorpid();
-		}
+		return usercorpid;
 	}
 	
 	public void setUsercorpid(String usercorpid) {
@@ -369,11 +360,7 @@ public class BasicModel implements Serializable{
 	}
 	
 	public String getUsersystemRole() {
-		if (usersystemRole != null && !"".equals(usersystemRole)) {
-			return usersystemRole;
-		} else {
-			return UserUtil.getUser(null).getSystemRole();
-		}
+		return usersystemRole;
 	}
 	
 	public void setUsersystemRole(String usersystemRole) {
@@ -577,10 +564,7 @@ public class BasicModel implements Serializable{
 	}
 	
 	public String getCreatedId() {
-		if("Y".equals(this.anonymousFlag) || null == UserUtil.getUser(null)){
-			return "0-1";
-		}
-		return UserUtil.getUser(null).getId();
+		return createdId;
 	}
 	
 	/*public void setCreatedId(String createdId) {
