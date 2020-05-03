@@ -1,8 +1,5 @@
 package com.hand.base.mvg.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.hand.base.promotion.model.SalesPromotionSchema;
 import com.hand.base.brandWorkbench.model.Classify;
 import com.hand.base.duty.model.Duty;
 import com.hand.base.goods.model.Goods;
@@ -13,6 +10,15 @@ import com.hand.base.mvg.dao.mybatis.order.mapper.OrderProdMvgMapper;
 import com.hand.base.mvg.dao.mybatis.sale.mapper.SalesCityMvgMapper;
 import com.hand.base.mvg.dao.mybatis.sale.mapper.SalesGoodsMvgMapper;
 import com.hand.base.mvg.dao.mybatis.sale.mapper.SalesTypeMvgMapper;
+import com.hand.base.mvg.dao.mybatis.user.mapper.ApprovalUserMvgMapper;
+import com.hand.base.mvg.dao.mybatis.user.mapper.UserDutyMvgMapper;
+import com.hand.base.mvg.dao.mybatis.user.mapper.UserMvgMapper;
+import com.hand.base.mvg.dao.mybatis.user.mapper.UserPostnMvgMapper;
+import com.hand.base.o2oaddress.model.O2OAddress;
+import com.hand.base.position.model.Position;
+import com.hand.base.user.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+
 //import com.hand.base.forum.model.People;
 //import com.hand.base.mvg.dao.mybatis.accnt.mapper.AccntPostnMvgMapper;
 //import com.hand.base.mvg.dao.mybatis.forum.mapper.ForumPeopleMvgMapper;
@@ -23,16 +29,9 @@ import com.hand.base.mvg.dao.mybatis.sale.mapper.SalesTypeMvgMapper;
 //import com.hand.base.mvg.dao.mybatis.postn.mapper.ApprovalPostnTypeMvgMapper;
 //import com.hand.base.mvg.dao.mybatis.product.mapper.ProductTagMvgMapper;
 //import com.hand.base.mvg.dao.mybatis.qdreception.mapper.QdReceptionUserMvgMapper;
-import com.hand.base.mvg.dao.mybatis.user.mapper.ApprovalUserMvgMapper;
-import com.hand.base.mvg.dao.mybatis.user.mapper.UserDutyMvgMapper;
-import com.hand.base.mvg.dao.mybatis.user.mapper.UserMvgMapper;
-import com.hand.base.mvg.dao.mybatis.user.mapper.UserPostnMvgMapper;
-import com.hand.base.o2oaddress.model.O2OAddress;
 //import com.hand.base.orgnization.model.Orgnization;
-import com.hand.base.position.model.Position;
 //import com.hand.base.product.model.Product;
 //import com.hand.base.product.model.Tag;
-import com.hand.base.user.model.User;
 
 /**
  * MvgMapper的子类的配置
@@ -55,22 +54,19 @@ public class MvgMapperBeen {
 	 */
 	@Autowired
 	public SalesCityMvgMapper salesCityMvgMapper;
-	public SalesPromotionSchema salesCityMvgBean;
-	
+
 	/**
 	 * 促销方案 默认商品MVG
 	 */
 	@Autowired
 	public SalesGoodsMvgMapper salesGoodsMvgMapper;
-	public SalesPromotionSchema salesGoodsMvgBean;
-	
+
 	/**
 	 * 促销方案 促销形式MVG
 	 */
 	@Autowired
 	public SalesTypeMvgMapper salesTypeMvgMapper;
-	public SalesPromotionSchema salesTypeMvgBean;
-	
+
 	@Autowired
 	public UserPostnMvgMapper userPostnMvgMapper;
 	public Position userPostnMvgBean;

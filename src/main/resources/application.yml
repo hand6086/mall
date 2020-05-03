@@ -59,9 +59,9 @@ application:
 spring:
   profiles: dev
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    url: jdbc:mysql://39.102.83.1:3306/demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
     username: root
-    password: 123456
+    password: mayi123456
   redis:
     host: 47.88.27.158
     password: mayi123456
@@ -69,7 +69,7 @@ spring:
 
 
 logging:
-  config: classpath:log4j2-local.xml
+  config: classpath:log4j2.xml
   
 application:
   static:
@@ -81,22 +81,12 @@ application:
       share: C://app/platform/share/portal
       httpshare: http://localhost:8080/share/mobile
     pic:
-#      share: /data/link_qingpi/pic
-#      httpshare: http://linkcrm.cn/qingpi/pic
       share: /app/server/pic
       httpshare: http://172.16.2.139/qingpi/pic
   io:
     temporary:
       share: D://LINK-CRM/lnkcrm-core-qp/src/main/webapp/share/io # 导出功能，生成的csv的存放路径
       httpshare: http://localhost:8082/share/io
-  user:
-    refund:
-      url: http://172.16.2.139/qingpi/order/userRefund # 用户退款URL
-  app:
-    img: /static/css/img/prod.png  # app二维码下载地址
-    appKey: lmxuhwagli0id #融云 appkey
-    appSecret: ZWEXFzmpOJCh #融云 appSecret
-  task:
-    defaultRun: N  # 是否运行定时任务
+
     
 

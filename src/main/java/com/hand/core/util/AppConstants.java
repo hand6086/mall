@@ -91,19 +91,6 @@ public class AppConstants {
 	public static String outerUserDefaultDuty ;/* 外部用户默认职责 （id) */
 	public static String outerUserDefaultPostn ;/* 外部用户默认职位 （id) */
 	
-	public static String companyManageDutyId; /* 企业管理新建帐套复制的职责ID，用于复制该职责下的所有菜单视图,用于CRM    */
-	public static String companyManageAppDutyId; /* 企业管理新建帐套复制的职责ID，用于复制该职责下的所有菜单视图 ，用于APP  */
-	
-	public static String loginMsgTemplate;/*用户名密码短信模板*/
-	public static String vCodeMsgTemplate; /*验证码短信模板 */
-	public static String couponMsgTemplate; /*优惠劵短信验证码模板 */
-	
-	public static String appQrCodeImg; /*下载APP的二维码图片*/
-	
-	public static String appKey; /*融云 appKey*/
-	
-	public static String appSecret; /*融云 appSecret*/
-	
 	public static String docAppUrl; /*对外接口路径 */
 	
 	/**

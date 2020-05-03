@@ -6,7 +6,7 @@
 	<!-- 定义引用属性 -->
 	<Properties>
 		<property name="Log_Pattern">[%-5level] %d{yyyy-MM-dd HH:mm:ss,SSS} %-1X{requestId} %-1X{ip} %-1X{userId} %class - %msg%n</property>
-		<property name="LOG_HOME">/home/o2ouser/app/server/logs</property>
+		<property name="LOG_HOME">/data/link_qingpi/logs</property>
 		<property name="LOG_LEVEL">DEBUG</property><!-- 日志输出级别 -->
 	</Properties>
 
@@ -65,16 +65,15 @@
 	</Appenders>
 	<!--然后定义logger，只有定义了logger并引入的appender，appender才会生效 -->
 	<Loggers>
-		<logger name="org.springframework.security.web" level="DEBUG"/>
-		<logger name="org.apache.ibatis" level="DEBUG"/>
-		<logger name="com.hand" level="DEBUG"/>
+		<logger name="org.springframework.security.web" level="error"/>
+		<logger name="org.springframework.web" level="error"/>
+		<logger name="org.apache.ibatis" level="INFO"/>
+		<logger name="com.hand.cloud" level="INFO"/>
 		<logger name="org.springframework" level="INFO"/>
 		
 		<!--建立一个默认的root的logger，需要在root的level中指定输出的级别， -->
 		<Root level="${LOG_LEVEL}">
 			<AppenderRef ref="Console" />
-			<AppenderRef ref="DEBUG" />
-			<AppenderRef ref="INFO" />
 			<AppenderRef ref="Error" />
 		</Root>
 	</Loggers>

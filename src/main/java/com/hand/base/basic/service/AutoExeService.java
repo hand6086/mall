@@ -64,14 +64,5 @@ public class AutoExeService {
 		// 数据库配置
 		AppConstants.key_applicationDatabase = env.getProperty("application.database");// "mysql";//"application.database";
 		
-		AppConstants.appQrCodeImg = env.getProperty("application.app.img");// 下载AndroidAPP的二维码图片名称
-		
-		AppConstants.appKey = env.getProperty("application.app.appKey");// 融云 appkey
-		
-		AppConstants.appSecret = env.getProperty("application.app.appSecret");// 融云 appSecret
-		
-		AppConstants.docAppUrl = env.getProperty("application.doc.url.path");
-		
-		AppConstants.portalTaskDefaultRun = env.getProperty("application.task.defaultRun");// 是否运行定时任务
 	}
 }
