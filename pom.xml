@@ -5,7 +5,7 @@
 
 	<artifactId>com.hand</artifactId>
 	<packaging>jar</packaging>
-	<name>lnkcrm-core</name>
+	<name>mall</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -301,7 +301,7 @@
 
 	<build>
 		
-		<finalName>lnkcrm-core</finalName>
+		<finalName>mall</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -11,7 +11,7 @@ public final class RedisUtil {
 	public static Jedis getJedis() {
 		//不用连接池连接
 		Jedis jedis = new Jedis(ADDR, PORT);
-		// jedis.auth("o2o_2017");
+		jedis.auth("mayi123456");
 		return jedis;
 	}
 	
