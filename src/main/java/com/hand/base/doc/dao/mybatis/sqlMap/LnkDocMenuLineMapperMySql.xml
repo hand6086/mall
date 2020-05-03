@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.doc.dao.mybatis.mapper.LnkDocMenuLineMapper">
+	<resultMap type="com.hand.base.doc.model.LnkDocMenuLine" id="lnkDocMenuLine"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+		T1.ROW_ID as id /*记录ID*/
+		,T1.CREATED as created /*创建时间*/
+		,T1.CREATED_BY as createdBy /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%k:%S') as lastUpdated /*最后更新时间*/
+		,T1.LAST_UPD_BY as lastUpdatedBy /*最后更新者ID*/
+		,T1.ENCRYPTION_MODE as encryptionMode /*加密方式*/
+		,T1.MENU_LINE_NAME as menuLineName /*主菜单下菜单名*/
+		,T1.MENU_ID as menuId /*与主菜单关联字段*/
+		,T1.SAMPLE_AFTER as sampleAfter /*示例（解密后）*/
+		,T1.REQUEST_ADDRESS as requestAddress /*请求地址*/
+		,T1.INTERFACE_SPECIFICATION as interfaceSpecification/*接口说明*/
+		,T1.SAMPLE_BEFORE as sampleBefore /*示例（解密前）*/
+		,GET_LOV_NAME(#{usercorpid},'DOC_TRANSMISSION_DIRECTION',T1.TRANSMISSION_DIRECTION) as transmissionDirection/*传输方向*/
+		,T1.REQUEST_HEADER as requestHeader /*请求Header*/
+		,GET_LOV_NAME(#{usercorpid},'DOC_JSON',T1.DATA_TYPE) as dataType /*数据类型*/
+		,GET_LOV_NAME(#{usercorpid},'DOC_REQUEST_TYPE',T1.REQUEST_MODE) as requestMode /*请求方式*/
+		,T1.SECRET_KEY_ENCRYPTION as secretKeyEncryption /*加密秘钥*/
+		
+	</sql>
+
+	<sql id="fromTableSql">
+		FROM LNK_DOC_MENU_LINE T1 WHERE 1=1
+	</sql>
+
+	<sql id="whereAllSql">
+		AND T1.corp_id = #{usercorpid}
+
+	</sql>
+
+	<sql id="orderByAllSql">
+
+	</sql>
+
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer"
+		parameterType="com.hand.base.doc.model.LnkDocMenuLine">
+		SELECT count(1)
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+	<select id="queryByExamplePage" resultMap="lnkDocMenuLine"
+		parameterType="com.hand.base.doc.model.LnkDocMenuLine">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+	<select id="queryById" resultMap="lnkDocMenuLine"
+		parameterType="com.hand.base.doc.model.LnkDocMenuLine">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		and T1.ROW_ID=#{id}
+	</select>
+
+	<select id="queryAll" resultMap="lnkDocMenuLine"
+		parameterType="com.hand.base.doc.model.LnkDocMenuLine">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.doc.model.LnkDocMenuLine"> 
+	INSERT INTO
+		LNK_DOC_MENU_LINE( ROW_ID /*记录ID*/ ,ENCRYPTION_MODE /*加密方式*/
+		,MENU_LINE_NAME /*主菜单下菜单名*/ ,MENU_ID /*与主菜单关联字段*/ ,SAMPLE_AFTER
+		/*示例（解密后）*/ ,REQUEST_ADDRESS /*请求地址*/ ,INTERFACE_SPECIFICATION/*接口说明*/
+		,SAMPLE_BEFORE /*示例（解密前）*/ ,TRANSMISSION_DIRECTION/*传输方向*/
+		,REQUEST_HEADER /*请求Header*/ ,DATA_TYPE /*数据类型*/ ,REQUEST_MODE
+		/*请求方式*/ ,SECRET_KEY_ENCRYPTION/*加密秘钥*/ )
+		values ( #{id} /*记录ID*/ ,#{encryptionMode} /*加密方式*/ ,#{menuLineName}
+		/*主菜单下菜单名*/ ,#{menuId} /*与主菜单关联字段*/ ,#{sampleAfter} /*示例（解密后）*/
+		,#{requestAddress} /*请求地址*/ ,#{interfaceSpecification}/*接口说明*/
+		,#{sampleBefore} /*示例（解密前）*/ ,#{transmissionDirection}/*传输方向*/
+		,#{requestHeader} /*请求Header*/ ,#{dataType} /*数据类型*/ ,#{requestMode}
+		/*请求方式*/ ,#{secretKeyEncryption}/*加密秘钥*/ 
+		) </insert>
+
+	<update id="update" parameterType="com.hand.base.doc.model.LnkDocMenuLine">
+	 UPDATE LNK_DOC_MENU_LINE SET
+		ENCRYPTION_MODE =#{encryptionMode} /*加密方式*/ ,MENU_LINE_NAME
+		=#{menuLineName} /*主菜单下菜单名*/ 
+		,SAMPLE_AFTER =#{sampleAfter} /*示例（解密后）*/ ,REQUEST_ADDRESS
+		=#{requestAddress} /*请求地址*/
+		,INTERFACE_SPECIFICATION=#{interfaceSpecification}/*接口说明*/
+		,SAMPLE_BEFORE =#{sampleBefore} /*示例（解密前）*/
+		,TRANSMISSION_DIRECTION=#{transmissionDirection}/*传输方向*/
+		,REQUEST_HEADER =#{requestHeader} /*请求Header*/ ,DATA_TYPE =#{dataType}
+		/*数据类型*/ ,REQUEST_MODE =#{requestMode} /*请求方式*/
+		,SECRET_KEY_ENCRYPTION=#{secretKeyEncryption}/*加密秘钥*/
+		 WHERE ROW_ID=#{id} </update>
+
+	<delete id="deleteById" parameterType="com.hand.base.doc.model.LnkDocMenuLine"> DELETE FROM
+		LNK_DOC_MENU_LINE WHERE ROW_ID=#{id} </delete>
+	
+	<select id="queryMenuLine" resultMap="lnkDocMenuLine"
+		parameterType="String">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		
+		and menu_id=#{_parameter}
+	</select>
+</mapper>
+

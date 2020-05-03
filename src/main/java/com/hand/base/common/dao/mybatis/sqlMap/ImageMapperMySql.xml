@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.ImageMapper">
+  <resultMap type="com.hand.base.common.model.Image" id="image"></resultMap>
+   <insert id="imageInsert" parameterType="com.hand.base.common.model.Image">
+		 INSERT INTO
+			cx_o_img
+			(row_id,
+			modification_num,
+			conflict_id,
+			code,
+			db_last_upd_src,
+			name,
+			path,
+			thumb_path
+			)
+			VALUES
+			(
+			#{id},
+			'0',
+			'0',
+			#{code},
+			#{dbLastUpdSrc},
+			#{name},
+			#{url},
+			#{thumbUrl}
+		)
+  </insert>
+  
+    
+ 
+  
+  
+  
+</mapper>

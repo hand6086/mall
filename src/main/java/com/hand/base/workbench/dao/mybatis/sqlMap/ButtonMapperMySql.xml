@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.workbench.dao.mybatis.mapper.ButtonMapper">
+	<resultMap type="com.hand.base.workbench.model.Button" id="button"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	T.corp_id      as corpId,
+	t.BUTTON_CODE buttonCode,
+	t.BUTTON_NAME buttonName,
+	t.COMMENTS comments,
+	t.COVER_FLAG coverFlag,
+	t.type type,
+	t.IMAGE_ID imageId,
+	t.is_display isDisplay,
+	t.display_order displayOrder,
+	t.source source
+	</sql>
+
+	<sql id="fromSql">
+	from CX_O_BUTTON_IMG t
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.workbench.model.Button" resultMap="button">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		<if test=" source == null or source == '' ">
+			and t.source = 'fast shopping'
+		</if>
+		<if test=" source != null and source != '' ">
+			and t.source = #{source}
+		</if>
+			order by t.CREATED desc
+  	</select>
+  	
+  	<select id="brandQueryByExamplePage" parameterType="com.hand.base.workbench.model.Button" resultMap="button">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		and t.source = 'brand'
+		<if test="pageFlag == false">
+			and t. is_display = 'Y'
+			order by t.display_order
+		</if>
+		<if test="pageFlag != false">
+			order by t.CREATED desc
+		</if>
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.workbench.model.Button"
+		parameterType="com.hand.base.workbench.model.Button">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultType="com.hand.base.workbench.model.Button"
+		parameterType="com.hand.base.workbench.model.Button">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.workbench.model.Button">
+		insert into CX_O_BUTTON_IMG
+		  (ROW_ID, BUTTON_CODE , BUTTON_NAME,COMMENTS,COVER_FLAG,IMAGE_ID,type,source)
+		values
+		  (#{id},#{buttonCode},#{buttonName},#{comments},#{coverFlag},#{imageId},#{type},'fast shopping')
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.workbench.model.Button">
+		update CX_O_BUTTON_IMG t
+		   set t.BUTTON_CODE = #{buttonCode}, t.BUTTON_NAME = #{buttonName},t.COMMENTS = #{comments},
+		    t.COVER_FLAG = #{coverFlag},t.IMAGE_ID = #{imageId},t.type = #{type},t.source = 'fast shopping'
+		 where t.row_id = #{id}
+	</update>
+	
+  	<insert id="brandInsert" parameterType="com.hand.base.workbench.model.Button">
+		insert into CX_O_BUTTON_IMG
+		  (ROW_ID,BUTTON_CODE , BUTTON_NAME,is_display,display_order,source)
+		values
+		  (#{id},#{buttonCode},#{buttonName},#{isDisplay},#{displayOrder},'brand')
+	</insert>
+  
+	<update id="brandUpdate" parameterType="com.hand.base.workbench.model.Button">
+		update CX_O_BUTTON_IMG t
+		   set t.BUTTON_CODE = #{buttonCode},t.BUTTON_NAME = #{buttonName},t.is_display = #{isDisplay},
+		    t.display_order = #{displayOrder},t.source = 'brand'
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.workbench.model.Button">
+		DELETE FROM CX_O_BUTTON_IMG WHERE ROW_ID = #{id}
+	</delete>
+	
+	<update id="cityImageUpdate" parameterType="com.hand.base.workbench.model.Button">
+	 	UPDATE CX_O_BTN_IMG_CT t
+		   SET t.IMAGE_ID = #{imageId}
+		 WHERE t.row_id = #{id}
+    </update>
+    
+	<update id="buttonImageUpdate" parameterType="com.hand.base.workbench.model.Button">
+	 	UPDATE CX_O_BUTTON_IMG t
+		   SET t.IMAGE_ID = #{imageId}
+		 WHERE t.row_id = #{id}
+    </update>
+  	
+</mapper>

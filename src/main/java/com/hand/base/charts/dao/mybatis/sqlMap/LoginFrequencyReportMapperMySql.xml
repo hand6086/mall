@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.LoginFrequencyReportMapper">
+	<resultMap type="com.hand.base.charts.model.LoginFrequencyReport"
+		id="loginfrequency"></resultMap>
+
+	<sql id="queryAllSql">
+	SELECT
+		t.row_id AS id,
+		t1.T_ATTR_01 AS NAME,
+		t1.PHONE_NUMBER AS phoneNumber,
+		count(1) count
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM
+		cx_o_ln_log_c t
+	LEFT JOIN cx_o2o_customer_v t1 ON t.user_id = t1.row_id
+	WHERE
+		1 = 1
+	</sql>
+	
+	<sql id="whereAllSql">
+		
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="loginfrequency"
+		parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<if test="startTime != null and startTime != ''">
+			and t.created &gt;= #{startTime}
+		</if>
+		
+		<if test="endTime != null and endTime != ''">
+			and t.created &lt;= #{endTime}
+		</if>
+		 GROUP BY
+		 t1.T_ATTR_01,t1.PHONE_NUMBER
+	</select>
+	<select id="brandQueryByExamplePage" resultMap="loginfrequency"
+		parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<if test="startTime != null and startTime != ''">
+			and t.created &gt;= #{startTime}
+		</if>
+		
+		<if test="endTime != null and endTime != ''">
+			and t.created &lt;= #{endTime}
+		</if>
+		 GROUP BY
+		 t1.T_ATTR_01,t1.PHONE_NUMBER
+	</select>
+	
+	<select id="queryById" resultMap="loginfrequency"
+		parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<select id="brandQueryById" resultMap="loginfrequency"
+		parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="loginfrequency"
+		parameterType="com.hand.base.charts.model.LoginFrequencyReport">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

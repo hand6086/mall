@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.PlatformDailyActivityMapper">
+	<resultMap type="com.hand.base.charts.model.PlatformDailyActivity" id="dailyactivity"></resultMap>
+
+	<sql id="queryAllSql">
+	SELECT
+		t.row_id AS id,
+		DATE_FORMAT(t.created, '%Y-%m-%d') AS created,
+		t.location AS city,
+		t3. NAME AS province,
+		count(1) AS pV,
+		count(DISTINCT t.device_num) AS uV
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM
+	 		cx_o_ln_log t
+			LEFT JOIN cx_o2o_user_v t1 ON t.user_id = t1.row_id
+			LEFT JOIN (cx_o_area t2 
+			LEFT JOIN cx_o_area t3 ON t2.parent_id = t3.row_id
+			)ON t.t_attr_01 = t2.row_id
+	WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="startTime != null and startTime != ''">
+			and t.created &gt;= #{startTime}
+		</if>
+		
+		<if test="endTime != null and endTime != ''">
+			and t.created &lt;= #{endTime}
+		</if>
+		<if test="city != null and city != ''">
+			and t.location LIKE CONCAT(CONCAT('%',#{city},'%'))
+			
+		</if>
+		<if test="province != null and province != ''">
+			and t3. NAME LIKE CONCAT(CONCAT('%',#{province},'%'))
+			
+		</if> 
+		 GROUP BY
+		 	DATE_FORMAT(t.created, '%Y-%m-%d'),
+			 t.location,
+			 t3.NAME
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="dailyactivity"
+		parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="dailyactivity"
+		parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="queryById" resultMap="dailyactivity"
+		parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultMap="dailyactivity"
+		parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="dailyactivity"
+		parameterType="com.hand.base.charts.model.PlatformDailyActivity">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

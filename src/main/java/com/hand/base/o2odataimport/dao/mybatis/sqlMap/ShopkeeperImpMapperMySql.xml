@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2odataimport.dao.mybatis.mapper.ShopkeeperImpMapper">
+  <resultMap type="com.hand.base.o2odataimport.model.ShopkeeperTemp" id="shopkeeperTemp"></resultMap>
+  	
+  	<sql id="queryAllSql">
+	select
+	T1.ROW_ID as id
+	,t1.created created
+	,T1.CREATED_BY as createdBy
+	,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+	,T1.LAST_UPD_BY as lastUpdatedBy
+	,T1.CORP_ID  corpid
+	,T1.CHECK_STATUS  checkStatus/*校验状态picklist:TB Check Status  ,Expr: 'LookupValue("TB_CHECK_STATUS","New")'*/
+	,T1.IMPORT_STATUS impStatus/*导入状态TB Import Status,Expr: 'LookupValue("TB_IMPORT_STATUS","New")'*/
+	,T1.ERROR_MESSAGE errMessage/*错误信息*/
+	,T1.LAST_NAME lastName/*姓氏*/
+	,T1.FIRST_NAME firstName/*名字*/
+	,T1.CELLPHONE cellPhone/*手机号*/
+	,T1.STATUS status/*状态*/
+	,t1.ACCT_CODE acctCode/*所属客户Siebel编码*/
+	,t1.ACCT_NAME acctName/*所属客户名称*/
+  </sql>
+  
+  <sql id="fromTableSql">
+	from CX_O_USER_IMT t1
+    WHERE t1.corp_id = #{usercorpid}
+    AND (t1.IMPORT_STATUS != 'Import Ok' OR t1.IMPORT_STATUS IS NULL)
+  </sql>
+  
+  <sql id="whereAllSql">
+  		<if test="impStatus != null and impStatus != '' ">
+			and  t1.IMPORT_STATUS = #{impStatus}
+		</if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+	order by T1.CREATED DESC
+  </sql>
+  
+  	<select id="queryById" resultMap="shopkeeperTemp"
+		parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="shopkeeperTemp"
+		parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="shopkeeperTemp"
+		parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+  	
+  <insert id="insert" parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+	insert into CX_O_USER_IMT
+	(ROW_ID
+	,CHECK_STATUS  
+	,IMPORT_STATUS 
+	,ERROR_MESSAGE 
+	,LAST_NAME
+	,FIRST_NAME
+	,CELLPHONE
+	,STATUS 
+	,ACCT_CODE
+	,ACCT_NAME
+	)
+	values
+	(#{id}
+	,#{checkStatus}
+	,#{impStatus}
+	,#{errMessage}
+	,#{lastName}
+	,#{firstName}
+	,#{cellPhone}
+	,#{status}
+	,#{acctCode}
+	,#{acctName}
+	)
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+	UPDATE CX_O_USER_IMT
+	SET 
+	ROW_ID 				=#{id}
+	,CHECK_STATUS 		=#{checkStatus}/*校验状态*/
+	,IMPORT_STATUS 		=#{impStatus}/*导入状态*/
+	,ERROR_MESSAGE 		=#{errMessage}/*错误信息*/
+	,LAST_NAME			=#{lastName}
+	,FIRST_NAME			=#{firstName}
+	,CELLPHONE			=#{cellPhone}
+	,STATUS 			=#{status}
+	,ACCT_CODE			=#{acctCode}
+	,ACCT_NAME			=#{acctName}
+	WHERE ROW_ID		= #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.o2odataimport.model.ShopkeeperTemp">
+		DELETE FROM CX_O_USER_IMT WHERE ROW_ID = #{id}
+  </delete>
+  
+  
+  <select id="runUserCheck" statementType="CALLABLE">
+			CALL CHECK_O2OUSER(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="runUserInsert" statementType="CALLABLE">
+			CALL TB_O2O_STORE_PKG_NEW_ACCOUNT_USER(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+</mapper>

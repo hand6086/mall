@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.rongcloud.dao.mybatis.mapper.RcsMerchantMapper">
+	<resultMap type="com.hand.base.rongcloud.model.RcsMerchant" id="rcsMerchantUser"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT t1.row_id id
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM lnk_enterprise t1
+		WHERE 1=1
+	</sql>
+	
+	<sql id="whereTableSql">
+		
+	</sql>
+	<select id="queryByExamplePage" resultMap="rcsMerchantUser" parameterType="com.hand.base.rongcloud.model.RcsMerchant">
+		<include refid="queryTableSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="rcsMerchantUser" parameterType="com.hand.base.rongcloud.model.RcsMerchant">
+		<include refid="queryTableSql"/>
+		<include refid="fromTableSql"/>
+		AND t1.ROW_ID = #{id}
+	</select>
+</mapper>

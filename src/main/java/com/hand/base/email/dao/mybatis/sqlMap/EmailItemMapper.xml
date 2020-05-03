@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.email.dao.mybatis.mapper.EmailItemMapper">
+  <resultMap type="com.hand.base.email.model.EmailItem" id="emailItem"></resultMap>
+  
+  <sql id="queryAllSql">
+  	SELECT 
+		ROW_ID id,
+		TO_CHAR (CREATED,'yyyy-MM-dd HH24:MI:ss') created,
+		CREATED_BY createdBy,
+		TO_CHAR (LAST_UPD,'yyyy-MM-dd HH24:MI:ss') lastUpdated,
+		LAST_UPD_BY lastUpdatedBy,
+		CORP_ID corpid,
+	    CONTACT_ID          contactId,
+	    EMAIL_ID			emailId,
+	    EMAIL_SEND_ADD      emailSendAddr,
+	    EMAIL_SEND_NAME     emailSendName,
+	    EMAIL_RECEIVE_ADD   emailReceiveAddr,
+	    EMAIL_RECEIVE_NAME  emailReceiveName,
+	    TO_CHAR (SENDED_TIME,'yyyy-MM-dd HH24:MI:ss')         sendedTime,
+	    ERR_MSG				errorMsg,
+		 STATUS  status
+  </sql>
+  
+  <sql id="fromTableSql">
+	FROM LNK_EMAIL_SEND_MSG
+   where corp_id = #{usercorpid}
+     and EMAIL_ID = #{emailId}
+  </sql>
+  
+  <sql id="whereAllSql">
+		
+		<!-- <if test="emailReceiveAddr != null and emailReceiveAddr != '' ">
+			<bind name="searchTextLike" value="'%'emailReceiveAddr'%'" />
+				and EMAIL_SEND_ADD like #{searchTextLike}
+		</if>
+		<if test="emailReceiveName != null and emailReceiveName != '' ">
+			<bind name="searchTextLike" value="'%'emailReceiveName'%'" />
+				and EMAIL_RECEIVE_NAME like #{searchTextLike}
+		</if> -->
+  </sql>
+  
+  <sql id="orderByAllSql">
+		ORDER BY created DESC
+  </sql>
+  
+  	<select id="queryById" resultMap="emailItem"
+		parameterType="com.hand.base.email.model.EmailItem">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.email.model.EmailItem">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="emailItem"
+		parameterType="com.hand.base.email.model.EmailItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="emailItem"
+		parameterType="com.hand.base.email.model.EmailItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>	
+  
+  <insert id="insert" parameterType="com.hand.base.email.model.EmailItem">
+  	 insert into LNK_EMAIL_SEND_MSG
+      (ROW_ID,
+       CONTACT_ID,
+       EMAIL_ID,
+       EMAIL_SEND_ADD,
+       EMAIL_SEND_NAME,
+       EMAIL_RECEIVE_ADD,
+       EMAIL_RECEIVE_NAME,
+       SENDED_TIME,
+       ERR_MSG,
+       STATUS)
+    values
+      (s_sequence_pkg.get_next_rowid(),
+       #{contactId},
+       #{emailId},
+       #{emailSendAddr},
+       #{emailSendName},
+       #{emailReceiveAddr},
+       #{emailReceiveName},
+       TO_DATE (#{sendedTime},'yyyy-MM-dd HH24:MI:ss'),
+       #{errorMsg},
+       GET_LOV_val(#{usercorpid},'EMAIL_ITEM_STATUS', '待发送'))
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.email.model.EmailItem">
+  	UPDATE LNK_EMAIL_SEND_MSG 
+  	  SET 
+		CONTACT_ID				= #{contactId},
+		EMAIL_ID				= #{emailId},
+       	EMAIL_SEND_ADD			= #{emailSendAddr},
+       	EMAIL_SEND_NAME			= #{emailSendName},
+       	EMAIL_RECEIVE_ADD		= #{emailReceiveAddr},
+       	EMAIL_RECEIVE_NAME		= #{emailReceiveName},
+       	SENDED_TIME				= TO_DATE (#{sendedTime},'yyyy-MM-dd HH24:MI:ss'),
+       	ERR_MSG					= #{errorMsg},
+       	STATUS					= GET_LOV_val(#{usercorpid},'EMAIL_ITEM_STATUS',#{status})
+	  WHERE ROW_ID				= #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.email.model.EmailItem">
+		DELETE FROM LNK_EMAIL_SEND_MSG WHERE ROW_ID = #{id}
+  </delete>
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.brandOrder.dao.mybatis.mapper.OrderItemMapper">
+	<resultMap type="com.hand.base.brandOrder.model.OrderItem"
+		id="orderItem"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,t2.o2o_display_name  as merchName			 /* 商品名字 */
+		,t2.o2o_int_code      as merchCode			 /* 商品编码 */
+		,t2.BAR_CODE      	  as productCode		 /* 商品条形码，69码 */
+		,(select t6.path from cx_o_prod_pic t5 left join cx_o_img t6 on t6.row_id = t5.pic_id where t5.prod_id = T1.PROD_ID limit 1) merchPic /*商品图片 */
+		,T1.BASE_UNIT_PRI     as price               /*报价*/
+		,T1.QTY_REQ           as qty                 /*数量*/
+		,T1.QTY_AFTERSALE     as qtyAftersale        /*售后数量*/
+		,T1.ATTRIB_17         as attrib17            /*报价总金额*/
+		,T1.NET_PRI           as pmoPrice            /*成交价*/
+		,T1.ATTRIB_19         as tAttr19             /*成交价总金额*/
+		,T1.ATTRIB_11         as attrib11            /*是否赠品*/
+		,T1.ATTRIB_03         as campId              /*活动id*/
+		,T3.NAME			  as activityName		 /*活动名称*/
+		,ROUND(IF( T1.ATTRIB_11 = 'Y', 0, IFNULL(T1.ATTRIB_17, 0) - IFNULL(T1.ATTRIB_19, 0)),2) merchantOfferSum /*商品优惠金额*/
+		,T1.coupon_id		  as couponId			 /*优惠券ID*/
+		,T1.FREIGHT           as freight             /*运费*/
+		,T1.ORDER_ID          as headId              /*订单id*/
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM S_ORDER_ITEM_X T1
+	LEFT JOIN S_PROD_INT_X T2 ON T1.PROD_ID = T2.row_id
+	LEFT JOIN CX_O_PMO_SP T3 ON T1.ATTRIB_03 = T3.row_id
+	WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.brandOrder.model.OrderItem">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="orderItem"
+		parameterType="com.hand.base.brandOrder.model.OrderItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<if test="aftersaleId != '' and aftersaleId != null">
+		and T1.AFTERSALE_ID =#{aftersaleId}
+		</if>
+		<if test=" headId != null and headId != '' ">
+		and T1.ORDER_ID =#{headId}
+		</if>
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="orderItem"
+		parameterType="com.hand.base.brandOrder.model.OrderItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<if test="aftersaleId != '' and aftersaleId != null">
+		and T1.AFTERSALE_ID =#{aftersaleId}
+		</if>
+		<if test=" headId != null and headId != '' ">
+		and T1.ORDER_ID =#{headId}
+		</if>
+	</select>
+	
+	<select id="queryById" resultMap="orderItem"
+		parameterType="com.hand.base.brandOrder.model.OrderItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultMap="orderItem"
+		parameterType="com.hand.base.brandOrder.model.OrderItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="orderItem"
+		parameterType="com.hand.base.brandOrder.model.OrderItem">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+
+	<insert id="insert" parameterType="com.hand.base.brandOrder.model.OrderItem">
+		INSERT INTO S_ORDER_ITEM_X(
+		 ROW_ID              /*记录ID*/
+		,ATTRIB_03           /*活动id*/
+		,X_ORDER_DT          /*订单时间（下单时间）*/
+		,X_ORDER_DISCOUNT    /*折扣活动id*/
+		,X_ACCNT_ID          /*消费者id*/
+		,ATTRIB_17           /*报价*/
+		,ATTRIB_19           /*成交价*/
+		,O2O_GP_PROD         /*是否团购商品*/
+		,ATTRIB_11           /*未知字段*/
+		,DB_LAST_UPD_SRC     /*数据最后修改源*/
+		,LN_NUM              /*行号*/
+		,PROD_ID             /*商品id*/
+		,FREIGHT             /*运费*/
+		,NET_PRI             /*成交价*/
+		,QTY_REQ             /*数量*/
+		,BASE_UNIT_PRI       /*报价*/
+		,ORDER_ID            /*订单id*/
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{attrib03}         /*活动id*/
+		,#{orderTime}        /*订单时间（下单时间）*/
+		,#{orderDiscount}    /*折扣活动id*/
+		,#{accountId}        /*消费者id*/
+		,#{attrib17}         /*报价*/
+		,#{attrib19}         /*成交价*/
+		,#{o2oGpProd}        /*是否团购商品*/
+		,#{attrib11}         /*未知字段*/
+		,#{dbLastUpdSrc}     /*数据最后修改源*/
+		,#{lnNum}            /*行号*/
+		,#{prodId}           /*商品id*/
+		,#{freight}          /*运费*/
+		,#{netPri}           /*成交价*/
+		,#{qtyReq}           /*数量*/
+		,#{baseUnitPri}      /*报价*/
+		,#{orderId}          /*订单id*/
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.brandOrder.model.OrderItem">
+		UPDATE S_ORDER_ITEM_X SET
+		 ATTRIB_03           =#{attrib03}         /*活动id*/
+		,X_ORDER_DT          =#{orderTime}        /*订单时间（下单时间）*/
+		,X_ORDER_DISCOUNT    =#{orderDiscount}    /*折扣活动id*/
+		,X_ACCNT_ID          =#{accountId}        /*消费者id*/
+		,ATTRIB_17           =#{attrib17}         /*报价*/
+		,ATTRIB_19           =#{attrib19}         /*成交价*/
+		,O2O_GP_PROD         =#{o2oGpProd}        /*是否团购商品*/
+		,ATTRIB_11           =#{attrib11}         /*未知字段*/
+		,DB_LAST_UPD_SRC     =#{dbLastUpdSrc}     /*数据最后修改源*/
+		,LN_NUM              =#{lnNum}            /*行号*/
+		,PROD_ID             =#{prodId}           /*商品id*/
+		,FREIGHT             =#{freight}          /*运费*/
+		,NET_PRI             =#{netPri}           /*成交价*/
+		,QTY_REQ             =#{qtyReq}           /*数量*/
+		,BASE_UNIT_PRI       =#{baseUnitPri}      /*报价*/
+		,ORDER_ID            =#{orderId}          /*订单id*/
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.brandOrder.model.OrderItem">
+		DELETE FROM S_ORDER_ITEM_X WHERE ROW_ID=#{id} AND CORP_ID=#{usercorpid}
+	</delete>
+</mapper>

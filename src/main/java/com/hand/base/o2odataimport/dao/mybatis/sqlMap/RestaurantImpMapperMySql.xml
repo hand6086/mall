@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2odataimport.dao.mybatis.mapper.RestaurantImpMapper">
+  <resultMap type="com.hand.base.o2odataimport.model.RestaurantTemp" id="restaurantTemp"></resultMap>
+  	
+  	<sql id="queryAllSql">
+	select
+	T1.ROW_ID as id
+	,t1.created created
+	,T1.CREATED_BY as createdBy
+	,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+	,T1.LAST_UPD_BY as lastUpdatedBy
+	,T1.CORP_ID  corpid
+	,T1.CHECK_STATUS  checkStatus/*校验状态picklist:TB Check Status  ,Expr: 'LookupValue("TB_CHECK_STATUS","New")'*/
+	,T1.IMPORT_STATUS impStatus/*导入状态TB Import Status,Expr: 'LookupValue("TB_IMPORT_STATUS","New")'*/
+	,T1.ERROR_MESSAGE errMessage/*错误信息*/
+	,T1.name name/*餐厅名称*/
+	,T1.Logo logo/*LogoId*/
+	,T2.path logoUrl/*Logo图片*/
+	,T1.province province/*省/直辖市*/
+	,T1.city city/*市*/
+	,t1.district district/*区/县*/
+	,t1.street street/*街道*/
+	,T1.address address/*详细地址*/
+	,t1.phone phone/*餐厅电话*/
+	,t1.merchants_name merchantsName/*配送商名称*/
+	,t1.merchants_contact merchantsContact/*配送商联系人*/
+	,t1.merchants_phone merchantsPhone/*配送商联系方式*/
+	,t1.latitude latitude  /**纬度*/
+	,t1.longtitude longtitude/*经度*/
+  </sql>
+  
+  <sql id="fromTableSql">
+	from lnk_restaurant_temp t1
+	left join cx_o_img t2 on t2.row_id = t1.logo
+	WHERE 1 = 1
+  </sql>
+  
+  <sql id="whereAllSql">
+    and t1.CREATED_BY = #{createdBy}
+    AND (t1.IMPORT_STATUS != 'Import Ok' OR t1.IMPORT_STATUS IS NULL)
+    <if test="attr5 == 'updateLatLng'">
+    and (t1.latitude IS NULL OR t1.longtitude IS NULL)
+    </if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+	order by T1.CREATED DESC
+  </sql>
+  
+  	<select id="queryById" resultMap="restaurantTemp"
+		parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="restaurantTemp"
+		parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="restaurantTemp"
+		parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+  	
+  <insert id="insert" parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+	insert into lnk_restaurant_temp
+	(ROW_ID
+	,CHECK_STATUS  
+	,IMPORT_STATUS 
+	,ERROR_MESSAGE 
+	,name
+	,province
+	,city 
+	,district
+	,street
+	,address
+	,phone
+	,merchants_name 
+	,merchants_contact
+	,merchants_phone
+	)
+	values
+	(#{id}
+	,#{checkStatus}
+	,#{impStatus}
+	,#{errMessage}
+	,#{name}
+	,#{province}
+	,#{city}
+	,#{district}
+	,#{street}
+	,#{address}
+	,#{phone}
+	,#{merchantsName}
+	,#{merchantsContact}
+	,#{merchantsPhone}
+	)
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+	UPDATE lnk_restaurant_temp
+	SET 
+	ROW_ID 				=#{id}
+	<if test="checkStatus != null and checkStatus != ''">
+	,CHECK_STATUS 		=#{checkStatus}/*校验状态*/
+	</if>
+	<if test="impStatus != null and impStatus != ''">
+	,IMPORT_STATUS 		=#{impStatus}/*导入状态*/
+	</if>
+	<if test="errMessage != null and errMessage != ''">
+	,ERROR_MESSAGE 		=#{errMessage}/*错误信息*/
+	</if>
+	<if test="name != null and name != ''">
+	,name				=#{name}
+	</if>
+	<if test="logo != null and logo != ''">
+	,Logo				=#{logo}
+	</if>
+	<if test="province != null and province != ''">
+	,province			=#{province}
+	</if>
+	<if test="city != null and city != ''">
+	,city 				=#{city}
+	</if>
+	<if test="district != null and district != ''">
+	,district			=#{district}
+	</if>
+	<if test="street != null and street != ''">
+	,street				=#{street}
+	</if>
+	<if test="address != null and address != ''">
+	,address			=#{address}
+	</if>
+	<if test="phone != null and phone != ''">
+	,phone				=#{phone}
+	</if>
+	<if test="merchantsName != null and merchantsName != ''">
+	,merchants_name		=#{merchantsName}
+	</if>
+	<if test="merchantsContact != null and merchantsContact != ''">
+	,merchants_contact	=#{merchantsContact}
+	</if>
+	<if test="merchantsPhone != null and merchantsPhone != ''">
+	,merchants_phone 	=#{merchantsPhone}
+	</if>
+	<if test="longtitude   != null and longtitude   != ''">
+	,longtitude  	=#{longtitude  }
+	</if>
+	<if test="latitude   != null and latitude   != ''">
+	,latitude   	=#{latitude  }
+	</if>
+	WHERE ROW_ID		= #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.o2odataimport.model.RestaurantTemp">
+		DELETE FROM lnk_restaurant_temp WHERE ROW_ID = #{id}
+  </delete>
+  
+  
+  <select id="runRestaurantCheck" statementType="CALLABLE">
+			CALL CHECK_RESTAURANT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="runRestaurantImp" statementType="CALLABLE">
+			CALL IMPORT_RESTAURANT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+</mapper>

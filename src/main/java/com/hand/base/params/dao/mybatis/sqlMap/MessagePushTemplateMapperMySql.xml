@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.params.dao.mybatis.mapper.MessagePushTemplateMapper">
+	<resultMap type="com.hand.base.params.model.MessagePushTemplate" id="messagePushTemplate"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			t1.CORP_ID corpId,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpd,
+			t1.LAST_UPD_BY lastUpdBy,
+			t1.T_ATTR_01 tAttr01,/*消息类型*/
+			t1.MSG_CONTEXT msgContext/*消息内容*/
+	</sql>
+	 
+	<sql id="fromTableSql">
+		FROM
+			CX_O_MSG_TEMP t1
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1=1
+		AND t1.T_ATTR_02 = 'MESSAGE'
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="messagePushTemplate" parameterType="com.hand.base.params.model.MessagePushTemplate">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="messagePushTemplate" parameterType="com.hand.base.params.model.MessagePushTemplate">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+		AND t1.ROW_ID=#{id}
+	</select>
+    <insert id="insert" parameterType="com.hand.base.params.model.MessagePushTemplate">
+		INSERT INTO CX_O_MSG_TEMP (
+			ROW_ID,
+			MODIFICATION_NUM,
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			DB_LAST_UPD_SRC,
+			MSG_CONTEXT,
+			T_ATTR_01,
+			T_ATTR_02,
+			T_ATTR_03
+			<!--
+			, 
+			T_ATTR_04,
+			T_ATTR_05,
+			T_ATTR_06,
+			T_ATTR_07,
+			T_ATTR_08,
+			T_ATTR_15
+			 -->
+			)
+		VALUES(
+			#{id},
+			0,
+			'0',
+			now(),
+			'User',
+			#{msgContext},
+			#{tAttr01},
+			'MESSAGE',
+			''
+			<!-- 
+			,
+			'',
+			'',
+			'',
+			'',
+			'',
+			''
+			-->
+		)
+    </insert>
+  
+    <update id="update" parameterType="com.hand.base.params.model.MessagePushTemplate">
+		UPDATE CX_O_MSG_TEMP 
+		SET T_ATTR_01 = #{tAttr01},
+			MSG_CONTEXT = #{msgContext}
+		WHERE ROW_ID = #{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="com.hand.base.params.model.MessagePushTemplate">
+		DELETE FROM CX_O_MSG_TEMP WHERE ROW_ID = #{id}
+    </delete>
+</mapper>

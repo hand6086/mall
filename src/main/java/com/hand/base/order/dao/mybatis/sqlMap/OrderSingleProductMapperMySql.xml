@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.OrderSingleProductMapper">
+	<resultMap type="com.hand.base.order.model.OrderSingleProduct" id="orderSingleProduct"></resultMap>
+	
+	<select id="queryByExamplePage" resultMap="orderSingleProduct" parameterType="com.hand.base.order.model.OrderSingleProduct">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t3.O2O_DISPLAY_NAME o2oProductDisplayName,/*单品名称*/
+			t3.O2O_INT_CODE o2oProductIntCode,/*单品编码*/
+			t2.NAME name,/*单品产品名称*/
+			t2.PART_NUM partNum,/*单品产品编码*/
+			ROUND(t1.BASE_UNIT_PRI,2) baseUnitPri,/*报价*/
+			ROUND(t1.NET_PRICE,2) netPrice,/*成交价*/
+			t1.DEAL_NUMBER dealNumber,/*成交数量*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI, 0) * IFNULL(t1.DEAL_NUMBER, 0)),2) quotedPriceSum,/*报价总金额*/
+			ROUND((IFNULL(t1.NET_PRICE, 0) * IFNULL(t1.DEAL_NUMBER, 0)),2) dealSum,/*成交总金额*/
+			t4.O2O_DISPLAY_NAME o2oMerchantDisplayName,/*套装商品名称*/
+			t4.O2O_INT_CODE o2oMerchantIntCode,/*套装商品编码*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI, 0) * IFNULL(t1.DEAL_NUMBER, 0) / IFNULL(t1.X_ATTRIB_01, 0) * ((IFNULL(t5.ATTRIB_20, 0) + IFNULL(t5.ATTRIB_22, 0) + IFNULL(t5.ATTRIB_21, 0)) * IFNULL(t7.ATTRIB_17, 0) / IFNULL(t5.ATTRIB_14, 0))),2) orderOfferSum,/*订单优惠金额分摊*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI, 0) * IFNULL(t1.DEAL_NUMBER, 0) / IFNULL(t1.X_ATTRIB_01, 0) * IF (t7.ATTRIB_11 = 'Y',0,IFNULL(t7.ATTRIB_17, 0) - IFNULL(t7.ATTRIB_19, 0))),2) merchantOfferSum,/*商品优惠金额分摊*/
+			t7.ATTRIB_11 attrib11,/*是否赠品*/
+			t7.O2O_GP_PROD o2oGpProd,/*是否团购商品*/
+			t8.ORDER_NUM orderNum,/*订单编号*/
+			t9.CONTACT contact,/*收货人*/
+			t9.CONTACT_PHONE contactPhone,/*收货电话*/
+			t5.ATTRIB_36 attrib36,/*省/直辖市*/
+			t5.ATTRIB_37 attrib37,/*城市*/
+			t5.ATTRIB_38 attrib38,/*区/县*/
+			t5.ATTRIB_01 attrib01,/*详细地址*/
+			t5.CREATED created,/*下单时间*/
+			date_format(t5.ATTRIB_26,'%Y-%m-%d %H:%i:%s') attrib26,/*付款时间*/
+			date_format(t5.ATTRIB_27,'%Y-%m-%d %H:%i:%s') attrib27,/*接单时间*/
+			date_format(t5.ATTRIB_28,'%Y-%m-%d %H:%i:%s') attrib28,/*配送时间*/
+			date_format(t5.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			ROUND(t5.ATTRIB_14,2) attrib14,/*商品总价*/
+			ROUND(t5.ATTRIB_16,2) attrib16,/*特价优惠金额*/
+			ROUND(t5.ATTRIB_20,2) attrib20,/*优惠券金额*/
+			ROUND(t5.ATTRIB_22,2) attrib22,/*买赠优惠金额*/
+			ROUND(t5.ATTRIB_21,2) attrib21,/*满减优惠金额*/
+			ROUND(t5.O2O_TIP,2) o2oTip,/*小费*/
+			ROUND(t5.ATTRIB_17,2) attrib17,/*订单总金额*/
+			t10.NAME merchantName,/*商户名称*/
+			t10.OU_NUM merchantOuNum,/*商户编码*/
+			t11.NAME customerName,/*消费者名称*/
+			t11.OU_NUM customerOuNum,/*消费者编码*/
+			t11.MAIN_PH_NUM mainPhNum,/*消费者电话*/
+			t5.O2O_FORCED_PICKUP o2oForcedPickup,/*是否兜底订单*/
+			t5.ATTRIB_50 attrib50,/*是否团购订单*/
+			t5.ATTRIB_55 attrib55,/*是否秒杀订单*/
+			t5.ATTRIB_48 attrib48,/*订单状态*/
+			t5.ATTRIB_07 attrib07 /*物流状态*/
+			,t100.T_ATTR_05 orgId
+		FROM
+			CX_O_ORD_ITM_LN t1
+		LEFT JOIN S_PROD_INT_X t3 ON t3.ROW_ID = t1.PRODUCT_ID
+		LEFT JOIN S_PROD_INT t2 ON t2.ROW_ID = t3.O2O_PROD_ID
+		LEFT JOIN S_PROD_INT_X t4 ON t4.ROW_ID = t1.PARENT_PRODUCT_ID
+		LEFT JOIN S_ORDER_ITEM t6 ON t6.ROW_ID = t1.ORDER_LINE_ID
+		LEFT JOIN (S_ORDER_X t5 join cx_o_area t100 on t5.x_attrib_68 = t100.row_id )ON t5.ROW_ID = t6.ORDER_ID
+		LEFT JOIN S_ORDER_ITEM_X t7 ON t7.ROW_ID = t1.ORDER_LINE_ID
+		LEFT JOIN S_ORDER t8 ON t8.ROW_ID = t6.ORDER_ID
+		LEFT JOIN CX_O_ADDRESS t9 ON t9.ROW_ID = t5.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t10 ON t10.ROW_ID = t5.ATTRIB_41
+		LEFT JOIN LNK_ACCNT t11 ON t11.ROW_ID = t8.ACCNT_ID
+		
+		where 1=1 
+			<if test="orderNum != null and orderNum != ''">
+			and t8.ORDER_NUM like concat('%',#{orderNum},'%')
+			</if>
+			<if test="o2oProductDisplayName != null and o2oProductDisplayName != ''">
+			and t3.O2O_DISPLAY_NAME like concat('%',#{o2oProductDisplayName},'%')
+			</if>
+			<if test="attrib48 != null and attrib48 != ''">
+			and t5.ATTRIB_48 = #{attrib48}
+			</if>
+			<if test="attrib07 != null and attrib07 != ''">
+			and t5.ATTRIB_07 = #{attrib07}
+			</if>
+			<if test="attr1 != null and attr1 != ''">
+			and t1.created &gt;= #{attr1}
+			</if>
+			<if test="attr2 != null and attr2 != ''">
+			and t1.created &lt;= #{attr2}
+			</if>
+			<if test="attrib37 != null and attrib37 != ''">
+			and t5.ATTRIB_37 like concat('%',#{attrib37},'%') 
+			</if>
+			<if test="contact != null and contact != ''">
+			and t9.CONTACT like concat('%',#{contact},'%') 
+			</if>
+			<if test="contactPhone != null and contactPhone != ''">
+			and t9.CONTACT_PHONE like concat('%',#{contactPhone},'%')
+			</if>
+			<if test="attrib01 != null and attrib01 != ''">
+			and t5.ATTRIB_01 like concat('%',#{attrib01},'%')
+			</if>
+			order by t1.CREATED desc
+	</select>
+	
+	<select id="queryorderSingleProductCount" resultType="java.lang.Integer" parameterType="com.hand.base.order.model.OrderSingleProduct">
+		
+		select count(ROW_ID)
+		FROM
+			CX_O_ORD_ITM_LN t1
+	</select>
+</mapper>

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.UserMapper">
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+	<resultMap type="com.hand.base.duty.model.Duty" id="duty"></resultMap>
+	<resultMap type="com.hand.base.user.model.Token" id="token"></resultMap>
+	
+	<sql id="querySql">
+<!--
+ 		select t1.row_id id,
+	      t1.created created,
+	      t1.CREATED_BY        as createdBy,
+		  DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %T') as lastUpdated,
+		  t1.LAST_UPD_BY       as lastUpdatedBy,
+		  T1.CORP_ID corpid,
+		  t7.name corpName,
+	      t1.username username,
+	      '' password,
+	      t1.fst_name firstName,
+	       t1.company_code companyCode,
+	      GET_SAP_LOV_VAL('COMPANY_CODE', t1.company_code) companyCodeLovType,
+	      t5.row_id deptId,
+			t5.org_name deptName,
+			t2.row_id as orgId,
+			t2.org_name orgName,
+	      t1.postn_id postnId,
+	      t3.postn_name postnName,
+	      t1.duty_id dutyId,
+	      t4.name dutyName,
+	       t1.emp_role role,
+	      t1.emp_role roleLovType,
+	      t1.emp_contact contact,
+	      t1.emp_tel contactPhone,
+	      t1.emp_mail email,
+	       t1.emp_status status,
+	      t1.emp_type empTypeLovType,
+	       t1.emp_type empType,
+	      0 errorTimes,
+	      t1.app_resp appResp,
+	      t1.BASE_NAME as basename,
+	      t1.FORMULA_DATE as formuladate,
+	      t1.HOME_TOWN as hometown,
+	      t1.JOB_LEVEL as joblevel,
+	      t1.JOIN_DATE as joindate,
+	      t1.JOIN_GROUP_DATE as joingroupdate,
+	      t1.NEXT_PROJ as nextproj,
+	      t1.POSITION_NAME as positionname,
+	      t1.TRIAL_DATE as trialdate,
+	      t5.org_name as unitname,
+	      t1.WORK_DATE as workdate,
+	      t1.SCANCARD_FLAG as scancardFlag,
+	      t6.acct_name acctName,
+	      t1.acct_id acctId,		客户ID
+	      t1.app_role as appRole,
+	      date_format(t1.last_login_date, '%Y-%m-%d %H:%i:%S') as lastLoginDate,
+   		  T1.X_ATTR_05 as customerServiceId,
+   		  T1.X_ATTR_06 as leaderId,
+   		  T9.FST_NAME	 as leader,
+   		  T1.X_ATTR_07 as currentProject,
+   		  T1.X_ATTR_08 as proRole,
+   		  T1.X_ATTR_09 as sourceStatus,
+   		  T1.X_ATTR_10 as updateVersion,
+   		  T1.X_ATTR_11 as qdUserOpenid,
+      	  T1.X_ATTR_12 as qdIsQduser,
+      	  T1.X_ATTR_13 as qdAssStatus,
+      	  T1.X_ATTR_14 as qdPrivTypeId,
+   		  date_format(t1.X_ATTR_31, '%Y-%m-%d') as enterProjDate,
+   		  date_format(t1.X_ATTR_32, '%Y-%m-%d') as releaseDate,
+   		  T1.X_ATTR_16 as planComments,
+   		  T1.X_ATTR_17 as timesheet,
+      	  T1.GENDER as gender,
+      	  T1.QIXINBAO_FLAG as qixinbaoFlag,
+      	  T1.system_role systemRole,
+      	  T1.store_status storeStatus
+      	 from LNK_EMP_INFO t1
+      	   left join LNK_POSTN_EXT t3 on t1.postn_id = t3.row_id
+      	   left join LNK_ORG_EXT t5 on t3.dept_id = t5.row_id
+      	   left join LNK_ORG_EXT t2 on t5.org_id = t2.row_id
+      	   left join LNK_DUTY t4 on t1.duty_id = t4.row_id
+	       left join LNK_ACCNT t6 on t1.acct_id = t6.row_id
+	       left join lnk_enterprise t7 on t1.corp_id = t7.code
+	       left join QD_USER t8 on t1.X_ATTR_05 = t8.row_id
+	       left join LNK_EMP_INFO t9 on t1.X_ATTR_06 = t9.row_id
+	     where 1=1 
+	     -->
+		SELECT
+			t1.*, 
+			t1.empType empTypeLovType,
+			t1.deptName unitname,
+   		  	T1.X_ATTR_06 leaderId,
+   		  	T9.FST_NAME leader
+		FROM
+			lnk_emp_info_v t1
+		LEFT JOIN LNK_EMP_INFO t9 ON t1.X_ATTR_06 = t9.row_id
+		WHERE
+			1 = 1
+	     <if test="usersystemRole!= 'super_administrator' ">
+			and t1.corpId = #{usercorpid}
+		 </if>
+	     <!-- from (select * from LNK_EMP_INFO 
+	          where 1 = 1 
+	          and corp_id = #{usercorpid}
+	          ) t1
+	          left join(
+	               LNK_POSTN_EXT t3 left join
+	                  ( 
+	                    LNK_ORG_EXT t5 left join LNK_ORG_EXT t2 on t5.org_id = t2.row_id
+	                  )on t3.dept_id = t5.row_id
+	           ) on t1.postn_id = t3.row_id
+	      left join LNK_DUTY t4 on t1.duty_id = t4.row_id
+	      left join LNK_ACCNT t6 on t1.acct_id = t6.row_id
+	      left join lnk_enterprise t7 on t1.corp_id = t7.code
+	      left join LNK_EMP_INFO t9 on t1.X_ATTR_06 = t9.row_id
+	    where 1=1 -->
+	    <if test="empTypeLovType != null and empTypeLovType != '' ">
+		and t1.empType = #{empTypeLovType}
+		</if>
+	</sql>
+	
+	<select id="queryById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		<include refid="querySql"></include>
+   		and t1.row_id=#{id}
+   </select>
+
+   <select id="brandQueryById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		<include refid="querySql"></include>
+   		and t1.row_id=#{id}
+   </select>
+   
+   <update id="update" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO
+		   SET acct_id         = #{acctId},
+		       username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       company_code    = GET_LOV_val(#{usercorpid},'COMPANY_CODE',#{companyCode}),
+		       emp_role        = GET_LOV_val(#{usercorpid}, 'ROLE',#{role}),
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       JOIN_GROUP_DATE = #{joingroupdate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       UNIT_NAME       = #{unitname},
+		       WORK_DATE       = #{workdate},
+		       emp_status      = GET_LOV_VAL(#{usercorpid}, 'USER_STATUS',#{status}),
+		       app_role        = GET_LOV_val(#{usercorpid},'EMP_APP_ROLE',#{appRole}),
+		       app_resp 	   = #{appResp},
+		       POSTN_ID        = #{postnId},
+		       DUTY_ID		   = #{dutyId},
+		       SCANCARD_FLAG   = #{scancardFlag},
+		       emp_type		   = GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		       X_ATTR_05	   = #{customerServiceId},
+		       X_ATTR_06  	   = #{leaderId} ,
+	      	   X_ATTR_07       = #{currentProject} ,
+      	   	   X_ATTR_08 	   = #{proRole} ,
+      		   X_ATTR_09       = #{sourceStatus} ,
+      		   X_ATTR_10       = #{updateVersion} ,
+      		   X_ATTR_12 	   = #{qdIsQduser},
+	      	   X_ATTR_14 	   = #{qdPrivTypeId},
+      		   X_ATTR_16       = #{planComments} ,
+      		   X_ATTR_17       = #{timesheet} ,
+      		   X_ATTR_31 	   =  str_to_date(#{enterProjDate},'%Y-%m-%d'),
+      		   X_ATTR_32	   =  str_to_date(#{releaseDate},'%Y-%m-%d'),
+      		   GENDER    	   = GET_LOV_VAL(#{usercorpid},'GENDER' ,#{gender}),
+      		   QIXINBAO_FLAG   = #{qixinbaoFlag}
+      		   <if test="corpid != null and corpid != '' ">
+			   ,corp_id		   = #{corpid}
+			   </if>
+			   <if test="systemRole != null and systemRole != '' ">
+			   ,system_role     = GET_LOV_val(#{usercorpid},'SYSTEM_ROLE' ,#{systemRole})
+			   </if>
+			   ,store_status =#{storeStatus}
+			   ,zh_mail =#{zhEmail}
+		 WHERE row_id = #{id}
+	</update>
+	
+   <update id="brandUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO
+		   SET acct_id         = #{acctId},
+		       username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       company_code    = GET_LOV_val(#{usercorpid},'COMPANY_CODE',#{companyCode}),
+		       emp_role        = GET_LOV_val(#{usercorpid}, 'ROLE',#{role}),
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       JOIN_GROUP_DATE = #{joingroupdate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       UNIT_NAME       = #{unitname},
+		       WORK_DATE       = #{workdate},
+		       emp_status      = GET_LOV_VAL(#{usercorpid}, 'USER_STATUS',#{status}),
+		       app_role        = GET_LOV_val(#{usercorpid},'EMP_APP_ROLE',#{appRole}),
+		       app_resp 	   = #{appResp},
+		       POSTN_ID        = #{postnId},
+		       DUTY_ID		   = #{dutyId},
+		       SCANCARD_FLAG   = #{scancardFlag},
+		       emp_type		   = GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		       X_ATTR_05	   = #{customerServiceId},
+		       X_ATTR_06  	   = #{leaderId} ,
+	      	   X_ATTR_07       = #{currentProject} ,
+      	   	   X_ATTR_08 	   = #{proRole} ,
+      		   X_ATTR_09       = #{sourceStatus} ,
+      		   X_ATTR_10       = #{updateVersion} ,
+      		   X_ATTR_12 	   = #{qdIsQduser},
+	      	   X_ATTR_14 	   = #{qdPrivTypeId},
+      		   X_ATTR_16       = #{planComments} ,
+      		   X_ATTR_17       = #{timesheet} ,
+      		   X_ATTR_31 	   =  str_to_date(#{enterProjDate},'%Y-%m-%d'),
+      		   X_ATTR_32	   =  str_to_date(#{releaseDate},'%Y-%m-%d'),
+      		   GENDER    	   = GET_LOV_VAL(#{usercorpid},'GENDER' ,#{gender}),
+      		   QIXINBAO_FLAG   = #{qixinbaoFlag}
+      		   <if test="corpid != null and corpid != '' ">
+			   ,corp_id		   = #{corpid}
+			   </if>
+			   <if test="systemRole != null and systemRole != '' ">
+			   ,system_role     = GET_LOV_val(#{usercorpid},'SYSTEM_ROLE' ,#{systemRole})
+			   </if>
+			   ,store_status =#{storeStatus}
+               ,zh_mail =#{zhEmail}
+		 WHERE row_id = #{id}
+	</update>
+	
+	<select id="queryByExamplePage" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		  <include refid="querySql"></include>
+	   	  <!-- order by T1.row_id asc, T1.username asc -->
+	   	  order by t1.CREATED desc
+   </select>
+   
+   <delete id="deleteById" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_EMP_INFO WHERE row_id = #{id}
+	</delete>
+
+	<select id="queryByUserId" parameterType="com.hand.base.user.model.User"
+		resultType="com.hand.base.user.model.User">
+		select id,
+		username,
+		firstName,
+		password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		dutyName,
+		acctAgencyName,
+		systemRole,
+		storeStatus,
+        zhEmail
+		from LNK_EMP_INFO_v
+		where
+		id = #{id}
+	</select>
+
+	<update id="changeUserPasswordUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+	</update>
+
+	<update id="changeAppUserPasswordUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		s_contact_x SET attrib_02 = #{password} WHERE ROW_ID = #{id}
+	</update>
+	
+	<update id="resetUserPassword">
+		 <if test="password!=null and password!='' and id!=null and id!=''">  
+            UPDATE LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+        </if>  
+	</update>
+
+	<update id="changeUserPassword" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+	</update>
+
+	<select id="querySampleUserById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select t1.row_id as id,
+		t1.created created,
+		t1.CREATED_BY        as createdBy,
+		date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		t1.LAST_UPD_BY       as lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.username username,
+		t1.fst_name firstName
+		from LNK_EMP_INFO t1
+		where  t1.row_id=#{id}
+   </select>
+   
+   	<!-- 修改企点信息 -->
+	<update id="qidianInfoUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO
+		   SET X_ATTR_13 = #{qdAssStatus}
+		<if test="qdUserOpenid != null">
+		      ,X_ATTR_11 = #{qdUserOpenid}
+		</if>
+		<if test="qdIsQduser != null">
+		      ,X_ATTR_12 = #{qdIsQduser}
+		</if>
+		 WHERE row_id = #{id}
+	</update>
+   
+   	<insert id="insert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		acct_id,
+		company_code,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_status,
+		emp_type,
+		SCANCARD_FLAG,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		JOIN_GROUP_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		UNIT_NAME,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_ID,
+		DUTY_ID,
+		X_ATTR_05,
+		X_ATTR_06,
+   		X_ATTR_07,
+   		X_ATTR_08,
+   		X_ATTR_09,
+   		X_ATTR_10,
+   		X_ATTR_12,
+      	X_ATTR_13,
+      	X_ATTR_14,
+   		X_ATTR_16,
+   		X_ATTR_17,
+   		X_ATTR_31,
+   		X_ATTR_32,
+   		GENDER,
+   		QIXINBAO_FLAG,
+   		system_role,
+   		store_status,
+   		zh_mail
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{acctId},
+		GET_LOV_val(#{usercorpid},'COMPANY_CODE',
+		#{companyCode}),
+		GET_LOV_val(#{usercorpid},'ROLE' ,#{role}),
+		#{contact},
+		#{contactPhone},
+		#{email},
+		GET_LOV_val(#{usercorpid},'USER_STATUS' ,#{status}),
+		GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		#{scancardFlag},
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{joingroupdate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{unitname},
+		#{workdate},
+		GET_LOV_val(#{usercorpid},'EMP_APP_ROLE' ,#{appRole}),
+		#{appResp},
+		#{postnId},
+		#{dutyId},
+		#{customerServiceId},
+		#{leaderId},
+		#{currentProject},
+		#{proRole},
+		#{sourceStatus},
+		#{updateVersion},
+		'N',
+		'unassigne',
+		#{qdPrivTypeId},
+		#{planComments},
+		#{timesheet},
+		str_to_date(#{enterProjDate},'%Y-%m-%d'),
+		str_to_date(#{releaseDate},'%Y-%m-%d'),
+		GET_LOV_VAL(#{usercorpid},'GENDER' ,#{gender}),
+		#{qixinbaoFlag},
+		GET_LOV_VAL(#{usercorpid},'SYSTEM_ROLE' ,#{systemRole}),
+		#{storeStatus}
+		#{zhEmail}
+		)
+	</insert>
+	
+   	<insert id="brandInsert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		acct_id,
+		company_code,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_status,
+		emp_type,
+		SCANCARD_FLAG,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		JOIN_GROUP_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		UNIT_NAME,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_ID,
+		DUTY_ID,
+		X_ATTR_05,
+		X_ATTR_06,
+   		X_ATTR_07,
+   		X_ATTR_08,
+   		X_ATTR_09,
+   		X_ATTR_10,
+   		X_ATTR_12,
+      	X_ATTR_13,
+      	X_ATTR_14,
+   		X_ATTR_16,
+   		X_ATTR_17,
+   		X_ATTR_31,
+   		X_ATTR_32,
+   		GENDER,
+   		QIXINBAO_FLAG,
+   		system_role,
+   		store_status,
+   		zh_mail
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{acctId},
+		GET_LOV_val(#{usercorpid},'COMPANY_CODE',
+		#{companyCode}),
+		GET_LOV_val(#{usercorpid},'ROLE' ,#{role}),
+		#{contact},
+		#{contactPhone},
+		#{email},
+		GET_LOV_val(#{usercorpid},'USER_STATUS' ,#{status}),
+		GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		#{scancardFlag},
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{joingroupdate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{unitname},
+		#{workdate},
+		GET_LOV_val(#{usercorpid},'EMP_APP_ROLE' ,#{appRole}),
+		#{appResp},
+		#{postnId},
+		#{dutyId},
+		#{customerServiceId},
+		#{leaderId},
+		#{currentProject},
+		#{proRole},
+		#{sourceStatus},
+		#{updateVersion},
+		'N',
+		'unassigne',
+		#{qdPrivTypeId},
+		#{planComments},
+		#{timesheet},
+		str_to_date(#{enterProjDate},'%Y-%m-%d'),
+		str_to_date(#{releaseDate},'%Y-%m-%d'),
+		GET_LOV_VAL(#{usercorpid},'GENDER' ,#{gender}),
+		#{qixinbaoFlag},
+		GET_LOV_VAL(#{usercorpid},'SYSTEM_ROLE' ,#{systemRole}),
+		#{storeStatus}
+		#{zhEmail}
+		)
+	</insert>
+	
+	<update id="mainPostnUpdate" parameterType="com.hand.base.user.model.User">
+		update
+		LNK_EMP_INFO t set t.postn_id = #{postnId} where t.row_id = #{id}
+	</update>
+	
+	
+	
+	
+	<!-- 外部系统调用接口列表 -->
+	<select id="queryTokenPage" parameterType="com.hand.base.user.model.Token" resultType="com.hand.base.user.model.Token">
+		SELECT
+			t.ROW_ID id,
+			t.CREATED created,
+			t.CREATED_BY createdBy,
+			t.LAST_UPD lastUpdated,
+			t.LAST_UPD_BY lastUpdatedBy,
+			t.START_DATE startDate,
+			t.END_DATE endDate,
+			t.LOGIN login,
+			t.j_username username,
+			'' password,
+			t.TOKEN token,
+			t1.`name` company
+		FROM
+			lnk_token t
+		LEFT JOIN lnk_enterprise t1 ON t.corp_id = t1.`code`
+	</select>
+	
+	<select id="queryUserCount" resultType="java.lang.Integer" parameterType="com.hand.base.user.model.User">
+		
+		select count(ROW_ID)
+		FROM
+			lnk_emp_info_v t1
+		where 1=1
+		<if test="usersystemRole!= 'super_administrator' ">
+			and t1.corpId = #{usercorpid}
+		 </if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.position.dao.mybatis.mapper.PositionImpMapper">
+  <resultMap type="com.hand.base.position.model.Position" id="position"></resultMap>
+  
+  <sql id="queryAllSql">
+		select T1.ROW_ID as id,
+		       t1.created as created,
+		       T1.CREATED_BY as createdBy,
+		       DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		       T1.LAST_UPD_BY as lastUpdatedBy,
+		       T1.CORP_ID corpid,
+		       t1.postn_name text,
+		       t1.postn_type positionType,
+		       t1.parent_postin_name parentPositionName,
+		       t1.dept_Name deptName,
+		       t1.fst_name fstName,
+		       t1.status status,
+		       t1.ERROR_MESSAGE errorMessage
+  </sql>
+  
+  <sql id="fromTableSql">
+		  from LNK_POSTN_TEMP t1
+		 where t1.corp_id=#{usercorpid}
+		   and t1.parent_postin_name is not null
+		   AND (t1.status != 'IMP_SUCCESS' OR t1.status IS NULL)
+  </sql>
+  
+  <sql id="whereAllSql">
+		<if test="status != null and status != '' ">
+			and  t1.status = #{status}
+		</if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+  </sql>
+  
+  	<select id="queryById" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.position.model.Position">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>	
+  
+  <insert id="insert" parameterType="com.hand.base.position.model.Position">
+		insert into LNK_POSTN_TEMP
+		  (ROW_ID,
+		   postn_name,
+		   postn_type,
+		   parent_postin_NAME,
+		   dept_NAME,
+		   FST_NAME,
+		   STATUS)
+		values
+		  (#{id},
+		   #{text},
+		   #{positionType},
+		   #{parentPositionName},
+		   #{deptName},
+		   #{fstName},
+		   GET_LOV_VAL(#{usercorpid},'IMP_STATUS', '新建')
+		   )
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.position.model.Position">
+  		DELETE FROM LNK_POSTN_TEMP WHERE row_id = #{id}
+  </delete>
+  
+  <update id="update" parameterType="com.hand.base.position.model.Position">
+		UPDATE LNK_POSTN_TEMP
+		   SET postn_name         = #{text},
+		       postn_type         = #{positionType},
+		       parent_postin_NAME = #{parentPositionName},
+		       dept_NAME          = #{deptName},
+		       FST_NAME           = #{fstName}
+		 WHERE row_id = #{id}
+  </update>
+  
+  <select id="runPositionCheck" statementType="CALLABLE">
+			CALL RUN_POSTN_IMP_CHECK(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="runNewPositionForimp" statementType="CALLABLE">
+			CALL RUN_POSTN_IMP_INSERT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.ImageMapper">
+  <resultMap type="com.hand.base.common.model.Image" id="image"></resultMap>
+   <insert id="imageInsert" parameterType="com.hand.base.common.model.Image">
+		 INSERT INTO
+		LNK_ATTACHMENT
+		(row_id,
+		longitude,
+		latitude,
+		address,
+		COMMMENTS,
+		ATTACHMENT_PATH,
+		SMALL_URL,
+		BIG_URL,
+		MODULE_TYPE,
+		HEAD_ID,
+		SOURCE,
+		ATTACHMENT_TYPE,
+		ATTACHMENT_SIZE,
+		ATTACHMENT_NAME
+		)
+		VALUES
+		(
+		#{id},
+		#{longitude},
+		#{latitude},
+		#{address},
+		#{imgdesc},
+		#{url},
+		#{smallurl},
+		#{bigurl},
+		#{module},
+		#{parentid},
+		'web',
+		#{attachmentType},
+		#{attachmentSize},
+		#{attachmentName}
+		)
+  </insert>
+  
+    
+  
+ 
+  
+  
+  
+</mapper>

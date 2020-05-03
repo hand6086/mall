@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.LoginLogMapper">
+  <resultMap type="com.hand.base.user.model.LoginLog" id="loginLog"></resultMap>
+  
+  	<sql id="queryAllSql">
+  		select  T1.ROW_ID            as id
+		       ,t1.created as created
+		       ,T1.CREATED_BY        as createdBy
+		       ,TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated
+			   ,T1.LAST_UPD_BY       as lastUpdatedBy
+		       ,T1.modification_num  modificationNum
+		       ,T1.conflict_id       conflictId
+		       ,T1.db_last_up        dbLastUp
+		       ,T1.db_last_up_src    dbLastUpSrc
+		       ,T1.session_id        sessionId
+		       ,T1.login_time        loginTime
+		       ,T1.user_id           userId
+		       ,T1.login_name        loginName
+		       ,T1.remote_ip         ipAddress
+		       ,T1.user_agent        userAgent
+		       ,T1.user_source       userSource
+		       ,T2.fst_name          firstName
+	</sql>
+
+	<sql id="fromTableSql">
+		from LNK_LOGINLOG T1
+    		,LNK_EMP_INFO T2
+	</sql>
+
+	<sql id="whereAllSql">
+		where T1.user_id = T2.row_id(+)
+		and   T2.corp_id = #{usercorpid}
+	</sql>
+
+	<sql id="orderByAllSql">
+		order by T1.login_time desc
+	</sql>
+  
+  	<select id="queryByExamplePage" resultMap="loginLog"
+		parameterType="com.hand.base.user.model.LoginLog">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		<include refid="orderByAllSql" />
+	</select>
+  	
+    <!-- 登陆成功 -->
+ 	<insert id="addLoginSuccessLog" parameterType="com.hand.base.user.model.LoginLog">
+ 		INSERT INTO LNK_LOGINLOG
+		  (ROW_ID,
+		   CREATED,
+		   CREATED_BY,
+		   LAST_UPD,
+		   LAST_UPD_BY,
+		   MODIFICATION_NUM,
+		   SESSION_ID,
+		   LOGIN_TIME,
+		   USER_ID,
+		   LOGIN_NAME,
+		   REMOTE_IP,
+		   USER_AGENT,
+		   USER_SOURCE)
+		VALUES
+		  (#{id},
+		   sysdate,
+		   #{userId},
+		   sysdate,
+		   #{userId},
+		   0,
+		   #{sessionId},
+		   sysdate,
+		   #{userId},
+		   #{loginName},
+		   #{ipAddress},
+		   #{userAgent},
+		   #{userSource})
+ 	</insert>
+ 	<!-- 登陆失败 -->
+ 	<insert id="addLoginErrorLog" parameterType="com.hand.base.user.model.LoginLog">
+ 		INSERT INTO LNK_PASSWD
+		  (ROW_ID, USER_ID, LOCK_FLG, CREATED, CREATED_BY, LAST_UPD, LAST_UPD_BY)
+		VALUES
+		  (s_sequence_pkg.get_next_rowid(),#{userId},#{lockFlag}, sysdate,#{userId}, sysdate,#{userId})
+ 	</insert>
+  
+</mapper>

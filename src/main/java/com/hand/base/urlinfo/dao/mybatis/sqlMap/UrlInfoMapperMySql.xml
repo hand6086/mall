@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.urlinfo.dao.mybatis.mapper.UrlInfoMapper">
+	<resultMap type="com.hand.base.urlinfo.model.UrlInfo"
+		id="urlInfo"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') AS lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.ORG_ID            as orgId               /*组织ID*/
+		,T1.POSTN_ID          as postnId             /*职位ID*/
+		,T1.URL               as url                 /*URL*/
+		,T1.NAME              as name                /*名称*/
+		,T1.COMMENTS          as comments            /*备注*/
+		,T1.INSERT_FLAG       as insertFlag          /*添加*/
+		,T1.DEL_FLAG          as delFlag             /*删除*/
+		,T1.UPDATE_FLAG       as updateFlag          /*修改*/
+		,T1.SELECT_FLAG       as selectFlag          /*查询*/
+		,T1.DEF_ACCESS_FLAG   as defaultAccessFlag   /*默认可访问*/
+		,T1.TYPE	as type
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_URL_INFO T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	<if test="defaultAccessFlag != null and defaultAccessFlag != ''">
+		AND T1.DEF_ACCESS_FLAG = #{defaultAccessFlag}
+	</if>
+
+	<if test="url != null and url != ''">
+		AND T1.URL = #{url}
+	</if>
+	<if test="type != null and type != ''">
+		AND T1.type = #{type}
+	</if>
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="urlInfo"
+		parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="urlInfo"
+		parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="urlInfo"
+		parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		INSERT INTO LNK_URL_INFO(
+		 ROW_ID              /*记录ID*/
+		,URL                 /*URL*/
+		,NAME                /*名称*/
+		,COMMENTS            /*备注*/
+		,INSERT_FLAG         /*添加*/
+		,DEL_FLAG            /*删除*/
+		,UPDATE_FLAG         /*修改*/
+		,SELECT_FLAG         /*查询*/
+		,DEF_ACCESS_FLAG     /*默认可访问*/
+		,TYPE
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{url}              /*URL*/
+		,#{name}             /*名称*/
+		,#{comments}         /*备注*/
+		,#{insertFlag}       /*添加*/
+		,#{delFlag}          /*删除*/
+		,#{updateFlag}       /*修改*/
+		,#{selectFlag}       /*查询*/
+		,#{defaultAccessFlag}/*默认可访问*/
+		,GET_LOV_val(#{usercorpid}, 'URL_TYPE', #{type})
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		UPDATE LNK_URL_INFO SET
+		 URL                 =#{url}              /*URL*/
+		,NAME                =#{name}             /*名称*/
+		,COMMENTS            =#{comments}         /*备注*/
+		,INSERT_FLAG         =#{insertFlag}       /*添加*/
+		,DEL_FLAG            =#{delFlag}          /*删除*/
+		,UPDATE_FLAG         =#{updateFlag}       /*修改*/
+		,SELECT_FLAG         =#{selectFlag}       /*查询*/
+		,DEF_ACCESS_FLAG     =#{defaultAccessFlag}/*默认可访问*/
+		,TYPE = GET_LOV_val(#{usercorpid}, 'URL_TYPE', #{type})
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		DELETE FROM LNK_URL_INFO WHERE ROW_ID=#{id}
+	</delete>
+	
+	<select id="queryUrlByUser" resultMap="urlInfo"
+		parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		SELECT T1.ROW_ID            as id                  /*记录编号*/
+		      ,T1.CREATED           as created             /*创建时间*/
+		      ,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		      ,DATE_FORMAT(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') AS lastUpdated         /*最后更新时间*/
+		      ,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		      ,T1.CORP_ID           as corpid              /*公司账套*/
+		      ,T1.ORG_ID            as orgId               /*组织ID*/
+		      ,T1.POSTN_ID          as postnId             /*职位ID*/
+		      ,T1.URL               as url                 /*URL*/
+		      ,T1.NAME              as name                /*名称*/
+		      ,T1.COMMENTS          as comments            /*备注*/
+		      ,T1.INSERT_FLAG       as insertFlag          /*添加*/
+		      ,T1.DEL_FLAG          as delFlag             /*删除*/
+		      ,T1.UPDATE_FLAG       as updateFlag          /*修改*/
+		      ,T1.SELECT_FLAG       as selectFlag          /*查询*/
+		      ,T1.DEF_ACCESS_FLAG   as defaultAccessFlag   /*默认可访问*/
+		      ,T1.TYPE 					as type
+		  FROM LNK_URL_INFO T1,
+		       LNK_EMP_INFO T2,
+		       LNK_DUTY     T3,
+		       LNK_INTER_DUTY_USER T4,
+		       LNK_URL_DUTY_INTER  T5
+		
+		 WHERE T3.ROW_ID = T4.DUTY_ID
+		   AND T2.ROW_ID = T4.USER_ID
+		   AND T3.ROW_ID = T5.DUTY_ID
+		   AND T1.ROW_ID = T5.URL_ID
+	<if test="url != null and url != ''">
+		AND T1.URL = #{url}
+	</if>
+	<if test="type != null and type != ''">
+		AND T1.TYPE = #{type}
+	</if>
+	<!-- attr1 用户ID -->
+	<if test="attr1 != null and attr1 != ''">
+		AND T2.ROW_ID = #{attr1}
+	</if>
+	<!-- attr2 可访问标记 -->
+	<if test="attr2 != null and attr2 != ''">
+		AND T5.ACCESS_FLAG = #{attr2}
+	</if>
+	</select>
+</mapper>

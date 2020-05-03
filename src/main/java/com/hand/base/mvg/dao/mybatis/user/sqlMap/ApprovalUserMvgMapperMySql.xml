@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.user.mapper.ApprovalUserMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="user" parameterType="com.hand.base.user.model.User">
+		 select t1.row_id id,
+				date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+				t1.username username,
+				t1.fst_name firstName,
+				 t1.company_code companyCode,
+				t1.company_code companyCodeLovType,
+				t1.emp_status status,
+				t1.emp_type empType,
+				t1.emp_role role,
+				t1.emp_contact contact,
+				t1.emp_tel contactPhone,
+				1 errorTimes
+		   from LNK_EMP_INFO t1
+		  where not exists (
+		  		select s1.user_id
+				  from LNK_INTER_APPROVAL_USER s1
+				 where t1.row_id = s1.user_id
+				   and s1.approval_node_id = #{mvgParentId}
+				)
+			and t1.corp_id = #{usercorpid}
+  </select>
+  
+  <select id="queryRightListPage" resultMap="user" parameterType="com.hand.base.user.model.User">
+		 select t1.row_id interId,
+				date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+				t1.user_Id id,
+				t2.username username,
+				t2.fst_name firstName,
+				t2.emp_status status,
+				1 errorTimes,
+				(case when t2.row_id = t3.user_id then 'Y' else 'N' end) isDefault
+		   from 
+		   LNK_INTER_APPROVAL_USER t1 left join LNK_EMP_INFO t2 on t1.user_id = t2.row_id
+				left join LNK_APPROVAL_FLOW_NODE t3 on t1.approval_node_id = t3.row_id
+			where 1=1
+			and t1.corp_id = #{usercorpid}
+			and t1.approval_node_id = #{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_APPROVAL_USER
+		  (row_id,
+		   user_id,
+		   approval_node_id)
+		values
+		  (#{id},
+		   #{mvgSubsetId},
+		   #{mvgParentId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_APPROVAL_USER
+		 WHERE approval_node_id = #{mvgParentId}
+		   and user_id = #{mvgSubsetId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_APPROVAL_USER WHERE approval_node_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

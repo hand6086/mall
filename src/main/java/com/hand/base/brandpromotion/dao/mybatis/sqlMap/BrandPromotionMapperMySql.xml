@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.brandpromotion.dao.mybatis.mapper.BrandPromotionMapper">
+
+	<resultMap type="com.hand.base.brandpromotion.service.BrandPromotionService" id="brandPromotion"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.CITY_ID cityId,
+		t4.fst_name createdName,
+		t1.NAME activityName,/*促销活动名称*/
+		t1.CODE activityCode,/*促销活动编码*/
+		date_format(t1.start_time,'%Y-%m-%d %H:%i:%S') startTime,/*活动开始时间*/
+		date_format(t1.end_time,'%Y-%m-%d %H:%i:%S') endTime,/*活动结束时间*/
+		t1.STATUS status,/*活动状态*/
+		t1.TYPE type,/*促销形式*/
+		t1.NOTES activityNotes,/*说明*/
+		t1.T_ATTR_03 noCouponUse,/*是否可用优惠券*/
+		t2.name cityName,/*大区*/
+		t1.approval_status approvalStatus,/*审批状态*/
+		t1.approval_suggest approvalSuggest,/*审批意见*/
+		t1.schema_id schemaId, /*活动方案ID*/
+		t5.APPROVAL_FLG approvalFlg,/*活动自动审批*/
+		t3.row_id orgId
+	</sql>
+
+	<sql id="fromTableSql">
+		FROM CX_O_PMO_SP t1
+		left join (
+			CX_O_AREA t2 LEFT JOIN lnk_org_ext t3 ON t3.ROW_ID = t2.T_ATTR_05
+			) on t1.CITY_ID= t2.ROW_ID
+		LEFT JOIN lnk_emp_info t4 on t1.CREATED_BY = t4.row_id
+		left join LNK_SALE_SCHEMA t5 on t1.schema_id = t5.row_id
+	</sql>
+
+	<sql id="whereAllSql">
+		where 1=1
+		<if test="type != null and type != '' ">
+		<!--
+			<if test="type == 'Free Buy' ">
+				and t1.TYPE='Free Buy'
+			</if>
+			<if test="type == 'Limited Purchase' ">
+				and t1.TYPE='Limited Purchase'
+			</if>
+			<if test="type == 'Second Kill' ">
+				and t1.TYPE='Second Kill'
+			</if>
+		 -->
+			AND t1.type = #{type}
+
+		</if>
+		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+		<if test="id != null and id != ''">
+			AND t1.ROW_ID = #{id}
+		</if>
+		<!-- 审批界面 -->
+		<if test="isApproved != '' and isApproved != null ">
+			AND t1.approval_status != 'New'
+			order by FIELD(t1.approval_status,'Pending','Rejected','Approved'),t1.CREATED desc
+		</if>
+		<if test="isApproved == '' or isApproved == null ">
+			order by FIELD(t1.approval_status,'Rejected','Pending','New','Approved'),t1.CREATED desc
+		</if>
+	</sql>
+
+	<select id="queryByExamplePage" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+	<select id="queryById" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		where T1.ROW_ID=#{id}
+	</select>
+
+
+
+	<select id="queryAll" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+	<select id="queryCityPage" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		SELECT
+			t4.NOTES cityNotes,
+			t3.NAME cityName,
+			t4.CITY_ID id,
+			t5.NAME name,
+			t3.T_ATTR_05 orgId
+		FROM
+			LNK_INTER_CITY_SALE t1
+		LEFT JOIN LNK_SALE_SCHEMA t2 ON t1.sale_schema_id = t2.row_id
+		LEFT JOIN ( CX_O_AREA t3 LEFT JOIN CX_O_CITY t4 ON t3.row_id = t4.CITY_ID
+					LEFT JOIN CX_O_AREA t5 ON t5.ROW_ID = t3.PARENT_ID
+					) ON t1.city_id = t3.row_id
+		WHERE 1 = 1
+		AND t3.T_ATTR_02 = 'Y'
+		AND t3. NAME != ''
+		AND t2.row_id=#{schemaId}
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryType" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		select
+			t3.row_id id,
+			t3.NAME name,/*促销形式*/
+			t3.val val
+		from lnk_inter_type_sale t1 left join LNK_SALE_SCHEMA t2 on t1.sale_schema_id = t2.row_id
+		left join lnk_list_of_val t3 on t1.type_id = t3.row_id
+		where 1=1
+			and t1.sale_schema_id = #{schemaId}
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+
+  		INSERT INTO cx_o_pmo_sp(
+		   ROW_ID, 
+		   city_id,
+           name,
+           code,
+		   start_time,
+		   end_time,
+		   type,
+		   STATUS,
+		   approval_status,
+		   approval_suggest,
+		   notes,
+		   COST_SHARE_PPT_D,
+		   COST_SHARE_MAX_D,
+		   COST_SHARE_MIN_D,
+		   COST_SHARE_PPT_W,
+		   COST_SHARE_MAX_W,
+		   COST_SHARE_MIN_W,
+		   COST_SHARE_PPT_R,
+		   COST_SHARE_MAX_R,
+		   COST_SHARE_MIN_R,
+		   schema_id,
+		   T_ATTR_03
+		   )
+		VALUES(
+		   #{id},
+		   #{cityId},
+		   #{activityName},
+		   TB_O2O_ACCTIVITYCODE(),
+		   #{startTime},
+		   #{endTime},
+		   #{type},
+		   #{status},
+		   #{approvalStatus},
+		   #{approvalSuggest},
+		   #{activityNotes},
+		   #{costProportionD},
+		   #{costMaxProportionD},
+		   #{costMinProportionD},
+		   #{costProportionW},
+		   #{costMaxProportionW},
+		   #{costMinProportionW},
+		   #{costProportionR},
+		   #{costMaxProportionR},
+		   #{costMinProportionR},
+		   #{schemaId},
+		   <if test="noCouponUse != '' and noCouponUse != null ">
+		   	  #{noCouponUse}
+		   	  <!-- GET_LOV_VAL(#{usercorpid}, 'TB_O2O_COUPON_USE',#{noCouponUse}) ); -->
+		   </if>
+		   <!-- 促销方案 新建拼团活动时 使优惠券默认不可用 -->
+		   <if test="noCouponUse == '' or noCouponUse == null ">
+		   	  'N'
+		   </if>
+		   )
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		UPDATE cx_o_pmo_sp
+  		SET 
+		   city_id=#{cityId},
+           name=#{activityName},
+		   start_time=#{startTime},
+		   end_time=#{endTime},
+		   type=#{type},
+		   STATUS=#{status},
+		   approval_status=#{approvalStatus},
+		   approval_suggest=#{approvalSuggest},
+		   notes=#{activityNotes},
+		   T_ATTR_03=#{noCouponUse}
+		   <if test="costProportionD != null and costProportionD != ''">
+		   ,COST_SHARE_PPT_D = #{costProportionD}
+		   </if>
+		   <if test="costMaxProportionD != null and costMaxProportionD != ''">
+		   ,COST_SHARE_MAX_D = #{costMaxProportionD}
+		   </if>
+		   <if test="costMinProportionD != null and costMinProportionD != ''">
+		   ,COST_SHARE_MIN_D = #{costMinProportionD}
+		   </if>
+		   <if test="costProportionW != null and costProportionW != ''">
+		   ,COST_SHARE_PPT_W = #{costProportionW}
+		   </if>
+		   <if test="costMaxProportionW != null and costMaxProportionW != ''">
+		   ,COST_SHARE_MAX_W = #{costMaxProportionW}
+		   </if>
+		   <if test="costMinProportionW != null and costMinProportionW != ''">
+		   ,COST_SHARE_MIN_W = #{costMinProportionW}
+		   </if>
+		   <if test="costProportionR != null and costProportionR != ''">
+		   ,COST_SHARE_PPT_R = #{costProportionR}
+		   </if>
+		   <if test="costMaxProportionR != null and costMaxProportionR != ''">
+		   ,COST_SHARE_MAX_R = #{costMaxProportionR}
+		   </if>
+		   <if test="costMinProportionR != null and costMinProportionR != ''">
+		   ,COST_SHARE_MIN_R = #{costMinProportionR}
+		   </if>
+		WHERE ROW_ID = #{id}
+
+	</update>
+	
+	<update id="batchUpdateStatus" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		UPDATE cx_o_pmo_sp
+  		SET 
+		   STATUS=#{status}
+		WHERE SCHEMA_ID = #{schemaId}
+		<if test="status == 'Active' ">
+			and approval_status=#{approvalStatus}
+		</if>
+
+	</update>
+
+	<delete id="deleteById" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		DELETE FROM CX_O_PMO_SP
+		WHERE ROW_ID=#{id}
+
+	</delete>
+
+	<select id="querygoods" resultMap="brandPromotion" parameterType="com.hand.base.brandpromotion.service.BrandPromotionService">
+		SELECT 
+			t1.product_id buyMerchId
+			from LNK_INTER_PRODUCT_SALE t1
+			LEFT JOIN LNK_SALE_SCHEMA t2 ON t1.sale_schema_id = t2.row_id
+			LEFT JOIN (
+						S_PROD_INT t3
+						LEFT JOIN S_PROD_INT_X t4 ON t3.ROW_ID = t4.PAR_ROW_ID
+					) ON t1.product_id = t3.row_id
+			where 1=1
+			and t1.sale_schema_id = #{schemaId}
+			<if test="attr1 == 'Combination' ">
+			and t4.ATTRIB_09 = 'Y'
+			</if>
+	</select>
+	
+</mapper>
+

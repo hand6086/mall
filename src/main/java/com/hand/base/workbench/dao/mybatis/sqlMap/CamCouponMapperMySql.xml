@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.workbench.dao.mybatis.mapper.CamCouponMapper">
+	<resultMap type="com.hand.base.workbench.model.CamCoupon" id="camCoupon"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T.ROW_ID            as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY        as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+	    t1.NAME couponName,
+		t1.CODE couponCode,
+		round(t.DISPLAY_SEQ) displaySeq,
+		t.STATUS status,
+		t2.O2O_DISPLAY_NAME prodName,
+		t2.O2O_INT_CODE prodCode,
+		t.COUPON_ID couponId,
+		t.PROD_ID prodId,
+		t.PIC_ID picId,
+		t3.path picUrl,
+		t.CAM_ID camId
+
+	</sql>
+
+	<sql id="fromSql">
+		from CX_O_CAM_LINE t
+		LEFT JOIN CX_O_PMO_SP t1 on t1.ROW_ID= t.COUPON_ID
+		LEFT JOIN S_PROD_INT_X t2 on t2.PAR_ROW_ID=t.PROD_ID
+		LEFT JOIN CX_O_IMG t3 on t3.ROW_ID=t.PIC_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.workbench.model.CamCoupon" resultMap="camCoupon">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		order by t.CREATED desc
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.workbench.model.CamCoupon"
+		parameterType="com.hand.base.workbench.model.CamCoupon">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.workbench.model.CamCoupon">
+		insert into CX_O_CAM_LINE
+		  (ROW_ID, DISPLAY_SEQ, STATUS,COUPON_ID, PROD_ID,CAM_ID)
+		values
+		  (#{id},lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT}),#{status},#{couponId},#{prodId},#{camId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.workbench.model.CamCoupon">
+		update CX_O_CAM_LINE t
+		   set t.DISPLAY_SEQ = lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT}), t.STATUS = #{status}, t.COUPON_ID = #{couponId}
+		   , t.PROD_ID = #{prodId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.workbench.model.CamCoupon">
+		DELETE FROM CX_O_CAM_LINE WHERE ROW_ID = #{id}
+	</delete>
+  
+</mapper>

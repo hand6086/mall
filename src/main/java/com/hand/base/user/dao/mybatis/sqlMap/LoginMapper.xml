@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.LoginMapper">
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+	
+	<!-- 更新最后登录时间 -->
+	<update id="lastLoginDateUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO t
+		SET t.last_login_date = sysdate
+		WHERE t.row_id = #{id}
+	</update>
+	
+	<select id="queryByUsername" parameterType="com.hand.base.user.model.User"
+		resultType="com.hand.base.user.model.User">
+		select id,
+		username,
+		firstName,
+		nvl(password, '***') password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		deptId,
+		deptName,
+		TO_CHAR(lastLoginDate, 'yyyy-mm-dd hh24:mi:ss') as lastLoginDate,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		corpName,
+		dutyName,
+		acctAgencyName
+		from LNK_EMP_INFO_v
+		where
+		username = #{username}
+	</select>
+	
+</mapper>

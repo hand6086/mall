@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.duty.dao.mybatis.mapper.DutyMapper">
+	<resultMap type="com.hand.base.duty.model.Duty" id="duty"></resultMap>
+	<resultMap type="com.hand.base.common.model.Menu" id="menu"></resultMap>
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+	<resultMap type="com.hand.base.urlinfo.model.UrlDutyLink" id="urlDutyLink"></resultMap>
+	<resultMap type="com.hand.base.urlinfo.model.UrlInfo" id="urlInfo"></resultMap>
+	<sql id="queryAllSql">
+		select t1.row_id id,
+		       t1.created_by createdBy,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.created created,
+		       t1.CORP_ID corpid,
+		       t1.name name,
+		       t1.comments comments,
+		       t2.name corpName
+	</sql>
+
+	<sql id="fromTableSql">
+		  from LNK_DUTY t1
+		  	  ,LNK_ENTERPRISE t2
+		 where 1 = 1
+		   and t1.CORP_ID = t2.CODE(+)
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+		and t1.corp_id = #{usercorpid}
+		<if test="id != null and id != '' ">
+			and t1.row_id = #{id}
+		</if>
+		<if test="name != null and name != '' ">
+			and t1.name = #{name}
+		</if>
+		<if test="comments != null and comments != '' ">
+			and t1.comments = #{comments}
+		</if>
+  	</sql>
+  	
+	<select id="queryById" resultType="com.hand.base.duty.model.Duty"
+		parameterType="com.hand.base.duty.model.Duty">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.duty.model.Duty">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录,不分页 -->
+	<select id="queryAll" resultMap="duty"
+		parameterType="com.hand.base.duty.model.Duty">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="duty"
+		parameterType="com.hand.base.duty.model.Duty">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+  
+	<delete id="deleteById" parameterType="com.hand.base.duty.model.Duty">
+		DELETE FROM LNK_DUTY WHERE ROW_ID = #{id}
+	</delete>
+  
+	<insert id="insert" parameterType="com.hand.base.duty.model.Duty">
+		insert into LNK_DUTY
+		  (ROW_ID, NAME, Comments)
+		values
+		  (#{id},#{name},#{comments})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.duty.model.Duty">
+		update LNK_DUTY t
+		   set t.name = #{name}, t.comments = #{comments}
+		 where t.row_id = #{id}
+	</update>
+  
+  <select id="queryDutyOfMenuListPage" resultMap="menu" parameterType="com.hand.base.common.model.Menu">
+		select t2.row_id id,
+		       t2.created created,
+		       t2.created_by createdBy,
+		       t2.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t2.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t2.CORP_ID corpid,
+		       t2.menu_read_only dutyReadonlyFlag,
+		       t2.menu_add dutyAddFlag,
+		       t2.menu_edit dutyEditFlag,
+		       t2.menu_del dutyDeleteFlag,
+		       t2.menu_export dutyExportFlag,
+		       t2.duty_id dutyId,
+		       
+		       t3.row_id        attr1,
+		       t3.menu_name     text,
+		       t3.comments      comments,
+		       t3.menu_type     menuType,
+		       t3.menu_grade    menuGrade,
+		       t3.readonly_flag readonlyFlag,
+		       t3.add_flag      addFlag,
+		       t3.edit_flag     editFlag,
+		       t3.delete_flag   deleteFlag,
+		       t3.export_flag   exportFlag,
+		       t3.platform_type platformType,
+		       
+		       t4.row_id    parentMenuId,
+		       t4.menu_name parentMenuName
+		
+		  from LNK_DUTY t1, LNK_INTER_DUTY_MENU t2, LNK_MENU t3, LNK_MENU t4
+		 where t1.row_id = t2.duty_id
+		   and t2.menu_id = t3.row_id
+		   and t3.parent_menu_id = t4.row_id(+)
+	   <if test="id != null and id != '' ">
+			and t2.row_id = #{id}
+		</if>
+  </select>
+  
+  <select id="queryDutyOfUserListPage" resultMap="user" parameterType="com.hand.base.user.model.User">
+		select t3.row_id id,
+		       t3.created created,
+		       t3.created_by createdBy,
+		       t3.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t3.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t3.CORP_ID corpid,
+		       t3.username username,
+		       t3.fst_name firstName,
+		       t3.emp_type empType,
+		       t2.duty_id dutyId,
+		       1 errorTimes
+		  from LNK_DUTY t1, LNK_INTER_DUTY_USER t2, LNK_EMP_INFO t3
+		 where t1.row_id = t2.duty_id
+		   and t2.user_id = t3.row_id
+  </select>
+  
+  <select id="queryUnSelectMenuListPage" resultMap="menu" parameterType="com.hand.base.common.model.Menu">
+		select t1.row_id id,
+		       t1.created created,
+		       t1.created_by createdBy,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.CORP_ID corpid,
+		       t1.menu_name text,
+		       t1.parent_menu_id parentMenuId,
+		       t1.menu_url menuUrl,
+		       t1.menu_type menuType,
+		       t1.readonly_flag readonlyFlag,
+		       t1.add_flag addFlag,
+		       t1.edit_flag editFlag,
+		       t1.delete_flag deleteFlag,
+		       t1.export_flag exportFlag,
+		       t1.platform_type platformType,
+		       t1.universal_ind universalInd,
+		       t1.fmcg_ind fmcgInd,
+		       t1.high_tech_ind highTechInd,
+		       t1.home_ind homeInd,
+		       t1.fin_ind finInd,
+		       t1.retail_ind retailInd,
+		       t1.auto_ind autoInd,
+		       
+		       t3.menu_name parentMenuName
+		  from LNK_MENU t1, LNK_MENU t3
+		 where not exists (select 1
+		          from LNK_INTER_DUTY_MENU t2
+		         where t2.duty_id = #{attr1}
+		           and t1.row_id = t2.menu_id)
+		   and t1.menu_grade = '1'
+		   and t1.parent_menu_id = t3.row_id(+)
+		<if test="usercorpid != '000' ">
+			and t1.menu_name != '企业管理'
+		</if>   
+  </select>
+  
+   <select id="queryUnSelectSubMenuListPage" resultMap="menu" parameterType="com.hand.base.common.model.Menu">
+		select t1.row_id id,
+		       t1.created created,
+		       t1.created_by createdBy,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.CORP_ID corpid,
+		       t1.menu_name text,
+		       t1.parent_menu_id parentMenuId,
+		       t1.menu_url menuUrl,
+		       t1.menu_type menuType,
+		       t1.readonly_flag readonlyFlag,
+		       t1.add_flag addFlag,
+		       t1.edit_flag editFlag,
+		       t1.delete_flag deleteFlag,
+		       t1.export_flag exportFlag,
+		       t1.platform_type platformType,
+		       t1.universal_ind universalInd,
+		       t1.fmcg_ind fmcgInd,
+		       t1.high_tech_ind highTechInd,
+		       t1.home_ind homeInd,
+		       t1.fin_ind finInd,
+		       t1.retail_ind retailInd,
+		       t1.auto_ind autoInd,
+		       
+		       t3.menu_name parentMenuName
+		  from LNK_MENU t1, LNK_MENU t3
+		 where not exists (select 1
+		          from LNK_INTER_DUTY_MENU t2
+		         where t2.duty_id = #{attr1}
+		           and t1.row_id = t2.menu_id)
+		   and t1.menu_grade = '2'
+		   and t1.parent_menu_id = t3.row_id(+)
+  </select>
+  
+  <select id="queryUnSelectUserListPage" resultMap="user" parameterType="com.hand.base.user.model.User">
+		select t1.row_id id,
+		       t1.created created,
+		       t1.created_by createdBy,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.CORP_ID corpid,
+		       t1.username username,
+		       t1.fst_name firstName,
+		       t1.emp_type empType,
+		       0 errorTimes
+		  from LNK_EMP_INFO t1
+		 where not exists (select 1
+		          from LNK_INTER_DUTY_USER t2
+		         where t2.duty_id = #{attr1}
+		           and t1.row_id = t2.user_id)
+		   and t1.corp_id = #{usercorpid}
+  </select>
+  
+  <insert id="addMenuOfDutyInsert" parameterType="com.hand.base.common.model.Menu">
+  		insert into LNK_INTER_DUTY_MENU
+		  (row_id, duty_id, menu_id, menu_read_only)
+		values
+		  (s_sequence_pkg.get_next_rowid(),#{dutyId},#{id}, 'N')
+  </insert>
+  
+  <update id="menuOfDutyUpdate" parameterType="com.hand.base.common.model.Menu">
+  		update LNK_INTER_DUTY_MENU
+		  set menu_read_only = #{dutyReadonlyFlag},
+		  		menu_add = #{dutyAddFlag},
+		  		menu_edit = #{dutyEditFlag},
+		  		menu_del = #{dutyDeleteFlag},
+		  		menu_export = #{dutyExportFlag}
+		  where
+		  row_id = #{id}
+  </update>
+  
+  <insert id="addUserOfDutyInsert" parameterType="com.hand.base.user.model.User">
+  		insert into LNK_INTER_DUTY_USER
+	      (row_id, duty_id, user_id)
+	    values
+	      (s_sequence_pkg.get_next_rowid(),#{dutyId},#{id})
+  </insert>
+  
+   <insert id="addParentMenuOfDutyInsert" parameterType="com.hand.base.common.model.Menu">
+  		insert into LNK_INTER_DUTY_MENU
+		  (row_id, duty_id, menu_id, menu_read_only)
+		values
+		  (s_sequence_pkg.get_next_rowid(),
+		   #{dutyId},
+		   (select t.parent_menu_id from LNK_MENU t where t.row_id = #{id}),
+		   'N')
+  </insert>
+  
+  <select id="querySecMenuIdListBySecMenuIdAndDutyIdFromMenuOfDuty" parameterType="com.hand.base.common.model.InterObject" resultMap="menu">
+  		select t.row_id id
+		  from LNK_INTER_DUTY_MENU t
+		 where t.duty_id = #{preObjId}
+		   and t.menu_id in
+		       (select t2.row_id
+		          from LNK_MENU t1, LNK_MENU t2
+		         where t1.row_id = #{rearObjId}
+		           and t1.parent_menu_id = t2.parent_menu_id)
+  </select>
+  
+  <delete id="delMenuOfDuty" parameterType="com.hand.base.common.model.InterObject">
+  		delete from LNK_INTER_DUTY_MENU t where t.menu_id = #{rearObjId} and t.duty_id = #{preObjId}
+  </delete>
+  
+  <delete id="delMenuParentOfDuty" parameterType="com.hand.base.common.model.InterObject">
+  		delete from LNK_INTER_DUTY_MENU t
+		 where t.menu_id = (select x.parent_menu_id
+		                      from LNK_MENU x
+		                     where x.row_id = #{rearObjId})
+		   and t.duty_id = #{preObjId}
+  </delete>
+  
+  <delete id="delUserOfDuty" parameterType="com.hand.base.common.model.InterObject">
+  		delete from LNK_INTER_DUTY_USER t where t.user_id = #{rearObjId} and t.duty_id = #{preObjId}
+  </delete>
+  
+  
+  <delete id="delMenuByParentId" parameterType="com.hand.base.common.model.Menu">
+  		delete from LNK_INTER_DUTY_MENU t1
+		 where exists (select t2.row_id
+		          from LNK_MENU t2
+		         where t2.parent_menu_id = #{parentMenuId}
+		           and t1.menu_id = t2.row_id)
+  </delete>
+  
+  <select id="queryParentMenuExistByMenuOfDuty" resultType="com.hand.base.common.model.InterObject" parameterType="com.hand.base.common.model.Menu">
+  		select t2.row_id id
+		  from LNK_INTER_DUTY_MENU t2
+		 where t2.duty_id = #{dutyId}
+		   and t2.menu_id =
+		       (select t1.parent_menu_id from LNK_MENU t1 where t1.row_id = #{id})
+  </select>
+  
+  	<select id="queryDutyListPage" resultMap="duty"
+		parameterType="com.hand.base.duty.model.Duty">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<if test="usercorpid == null || usercorpid != '000' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+	</select>
+  
+  <!-- url-职责管理 -->
+  <select id="queryUnSelectUrlListPage" resultMap="urlInfo" parameterType="com.hand.base.urlinfo.model.UrlInfo">
+		select t1.row_id id
+		       	,t1.created created
+		       	,t1.created_by createdBy
+		       	,t1.last_upd_by lastUpdatedBy
+		       	,TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated
+		       	,t1.CORP_ID corpid
+		       	,T1.URL               as url                 /*URL*/
+				,T1.NAME              as name                /*名称*/
+				,T1.COMMENTS          as comments            /*备注*/
+				,T1.INSERT_FLAG       as insertFlag          /*添加*/
+				,T1.DEL_FLAG          as delFlag             /*删除*/
+				,T1.UPDATE_FLAG       as updateFlag          /*修改*/
+				,T1.SELECT_FLAG       as selectFlag          /*查询*/
+				,T1.DEF_ACCESS_FLAG   as defaultAccessFlag   /*默认可访问*/
+		  from LNK_URL_INFO t1
+		 where not exists (select 1
+		          from LNK_URL_DUTY_INTER t2
+		         where t2.duty_id = #{attr1}
+		           and t1.row_id = t2.url_id)
+		   <!-- and t1.corp_id = #{usercorpid} -->
+  </select>
+</mapper>

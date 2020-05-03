@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.OnlineUserMapper">
+  <resultMap type="com.hand.base.user.model.OnlineUser" id="onlineUser"></resultMap>
+  
+  <select id="queryByExamplePage" resultMap="onlineUser" parameterType="com.hand.base.user.model.OnlineUser">
+		<include refid="querySql"></include>
+  </select>
+  
+   <sql id="querySql">
+  SELECT t1.row_id id,
+		       t1.created created,
+		       t1.CREATED_BY createdBy,
+		       date_format(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       t1.LAST_UPD_BY lastUpdatedBy,
+		       t1.CORP_ID corpid,
+		       t1.ip_address ipAddress,
+		       date_format(t1.login_time, '%Y-%m-%d %H:%i:%S') loginTime,
+		       date_format(t1.logout_time, '%Y-%m-%d %H:%i:%S') logoutTime,
+		       t1.login_type loginType,
+		       t2.row_id	empId,
+		       t2.username username,
+		       t2.fst_name firstName,
+		        t2.emp_type empType
+		  FROM lnk_emp_online t1 left join lnk_emp_info t2
+		 	on (t1.emp_id = t2.row_id)
+		 where 1=1 
+  </sql>
+  
+  <select id="queryListSelect" resultMap="onlineUser" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t1.row_id id,
+		       t1.created created,
+		       t1.CREATED_BY createdBy,
+		       date_format(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       t1.LAST_UPD_BY lastUpdatedBy,
+		       t1.CORP_ID corpid,
+		       t1.ip_address ipAddress,
+		       date_format(t1.login_time, '%Y-%m-%d %H:%i:%S') loginTime,
+		       date_format(t1.logout_time, '%Y-%m-%d %H:%i:%S') logoutTime,
+		       t1.login_type loginType,
+		       t2.row_id	empId,
+		       t2.username username,
+		       t2.fst_name firstName,
+		        t2.emp_type empType
+		  FROM lnk_emp_online t1 left join lnk_emp_info t2
+		 on (t1.emp_id = t2.row_id)
+		 where 1=1 
+  </select>
+  
+  <select id="querySessionIdListPage" resultMap="onlineUser" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t1.row_id 		id,
+		       date_format (t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       t1.emp_id		empId,
+			   t1.session_id 	sessionId
+		  FROM lnk_emp_online t1
+		  where 1=1 
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.user.model.OnlineUser">
+		insert into LNK_EMP_ONLINE
+		  (ROW_ID, emp_id, ip_address, login_type, session_id)
+		values
+		  (#{id},#{empId},#{ipAddress},#{loginType},#{sessionId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM lnk_emp_online WHERE ROW_ID = #{id}
+  </delete>
+</mapper>

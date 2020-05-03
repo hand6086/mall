@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.ProdNormsMapper">
+	<resultMap type="com.hand.base.goods.model.ProdNorms" id="prodNorms"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		 ,date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as	created
+	     , T1.CREATED_BY as createdBy
+	     ,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.ORG_ID            as orgId               /*组织ID*/
+		,T1.POSTN_ID          as postnId             /*职位ID*/
+		,T1.PROD_NORM_NAME    as prodNormName        /*参数名称*/
+		,T1.PROD_NORM_VAL     as prodNormVal         /*参数值*/
+		,T1.PROD_ID           as prodId              /*商品ID*/
+
+	</sql>
+	
+	<sql id="brandQueryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		 ,date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as	created
+	     , T1.CREATED_BY as createdBy
+	     ,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.ORG_ID            as orgId               /*组织ID*/
+		,T1.POSTN_ID          as postnId             /*职位ID*/
+		,T1.PROD_NORM_NAME    as prodNormName        /*参数名称*/
+		,T1.PROD_NORM_VAL     as prodNormVal         /*参数值*/
+		,T1.PROD_ID           as prodId              /*商品ID*/
+
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM CX_O_PROD_NORMS T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="brandFromTableSql">
+	FROM CX_O_PROD_NORMS T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	AND T1.corp_id = #{usercorpid}
+	<if test="prodId != null and prodId != '' ">
+		and t1.PROD_ID = #{prodId}
+	 </if>
+
+	</sql>
+	
+	<sql id="brandWhereAllSql">
+	AND T1.corp_id = #{usercorpid}
+	<if test="prodId != null and prodId != '' ">
+		and t1.PROD_ID = #{prodId}
+	 </if>
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<sql id="brandOrderByAllSql">
+	
+	</sql>
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.goods.model.ProdNorms">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="brandQueryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.goods.model.ProdNorms">
+		SELECT count(1)
+		<include refid="brandFromTableSql"/>
+		<include refid="brandWhereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromTableSql"/>
+		<include refid="brandWhereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="brandQueryAll" resultMap="prodNorms"
+		parameterType="com.hand.base.goods.model.ProdNorms">
+		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromTableSql"/>
+		<include refid="brandWhereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.goods.model.ProdNorms">
+		INSERT INTO CX_O_PROD_NORMS(
+		 ROW_ID              /*记录ID*/
+		,PROD_NORM_NAME      /*参数名称*/
+		,PROD_NORM_VAL       /*参数值*/
+		,PROD_ID             /*商品ID*/
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{prodNormName}     /*参数名称*/
+		,#{prodNormVal}      /*参数值*/
+		,#{prodId}           /*商品ID*/
+		)
+	</insert>
+	
+	<insert id="brandInsert" parameterType="com.hand.base.goods.model.ProdNorms">
+		INSERT INTO CX_O_PROD_NORMS(
+		 ROW_ID              /*记录ID*/
+		,PROD_NORM_NAME      /*参数名称*/
+		,PROD_NORM_VAL       /*参数值*/
+		,PROD_ID             /*商品ID*/
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{prodNormName}     /*参数名称*/
+		,#{prodNormVal}      /*参数值*/
+		,#{prodId}           /*商品ID*/
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.goods.model.ProdNorms">
+		UPDATE CX_O_PROD_NORMS SET
+		 PROD_NORM_NAME      =#{prodNormName}     /*参数名称*/
+		,PROD_NORM_VAL       =#{prodNormVal}      /*参数值*/
+		,PROD_ID             =#{prodId}           /*商品ID*/
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.goods.model.ProdNorms">
+		UPDATE CX_O_PROD_NORMS SET
+		 PROD_NORM_NAME      =#{prodNormName}     /*参数名称*/
+		,PROD_NORM_VAL       =#{prodNormVal}      /*参数值*/
+		,PROD_ID             =#{prodId}           /*商品ID*/
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.ProdNorms">
+		DELETE FROM CX_O_PROD_NORMS WHERE ROW_ID=#{id} AND CORP_ID=#{usercorpid}
+	</delete>
+	
+	<delete id="brandDeleteById" parameterType="com.hand.base.goods.model.ProdNorms">
+		DELETE FROM CX_O_PROD_NORMS WHERE ROW_ID=#{id} AND CORP_ID=#{usercorpid}
+	</delete>
+</mapper>

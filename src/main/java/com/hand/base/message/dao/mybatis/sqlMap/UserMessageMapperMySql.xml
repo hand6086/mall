@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.message.dao.mybatis.mapper.UserMessageMapper">
+	<resultMap type="com.hand.base.message.model.UserMessage" id="userMsg"></resultMap>
+	
+	<sql id="queryAllSql">
+		SELECT
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		   T1.user_id AS userId,
+	       T1.msg_id AS msgId,
+	       T1.is_read AS isRead,
+	       T1.read_comments AS readComments,
+	       date_format(T1.read_time,'%Y-%m-%d %H:%i') AS readTime,
+
+	       T2.username AS userName,
+	       T2.fst_name AS firstName,       
+		   T3.msg_code AS msgCode,
+	       T3.msg_title AS msgTitle,
+	       T3.msg_content AS msgContent,
+	        T3.MSG_IMPORTANCE importance,
+	       T3.msg_type AS msgType,
+	       T3.msg_receive_type AS msgReceiveType,
+	       T3.is_delete AS isDelete,
+	       T3.is_send AS isSend,
+	       date_format(T3.MSG_SEND_TIME,'%Y-%m-%d %H:%i') AS sendTime,
+	       T3.SEND_BY AS sendBy,
+	       T3.SENDBY_ID AS sendById
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM LNK_MSG_USER T1, LNK_EMP_INFO T2, LNK_MESSAGE T3
+	   WHERE T1.is_delete='N' 
+	     AND T1.user_id=T2.row_id 
+	     AND T1.msg_id=T3.row_id
+	     AND T1.corp_id = #{usercorpid}
+	     and T1.msg_id = #{msgId}
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!-- <if test="msgId != null and msgId != '' ">
+			
+		</if> -->
+	</sql>
+	
+	<select id="queryById" resultMap="userMsg"
+		parameterType="com.hand.base.message.model.UserMessage">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.message.model.UserMessage">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="userMsg"
+		parameterType="com.hand.base.message.model.UserMessage">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="userMsg"
+		parameterType="com.hand.base.message.model.UserMessage">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>  
+
+	
+	<select id="queryMyMessagePage" resultMap="userMsg" parameterType="com.hand.base.message.model.UserMessage">         
+		SELECT
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		
+			T1.user_id AS userId,
+			T1.msg_id AS msgId,
+			T1.is_read AS isRead,
+			T1.read_comments AS readComments,
+			date_format(T1.read_time,'%Y-%m-%d %H:%i') AS readTime,
+			T2.username AS userName,
+			T2.fst_name AS firstName,       
+			T3.msg_code AS msgCode,
+			T3.msg_title AS msgTitle,
+			T3.msg_content AS msgContent,
+			 T3.MSG_IMPORTANCE importance,
+			T3.msg_type AS msgType,
+			T3.msg_receive_type AS msgReceiveType,
+			T3.is_delete AS isDelete,
+			T3.is_send AS isSend,
+			date_format(T3.MSG_SEND_TIME,'%Y-%m-%d %H:%i') AS sendTime,
+			T3.SEND_BY AS sendBy,
+			T3.SENDBY_ID AS sendById,
+			'receive' sendOrReceive
+		FROM LNK_MSG_USER T1, LNK_EMP_INFO T2, LNK_MESSAGE T3
+		WHERE T1.is_delete='N' 
+		AND T1.user_id=T2.row_id 
+		AND T1.msg_id=T3.row_id 
+		and t1.user_id=#{attr1} 
+	    and t3.sendby_id != #{attr1}
+	union all
+		select 
+				T3.ROW_ID as id,
+               date_format(t3.created, '%Y-%m-%d %H:%i:%S') created,
+               T3.CREATED_BY as createdBy,
+               date_format(T3.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+               T3.LAST_UPD_BY as lastUpdatedBy,
+               T3.CORP_ID corpid,
+               
+			  '' userId,
+			  T3.Row_Id msgId,
+			  '' isRead,
+			  '' readComments,
+			  date_format('','%Y-%m-%d %H:%i') AS readTime,
+			  T2.username userName,
+			  T2.fst_name firstName,
+			  T3.msg_code msgCode,
+			  T3.msg_title msgTitle,
+			   T3.msg_content AS msgContent,
+			    T3.MSG_IMPORTANCE importance,
+			   T3.msg_type AS msgType,
+			   T3.msg_receive_type AS msgReceiveType,
+			   T3.is_delete AS isDelete,
+			   T3.is_send AS isSend,
+			   date_format(T3.MSG_SEND_TIME,'%Y-%m-%d %H:%i') AS sendTime,
+			   T3.SEND_BY AS sendBy,
+			   T3.SENDBY_ID AS sendById,
+			   'send' sendOrReceive 
+			  from lnk_message T3, LNK_EMP_INFO T2
+			  where T3.sendby_id=T2.Row_Id and t3.sendby_id = #{attr1} 
+	</select>
+	
+	  <!-- 新建记录 -->
+    <insert id="insert" parameterType="com.hand.base.message.model.UserMessage">
+	  	INSERT INTO LNK_MSG_USER
+		  (row_id,
+	       msg_id,
+	       user_id
+		  )
+		VALUES
+		  (#{id},
+		  #{msgId},
+		  #{userId}
+		 )
+    </insert>
+    <!--更新记录-->
+    <update id="update" parameterType="com.hand.base.message.model.UserMessage">
+  	 UPDATE LNK_MSG_USER
+        SET
+	       READ_COMMENTS = #{readComments}
+	       <if test="isSend != null and isSend != ''"></if>
+      WHERE row_id = #{id}
+    </update>
+    
+    <!--更新记录为已读-->
+    <update id="readFlagUpdate" parameterType="com.hand.base.message.model.UserMessage">
+  	 UPDATE LNK_MSG_USER
+        SET
+           is_read = 'Y',
+	       read_time = now()
+	       WHERE row_id in
+	      <foreach collection="ids" item="id" open="(" separator=", " close=")">
+	      #{id}
+	      </foreach>
+      	and is_read <![CDATA[<>]]>   'Y'
+    </update>
+    
+    <!--删除记录 根据ROW_ID-->
+    <update id="deleteById" parameterType="com.hand.base.message.model.UserMessage">
+  	 DELETE from LNK_MSG_USER
+     WHERE ROW_ID = #{id}
+    </update>
+</mapper>

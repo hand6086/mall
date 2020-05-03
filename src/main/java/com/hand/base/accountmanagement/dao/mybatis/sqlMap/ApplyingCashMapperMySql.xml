@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.accountmanagement.dao.mybatis.mapper.ApplyingCashMapper">
+	<resultMap type="com.hand.base.accountmanagement.model.BillInfo" id="applyingcash">
+	</resultMap>
+	
+	<sql id="queryAllSql">
+		SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid
+		,T1.ENTERPRISE_ID     as enterpId            /*企业id*/
+		,T1.BANK              as bank                /*开户行*/
+		,T1.FUNDING_DIRECTION as fundingDirection    /*资金往来方向*/
+		,T1.RECEIPT_CODE      as receiptCode         /*单据编号*/
+		,T1.RECEIPT_TYPE      as receiptType         /*单据类型*/
+		,T1.SERVICE_CHARGE    as serviceCharge     	 /*手续费*/
+		,T1.ARRIVED_AMOUNT    as arrivedAmount       /*到账金额*/
+		,T1.MONEY_TYPE        as moneyType           /*资金类型*/
+		,T1.MERCHANT_ACCOUNT  as merchantAccount     /*商家账户*/
+		,T1.LOG               as log                 /*日志*/
+		,T1.STATUS            as status              /*状态*/
+		,T1.bill_id   		  as billId      		 /*提现对账单号*/
+		,T1.REMARKS           as remarks             /*备注*/
+		,T1.ENTERPRISE_NAME   as entpName            /*企业名称*/
+		,T1.PHONE             as phone               /*绑定手机*/
+		,T1.APPROVAL_OPINION  as approvalOpinion	 /*审批意见*/
+		,T1.SERVICE_CHARGE_PROPORTION  as servChargeProportion	 /*手续费比例*/
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM LNK_BILL_INFO T1
+		WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!-- 如果是管理员进来则不执行套账限制 -->
+		<if test="usercorpid !=null and usercorpid !='admin' and usercorpid !=''"> 
+			 AND T1.CORP_ID =#{usercorpid}
+		</if>
+	 	<!-- <if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if> -->
+		
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		AND  T1.STATUS='New'
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<if test="usercorpid !=null and usercorpid !=''"> 
+			 AND T1.CORP_ID =#{usercorpid}
+		</if>
+		AND T1.STATUS  !='transfer_success'
+		AND T1.STATUS  !='New'
+	</select>
+	
+	<!-- 品牌馆查询 品牌馆管理员可以查看其他品牌馆但不可以查看快购-->
+	<select id="brandQueryByExamplePage" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		AND T1.CORP_ID !='101'
+		AND T1.STATUS  !='transfer_success'
+		AND T1.STATUS  !='New'
+	</select>
+	
+	<select id="queryApplyingCashPage" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		AND T1.STATUS  !='transfer_success'
+	</select>
+		
+	<!-- 根据条件查询对账单对账单 -->
+	<select id="queryByExample" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<if test="status !=null and status !=''"> 
+		 	AND T1.STATUS  = #{status}
+		</if>
+	</select>
+	
+	<!-- 查询状态为新建和审批拒绝的对账单 -->
+	<select id="queryNewOrRejectBill" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		 AND (T1.STATUS  = 'New' OR T1.STATUS='rejected')
+	</select>
+	
+	<select id="queryById" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<!-- 品牌馆根据id查询 -->
+	<select id="brandQueryById" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="applyingcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		INSERT INTO lnk_bill_info(
+		 ROW_ID              /*记录编号*/
+		,ENTERPRISE_ID       /*企业id*/
+		,BANK                /*开户行*/
+		,FUNDING_DIRECTION   /*资金往来方向*/
+		,RECEIPT_CODE        /*单据编号*/
+		,RECEIPT_TYPE        /*单据类型*/
+		,SERVICE_CHARGE      /*手续费*/
+		,ARRIVED_AMOUNT      /*到账金额*/
+		,MERCHANT_ACCOUNT    /*商家账户*/
+		,LOG                 /*日志*/
+		,STATUS              /*状态*/
+		,bill_id     		 /*提现对账单号*/
+		,REMARKS             /*备注*/
+		,ENTERPRISE_NAME
+		,APPROVAL_OPINION
+		,PHONE
+		,SERVICE_CHARGE_PROPORTION /*手续费比例*/
+		)
+		VALUES(
+		 #{id}
+		,#{enterpId}
+		,SUBSTRING_INDEX(#{merchantAccount},'-',1)
+		,#{fundingDirection}
+		,#{receiptCode}
+		,#{receiptType}
+		,#{serviceCharge}
+		,#{arrivedAmount}
+		,SUBSTRING_INDEX(#{merchantAccount},'-',-1)
+		,#{log}
+		,#{status}	
+		,#{billId}
+		,#{remarks}
+		,#{entpName}
+		,#{approvalOpinion}
+		,#{phone}
+		,#{servChargeProportion}
+			)
+	</insert>
+
+	<!-- 快购审批通过 -->
+	<update id="update" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO  SET STATUS  ='approved'
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<!-- 品牌馆审批通过 -->
+	<update id="brandUpdate" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO  SET STATUS  ='approved'
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	
+	<!-- 刷新时更新到账金额跟手续费 -->
+	<update id="billAccountUpdate" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO  SET 
+		ARRIVED_AMOUNT  =#{arrivedAmount}
+		,SERVICE_CHARGE	=#{serviceCharge}
+		,PHONE = #{phone}
+		,SERVICE_CHARGE_PROPORTION = #{servChargeProportion}
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<!-- 更新状态 -->
+	<update id="billStatusUpdate" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO  SET STATUS  =#{status}
+		<!-- <if test="merchantAccount != null" >
+		    ,bank = (select bank from lnk_enterprise_account where row_id = SUBSTRING_INDEX(#{merchantAccount},'-',1))
+		</if>
+		<if test="merchantAccount != null" >
+		    ,merchant_account = (select card_number from lnk_enterprise_account where row_id = SUBSTRING_INDEX(#{merchantAccount},'-',1))
+		</if> -->
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<!-- 更新审批意见-->
+	<update id="approvalOpinionUpdate" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO  SET APPROVAL_OPINION  =#{approvalOpinion}
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	
+	<delete id="deleteById" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		DELETE FROM LNK_BILL_INFO WHERE ROW_ID=#{id}
+	</delete>
+	
+</mapper>
+	

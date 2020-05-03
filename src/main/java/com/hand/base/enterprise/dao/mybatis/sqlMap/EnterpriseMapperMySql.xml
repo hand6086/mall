@@ -1,0 +1,687 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.enterprise.dao.mybatis.mapper.EnterpriseMapper">
+	<resultMap type="com.hand.base.enterprise.model.Enterprise"
+		id="enterprise"></resultMap>
+	<resultMap type="com.hand.base.basic.model.CallParam"
+		id="callParam"></resultMap>
+	
+	<sql id="queryAllSql">
+		SELECT
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.NAME              as name                /*名称*/
+		,T1.COMMENTS          as comments            /*说明*/
+		,T1.CODE              as code                /*编号*/
+		,T1.USER_ID			  as userId				 /*商户id*/
+		,T1.applicant_name applicantName
+		,T1.applicant_mailbox applicantMailbox
+		,T1.applicant_phone applicantPhone 
+		,T1.if_thirdStore ifThirdStore
+		,T1.main_product_category mainProductCategory
+		,T1.province province
+		,T1.company_address companyAddress
+		,T1.cLegalPerson_mail cLegalPersonMail
+		,T1.cLegal_personphone cLegalPersonPhone
+		,T1.cLegal_personIDnum cLegalPersonIDNum
+		,T1.businesslicense_num businessLicenseNum /*营业执照*/
+		,T1.organizatio_code organizatioCode /*组织机构代码*/
+		,T1.tax_identificode taxIdentifiCode /*纳税人识别码*/
+		,T1.social_creditcode socialCreditCode /*统一社会信用代码*/
+		,DATE_FORMAT(T1.ID_starttime, '%Y-%m-%d') as iDStarttime /*身份证号开始时间*/
+		,DATE_FORMAT(T1.ID_finishtime, '%Y-%m-%d') as iDFinishtime
+		,T1.mark_registration_num  markRegistrationNum /*商标注册号*/
+		,DATE_FORMAT(T1.brandAuthoriza_start, '%Y-%m-%d') as brandAuthorizaStart /*品牌授权开始时间*/
+		,DATE_FORMAT(T1.brandAuthoriza_end, '%Y-%m-%d') as brandAuthorizaEnd
+		,T1.store_name  storeName
+		,T1.store_details  storeDetails
+		,T1.PIdentifi_card pIdentifiCard /*法定代表人正面照片Id*/
+		,T1.NIdtifi_card nIdtifiCard
+		,T1.business_license businessLicense /*营业执照Id*/
+		,T1.open_account_license openAccountLicense /*开户许可证Id*/
+		,T1.QualityReport qualityReport /*质检报告Id*/
+		,T1.certificate_registration certificateRegistration /*商标注册证明Id*/
+		,T1.authorization_certificate authorizationCertificate /*品牌授权证明Id*/
+		,T1.store_logo storeLogo
+		,(select thumb_path from cx_o_img where T1.PIdentifi_card=row_id) pIdentifiCardPath /*法定代表人正面照片*/
+		,(select thumb_path from cx_o_img where T1.NIdtifi_card=row_id) nIdtifiCardPath
+		,(select thumb_path from cx_o_img where T1.business_license=row_id) businessLicensePath /*营业执照*/
+		,(select thumb_path from cx_o_img where T1.open_account_license=row_id) openAccountLicensePath /*开户许可证*/
+		,(select thumb_path from cx_o_img where T1.QualityReport=row_id) qualityReportPath /*质检报告*/
+		,(select thumb_path from cx_o_img where T1.certificate_registration=row_id) certificateRegistrationPath /*商标注册证明*/
+		,(select thumb_path from cx_o_img where T1.authorization_certificate=row_id) authorizationCertificatePath /*品牌授权证明*/
+		,(select thumb_path from cx_o_img where T1.store_logo=row_id) storeLogoPath
+		,T1.county county
+        ,T1.city city
+        ,T1.approval_opinion approvalOpinion
+        ,T1.if_dom_enter_prove ifDomEnterProve /*是否国内企业证明*/
+        ,T1.emergen_contact_phone emergenContactPhone /*紧急联系人电话*/
+        ,T1.if_three_in_one ifThreeInOne /*是否三证合一*/
+        ,t1.store_address storeAddress /*网店收货地址*/
+        ,t1.sales sales /*销售额*/
+        ,t1.sales_num salesNum /*销量*/
+        ,t1.deposit_payable depositPayable /*应付店铺押金*/
+        ,t1.deposit_paid depositPaid /*已付店铺押金*/
+        ,t1.activity_deposit activityDeposit /*已付活动押金*/
+        ,t1.total_deposit totalDeposit /*押金合计*/
+        ,t1.transferCode transferCode /*转账验证码*/
+        ,t1.enterprise_status enterpriseStatus /*企业状态*/
+        ,t1.store_type     storeType   /*店铺类型*/
+        ,t1.service_charge_proportion    servChargePro   /*手续费比例*/
+        ,t2.store_status storeStatus /*商户审批状态*/
+        ,t1.store_number storeNumber /*店铺编号*/
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_ENTERPRISE T1
+	left join lnk_emp_info t2 on t1.user_id = t2.row_id
+	WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="code != null and code != '' ">
+			and T1.CODE = #{code}
+		</if>
+		<if test="id != null and id != '' ">
+			and T1.row_id = #{id}
+		</if>
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.enterprise.model.Enterprise">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<!-- 根据entpId查询Enterprise -->
+	<select id="queryByEntpID" resultMap="enterprise" parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<if test="entpId != null and entpId != '' ">
+			and t1.row_id = #{entpId}
+		</if>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		order by t1.CREATED desc
+	</select>
+	<select id="brandQueryByExamplePage" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		order by t1.CREATED desc
+	</select>
+	<!-- 查询店铺管理人员信息 -->
+	<select id="queryShopKeeperPage" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		SELECT
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.NAME              as name                /*名称*/
+		,T1.COMMENTS          as comments            /*说明*/
+		,T1.CODE              as code                /*编号*/
+		,t2.row_id			  as userId              /*用户id*/
+		,t2.fst_name 		  as applicantName			 /*用户名*/
+		,t2.emp_status		  as applicantStatus		 /*状态*/
+		,t2.emp_tel			  as applicantPhone      /*电话*/
+		,t2.emp_mail		  as applicantMailbox    /*邮箱*/
+	FROM LNK_ENTERPRISE T1
+	left join lnk_emp_info t2 on t1.user_id = t2.row_id
+	WHERE 1=1
+	<if test="usersystemRole!= 'super_administrator' ">
+	and t2.corp_id = #{usercorpid}
+	</if>
+	</select>
+	
+	<select id="queryById" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<select id="brandQueryById" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryByUserId" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<if test="userId != null and userId != '' ">
+			AND T1.USER_ID=#{userId}
+		</if>
+	</select>
+	
+	<select id="queryAll" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<insert id="insertEnterprise" parameterType="com.hand.base.enterprise.model.Enterprise">
+		INSERT INTO LNK_ENTERPRISE(
+			 ROW_ID              /*记录ID*/
+			,CREATED
+			,CREATED_BY
+			,LAST_UPD
+			,LAST_UPD_BY
+			,CORP_ID
+			,NAME                /*名称*/
+			,COMMENTS            /*说明*/
+			,CODE                /*编号*/
+			,user_id
+			,applicant_name 	<!-- 申请人姓名 -->		
+			,applicant_mailbox		<!-- 申请人邮箱 -->
+			,applicant_phone	<!-- 申请人常用手机号 -->	
+			,if_thirdStore		<!-- 是否存在第三方店铺 -->
+			,main_product_category		<!-- 主营产品类目 -->
+			,province		<!-- 省 -->
+			,city		<!-- 省 -->
+			,county		<!-- 区/县 -->
+			,company_address		<!-- 公司详细地址 -->	
+		 	,cLegalPerson_mail		<!-- 企业法人邮箱 -->
+		 	,cLegal_personphone		<!-- 企业法人手机号 -->
+		 	,cLegal_personIDnum		<!-- 企业法人身份证号 -->
+		 	,businesslicense_num		<!-- 营业执照注册号 -->
+		 	,organizatio_code		<!-- 组织机构代码 -->
+		 	,tax_identificode		<!-- 纳税人识别码 -->
+		 	,social_creditcode		<!-- 统一社会信用代码 -->
+		 	,ID_starttime		<!-- 身份证有效起始日期 -->
+		 	,ID_finishtime		<!-- 身份证有效结束日期 -->
+		 	,mark_registration_num		<!-- 商标注册号 -->
+		 	,brandAuthoriza_start		<!-- 品牌授权起始日期 -->
+		 	,brandAuthoriza_end		<!-- 品牌授权结束日期 -->
+		 	,store_name		<!-- 店铺名称 -->
+		 	,store_number		<!-- 网店编号-->
+		 	,store_details		<!-- 店铺详情 -->
+		 	,if_dom_enter_prove		<!-- 是否国内企业证明 -->
+		 	,if_three_in_one		<!-- 是否三证合一 -->
+		 	,PIdentifi_card
+	 		,NIdtifi_card 				
+	 		,business_license
+	 		,open_account_license
+	 		,QualityReport
+	 		,certificate_registration
+	 		,authorization_certificate
+	 		,store_logo
+	 		,enterprise_status /*企业状态*/
+	 		,store_type 
+		) values (
+			 #{id}              /*记录ID*/
+			,now()            
+			,#{createdBy}          
+			,now()     
+			,#{lastUpdatedBy}   
+			,#{code}
+			,#{name}             /*名称*/
+			,#{comments}         /*说明*/
+			,#{code}             /*编号*/
+			,#{userId}
+			,#{applicantName}	 				
+	 		,#{applicantMailbox}
+	 		,#{applicantPhone}
+	 		,#{ifThirdStore}
+	 		,#{mainProductCategory}
+	 		,#{province}
+	 		,#{city}
+			,#{county}
+	 		,#{companyAddress}
+	 		,#{cLegalPersonMail}
+	 		,#{cLegalPersonPhone}	 				
+	 		,#{cLegalPersonIDNum}
+	 		,#{businessLicenseNum}
+	 		,#{organizatioCode}
+	 		,#{taxIdentifiCode}
+	 		,#{socialCreditCode}
+	 		,lnk_blank_str_to_null(#{iDStarttime,jdbcType=TIMESTAMP})
+	 		,lnk_blank_str_to_null(#{iDFinishtime,jdbcType=TIMESTAMP})
+	 		,#{markRegistrationNum}	 				
+	 		,lnk_blank_str_to_null(#{brandAuthorizaStart,jdbcType=TIMESTAMP})
+	 		,lnk_blank_str_to_null(#{brandAuthorizaEnd,jdbcType=TIMESTAMP})
+	 		,#{storeName}
+	 		,get_next_storenumber()
+	 		,#{storeDetails}
+	 		,#{ifDomEnterProve}
+	 		,#{ifThreeInOne}
+	 		
+	 		,#{pIdentifiCard}
+	 		,#{nIdtifiCard}	 				
+	 		,#{businessLicense}
+	 		,#{openAccountLicense}
+	 		,#{qualityReport}
+	 		,#{certificateRegistration}
+	 		,#{authorizationCertificate}
+	 		,#{storeLogo}
+	 		,'New'
+	 		,#{storeType}
+		)
+	</insert>
+	
+	<!-- 插入店铺管理员 -->
+	<insert id="shopKeeperInsert" parameterType="com.hand.base.enterprise.model.Enterprise">
+	 insert into lnk_emp_info
+			(row_id,
+			username,
+			passwd,
+			fst_name,
+			emp_tel,
+			emp_mail,
+			duty_id,
+			emp_role,
+			emp_type,
+			emp_status,
+			store_status)
+		VALUES(
+			#{id},
+			#{applicantPhone},
+			#{password},
+			#{applicantName},
+			#{applicantPhone},
+			#{applicantMailbox},
+			#{crmDutyId},
+			'REGION_SALER',
+			'BRAND_EMP',
+			'NORMAL',
+			'SIGNED'	
+		)
+		</insert>
+	
+	<update id="update" parameterType="com.hand.base.enterprise.model.Enterprise">
+	UPDATE LNK_ENTERPRISE SET
+	ROW_ID =#{id}
+	<if test="name != null and name != '' ">
+		,NAME =#{name} /*名称*/
+	</if>
+	<if test="comments != null and comments != '' ">
+		,COMMENTS =#{comments} /*说明*/
+	</if>
+	<if test="code != null and code != '' ">
+		,CODE =#{code} /*编号*/
+	</if>
+	<if test="userId != null and userId != '' ">
+		,user_id =#{userId}
+	</if>
+	<if test="applicantName != null and applicantName != '' ">
+		,applicant_name =#{applicantName} /*申请人姓名*/
+	</if>
+	<if test="applicantMailbox != null and applicantMailbox != '' ">
+		,applicant_mailbox =#{applicantMailbox} /*申请人邮箱*/
+	</if>
+	<if test="applicantPhone != null and applicantPhone != '' ">
+		,applicant_phone =#{applicantPhone}/*申请人常用手机号*/
+	</if>
+	<if test="ifThirdStore != null and ifThirdStore != '' ">
+		,if_thirdStore =#{ifThirdStore}/*是否存在第三方店铺*/
+	</if>
+	<if test="mainProductCategory != null and mainProductCategory != '' ">
+		,main_product_category =#{mainProductCategory} /*主营产品类目*/
+	</if>
+	<if test="province != null and province != '' ">
+		,province =#{province}/*省*/
+	</if>
+	<if test="city != null and city != '' ">
+		,city =#{city}/*省*/
+	</if>
+	<if test="county != null and county != '' ">
+		,county =#{county}/*区/县*/
+	</if>
+	<if test="companyAddress != null and companyAddress != '' ">
+		,company_address =#{companyAddress}/*公司详细地址*/
+	</if>
+	<if test="cLegalPersonMail != null and cLegalPersonMail != '' ">
+		,cLegalPerson_mail =#{cLegalPersonMail}/*企业法人邮箱*/
+	</if>
+	<if test="cLegalPersonPhone != null and cLegalPersonPhone != '' ">
+		,cLegal_personphone =#{cLegalPersonPhone}/*企业法人手机号*/
+	</if>
+	<if test="cLegalPersonIDNum != null and cLegalPersonIDNum != '' ">
+		,cLegal_personIDnum =#{cLegalPersonIDNum}/*企业法人身份证号*/
+	</if>
+	<if test="businessLicenseNum != null and businessLicenseNum != '' ">
+		,businesslicense_num =#{businessLicenseNum}/*营业执照注册号*/
+	</if>
+	<if test="organizatioCode != null and organizatioCode != '' ">
+		,organizatio_code =#{organizatioCode}/*组织机构代码*/
+	</if>
+	<if test="taxIdentifiCode != null and taxIdentifiCode != '' ">
+		,tax_identificode =#{taxIdentifiCode}/*纳税人识别码*/
+	</if>
+	<if test="socialCreditCode != null and socialCreditCode != '' ">
+		,social_creditcode =#{socialCreditCode}/*统一社会信用代码*/
+	</if>
+	<if test="iDStarttime != null and iDStarttime != '' ">
+		,ID_starttime =lnk_blank_str_to_null(#{iDStarttime,jdbcType=TIMESTAMP})/*身份证有效起始日期*/
+	</if>
+	<if test="iDFinishtime != null and iDFinishtime != '' ">
+		,ID_finishtime =lnk_blank_str_to_null(#{iDFinishtime,jdbcType=TIMESTAMP})/*身份证有效结束日期*/
+	</if>
+	<if test="markRegistrationNum != null and markRegistrationNum != '' ">
+		,mark_registration_num =#{markRegistrationNum} /*商标注册号*/
+	</if>
+	<if test="brandAuthorizaStart != null and brandAuthorizaStart != '' ">
+		,brandAuthoriza_start =lnk_blank_str_to_null(#{brandAuthorizaStart,jdbcType=TIMESTAMP})/*品牌授权起始日期*/
+	</if>
+	<if test="brandAuthorizaEnd != null and brandAuthorizaEnd != '' ">
+		,brandAuthoriza_end =lnk_blank_str_to_null(#{brandAuthorizaEnd,jdbcType=TIMESTAMP})/*品牌授权结束日期*/
+	</if>
+	<if test="storeName != null and storeName != '' ">
+		,store_name =#{storeName}/*店铺名称*/
+	</if>
+	<if test="storeDetails != null and storeDetails != '' ">
+		,store_details =#{storeDetails}/*店铺详情*/
+	</if>
+	<if test="ifDomEnterProve != null and ifDomEnterProve != '' ">
+		,if_dom_enter_prove =#{ifDomEnterProve}/*是否国内企业证明*/
+	</if>
+	<if test="ifThreeInOne != null and ifThreeInOne != '' ">
+		,if_three_in_one =#{ifThreeInOne}/*是否三证合一*/
+	</if>
+	<if test="pIdentifiCard != null and pIdentifiCard != '' ">
+		,PIdentifi_card =#{pIdentifiCard}
+	</if>
+	<if test="nIdtifiCard != null and nIdtifiCard != '' ">
+		,NIdtifi_card =#{nIdtifiCard}
+	</if>
+	<if test="businessLicense != null and businessLicense != '' ">
+		,business_license =#{businessLicense}
+	</if>
+	<if test="openAccountLicense != null and openAccountLicense != '' ">
+		,open_account_license =#{openAccountLicense}
+	</if>
+	<if test="qualityReport != null and qualityReport != '' ">
+		,QualityReport =#{qualityReport}
+	</if>
+	<if test="certificateRegistration != null and certificateRegistration != '' ">
+		,certificate_registration =#{certificateRegistration}
+	</if>
+	<if test="authorizationCertificate != null and authorizationCertificate != '' ">
+		,authorization_certificate =#{authorizationCertificate}
+	</if>
+	<if test="storeLogo != null and storeLogo != '' ">
+		,store_logo =#{storeLogo}
+	</if>
+	<if test="storeType != null and storeType != '' ">
+		,store_type =#{storeType}
+	</if>
+		WHERE ROW_ID =#{id}
+	</update>
+	
+	<update id="userAuditImageUpate" parameterType="com.hand.base.o2oaccnt.model.UserAudit">
+	 	UPDATE lnk_enterprise t
+		   SET t.PIdentifi_card  = #{pIdentifiCard}
+		 WHERE t.row_id = #{id}
+ 	</update>
+	
+	<insert id="dutyInsert" parameterType="com.hand.base.enterprise.model.Enterprise">
+		insert into lnk_duty (row_id,name,comments) values(#{crmDutyId},CONCAT(#{name},'管理员'),#{comments})
+	</insert>
+	
+	<update id="dutyUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_duty set 
+		name=CONCAT(#{name},'管理员')
+		,comments=#{comments} where row_id=#{id}
+	</update>
+	<update id="qrCodeImageUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+	 	UPDATE LNK_ENTERPRISE t
+		   SET t.X_ATTR_08  = #{qrCodeId}
+		 WHERE t.row_id = #{id}
+  	</update>
+  	
+	<delete id="deleteById" parameterType="com.hand.base.enterprise.model.Enterprise">
+		DELETE FROM LNK_ENTERPRISE WHERE ROW_ID=#{id}
+	</delete>
+	
+  	<!-- 初始化企业 -->
+  	<select id="initializeCompany" statementType="CALLABLE" resultMap="callParam">
+		CALL LNK_COMPANY_INIT_PKG_RUN_COMPANY_INIT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 									   #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 				                   #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR},#{param6,mode=IN,jdbcType=VARCHAR},
+     	     							           #{attr1,mode=IN,jdbcType=VARCHAR},#{attr2,mode=IN,jdbcType=VARCHAR})
+  	</select>
+ 
+  	<!-- 删除企业 -->
+  	<select id="deleteCompany" statementType="CALLABLE" resultMap="callParam">
+		CALL LNK_COMPANY_INIT_PKG_RUN_COMPANY_DELETE(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  	</select>
+  	
+  	<update id="qidianAuthUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_enterprise
+		   set authorizer_appid         = #{authAppid},
+		       authorizer_access_token  = #{authAccessToken},
+		       authorizer_refresh_token = #{authRefreshToken}
+		 where row_id = #{id}
+  	</update>
+  	
+  	<update id="authAccessTokenUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_enterprise
+		   set authorizer_access_token  = #{authAccessToken}
+		 where 1=1
+		   and authorizer_appid = #{authAppid}
+		   and authorizer_refresh_token = #{authRefreshToken}
+  	</update>
+  	
+  	<select id="queryQidianEnt" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and T1.authorizer_appid is not null
+		and T1.authorizer_appid != ""
+		and T1.authorizer_refresh_token is not null
+		and T1.authorizer_refresh_token != ""
+	</select>
+	 <insert id="defaultMenuInsert" parameterType="com.hand.base.enterprise.model.Enterprise">
+	INSERT INTO LNK_INTER_DUTY_MENU (
+		row_id,
+		created,
+		created_by,
+		last_upd,
+		last_upd_by,
+		menu_id,
+		duty_id,
+		corp_id
+	)(
+	SELECT
+		s_sequence_pkg_get_next_rowid(),
+		created,
+		created_by,
+		last_upd,
+		last_upd_by,
+		row_id,
+		#{crmDutyId},
+		#{corpid}
+		FROM
+		LNK_MENU
+		WHERE
+		default_flag = 'Y'
+	)
+	</insert> 
+	
+	<!-- 根据企业ID:param1查询企业名称企业编码，生成职责，添加默认菜单，添加用户 -->
+	<select id="getEnterPriseRun" statementType="CALLABLE">
+         CALL RUN_ENTERPRISE_P(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+         					#{msgData,mode=OUT,jdbcType=VARCHAR},
+         					#{param1,mode=IN,jdbcType=VARCHAR},
+         					#{param2,mode=IN,jdbcType=VARCHAR},
+         					#{param3,mode=IN,jdbcType=VARCHAR},
+         					#{param4,mode=IN,jdbcType=VARCHAR},
+         					#{param5,mode=IN,jdbcType=VARCHAR})
+	</select>
+	
+	<!-- 根据商户填写的资料补全用户信息 -->
+	<update id="updateEmpInfo" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_emp_info set 
+			last_upd     = now()
+			<if test="userId !=null and userId !=''">
+			,last_upd_by = #{userId}
+			</if>
+			<if test="applicantName !=null and applicantName !=''">
+			,fst_name    = #{applicantName}
+			</if>
+			<if test="applicantMailbox !=null and applicantMailbox !=''">
+			,emp_mail    = #{applicantMailbox}
+			</if>
+			<if test="applicantPhone !=null and applicantPhone !=''">
+			,emp_tel    = #{applicantPhone}
+			</if>
+			<if test="code !=null and code !=''">
+			,corp_id     = #{code}
+			</if>
+		where row_id=#{userId}
+	</update>
+	
+	<!-- 审批通过 -->
+	<update id="storeStatusPassUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_emp_info set store_status ='AUDIT_PASSED'
+		where row_id=#{userId}
+	</update>
+	
+	<!-- 押金支付 -->
+	<update id="storeStatusPayUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_emp_info set store_status ='ALREADY_PAID'
+		where row_id=#{userId}
+	</update>
+	
+	<!-- 确认转账 -->
+	<update id="storeStatuspassedNopaidUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_emp_info set store_status ='PASSED_NOPAID'
+		where row_id=#{userId}
+	</update>
+	
+	<!-- 审批拒绝 -->
+	<update id="storeStatusRejectUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		update lnk_emp_info set store_status ='AUDIT_REJECT'
+		where row_id=#{userId}
+	</update>
+	
+	
+	<!-- 更据头查询押金详细记录 -->
+	<select id="queryDepositDetailsPage" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+		select t1.row_id  depositId/*押金id*/
+		,t1.source_code sourceCode/*来源编码*/
+		,t1.source_type sourceType/*来源方式*/
+		,t1.deposit money /*金额*/
+		,t1.payment_time paymentTime/*转账时间*/
+		,t1.remarks remarks /*备注*/
+		,t1.enterprise_id entpId/*企业id*/
+		from lnk_enterprise_funds t1
+	</select>
+	
+	<!-- 押金记录新建 -->
+	<insert id="depositDetailsInsert" parameterType="com.hand.base.enterprise.model.Enterprise">
+	insert into lnk_enterprise_funds (
+	row_id /*押金id*/
+	,source_code /*来源编码*/
+	,source_type /*来源方式*/
+	,deposit /*金额*/
+	,payment_time /*转账时间*/
+	,remarks /*备注*/
+	,enterprise_id /*企业id*/
+	)values (
+	#{id}
+	,#{sourceCode}
+	,#{sourceType}
+	,#{money}
+	,#{paymentTime}
+	,#{remarks} 
+	,#{entpId}
+	)
+	</insert>
+	
+	<!-- 押金同步 -->
+	<update id="depositUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		UPDATE LNK_ENTERPRISE SET
+		row_id =#{id}
+		<if test="money !=null and money !=''">
+			,deposit_paid=#{money}/*金额*/
+		</if>
+		where row_id=#{entpId}
+	</update>
+	
+	<!-- 删除一条押金详情记录 -->
+	<delete id="depositDetailsDelete" parameterType="com.hand.base.enterprise.model.Enterprise">
+		DELETE FROM lnk_enterprise_funds WHERE ROW_ID=#{id}
+	</delete>
+	
+	<!-- 客服信息查询 -->
+	<select id="queryCustomerServicePage" resultMap="enterprise"
+		parameterType="com.hand.base.enterprise.model.Enterprise">
+	select t1.row_id id
+		,t1.name custName /*姓名*/
+		,t1.nickname nickname/*昵称*/
+		,t1.code custCode/*编码*/
+		,t1.phone custPhone/*电话*/
+		,t1.status custSstatus/*状态*/
+		,t1.enterprise_id entpId/*企业id*/
+	from lnk_cust_service t1
+	</select>
+	
+	<!-- 新建客服 -->
+	<insert id="customerServiceInsert" parameterType="com.hand.base.enterprise.model.Enterprise">
+	insert into lnk_cust_service (
+		row_id 
+		,name /*姓名*/
+		,nickname /*昵称*/
+		,code /*编码*/
+		,phone /*电话*/
+		,status /*状态*/
+		,enterprise_id /*企业id*/
+	)values (
+		#{id}
+		,#{custName}
+		,#{nickname}
+		,#{custCode}
+		,#{custPhone}
+		,#{status} 
+		,#{entpId}
+	)
+	</insert>
+	
+	<!-- 更新审批意见 -->
+	<update id="approvalOpinionUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		UPDATE LNK_ENTERPRISE SET
+			row_id  =#{id}
+			<if test="approvalOpinion != null and approvalOpinion !=''">
+			,approval_opinion=#{approvalOpinion}/*审批意见*/
+			</if>
+		where row_id=#{id}
+	</update>
+	
+	<!-- 更新转账验证码 -->
+	<update id="transferCodeUpdate" parameterType="com.hand.base.enterprise.model.Enterprise">
+		UPDATE LNK_ENTERPRISE SET
+			row_id =#{id}
+			<if test="transferCode!=null and transferCode!=''">
+			,transferCode=#{transferCode}/*转账验证码*/
+			</if>
+		where row_id=#{id}
+	</update>
+	
+</mapper>

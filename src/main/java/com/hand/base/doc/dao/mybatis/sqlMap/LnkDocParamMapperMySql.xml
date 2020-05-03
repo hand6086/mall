@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.doc.dao.mybatis.mapper.LnkDocParamMapper">
+	<resultMap type="com.hand.base.doc.model.LnkDocParam"
+		id="lnkDocParam"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,date_format(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,GET_LOV_NAME(#{usercorpid},'DOC_DATA_TYPE',T1.TYPE)     as type                /*类型*/
+		,GET_LOV_NAME(#{usercorpid},'S_IF',T1.IF_NECESSARY)      as ifNecessary         /*是否必要*/
+		,T1.MENU_LINE_ID      as menuLineId          /*与主菜单line表的关联条件*/
+		,T1.PARAM_NAME        as paramName           /*名称*/
+		,T1.param     as param         /*参数*/
+		,T1.menu_describe          as menuDescribe            /*描述*/
+
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_DOC_PARAM T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	 <if test="menuLineId != null and  menuLineId != '' ">
+			and t1.MENU_LINE_ID = #{menuLineId}
+	  </if>
+	
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.doc.model.LnkDocParam">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="lnkDocParam"
+		parameterType="com.hand.base.doc.model.LnkDocParam">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="lnkDocParam"
+		parameterType="com.hand.base.doc.model.LnkDocParam">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="lnkDocParam"
+		parameterType="com.hand.base.doc.model.LnkDocParam">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.doc.model.LnkDocParam">
+		INSERT INTO LNK_DOC_PARAM(
+		 ROW_ID              /*记录ID*/
+		,TYPE                /*类型*/
+		,IF_NECESSARY        /*是否必要*/
+		,MENU_LINE_ID        /*与主菜单line表的关联条件*/
+		,PARAM_NAME          /*名称*/
+		,param       /*参数*/
+		,menu_describe            /*描述*/
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{type}             /*类型*/
+		,#{ifNecessary}      /*是否必要*/
+		,#{menuLineId}       /*与主菜单line表的关联条件*/
+		,#{paramName}        /*名称*/
+		,#{param}      /*参数*/
+		,#{menuDescribe}         /*描述*/
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.doc.model.LnkDocParam">
+		UPDATE LNK_DOC_PARAM SET
+		 TYPE                =#{type}             /*类型*/
+		,IF_NECESSARY        =#{ifNecessary}      /*是否必要*/
+		,PARAM_NAME          =#{paramName}        /*名称*/
+		,param       =#{param}      /*参数*/
+		,menu_describe=#{menuDescribe}         /*描述*/
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.doc.model.LnkDocParam">
+		DELETE FROM LNK_DOC_PARAM WHERE ROW_ID=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,53 @@
+
+.lnk-step {
+	text-align: center;
+	margin: 20px auto;
+}
+
+.lnk-step-logo-icon{
+	background: url(/static/images/step/step-logo.png) no-repeat 0 0 / 40px auto;
+	color: #fff;
+	width: 40px;
+	height: 40px;
+	line-height: 40px;
+	margin-right: 10px;
+	display: inline-block;
+}
+
+.lnk-step-icon{
+	width: 186px;
+	height: 40px;
+	line-height: 40px;
+	display: inline-block;
+	margin: 0 -6px;
+}
+
+.lnk-step-icon-first-finish {
+	background: url(/static/images/step/step-first-finish.png) no-repeat;
+	color: #fff;
+	margin-left: 0;
+}
+
+.lnk-step-icon-unfinish {
+	background: url(/static/images/step/step-unfinish.png) no-repeat;
+	color: darkgray;
+}
+
+.lnk-step-icon-finish {
+	background: url(/static/images/step/step-finish.png) no-repeat;
+	color: #fff;
+}
+
+.lnk-step-icon-last-unfinish {
+	background: url(/static/images/step/step-last-unfinish.png) no-repeat;
+	color: darkgray;
+	margin-right: 0;
+	width: 164px;
+}
+.lnk-step-icon-last-finish {
+	background: url(/static/images/step/step-last-finish.png) no-repeat;
+	color: #fff;
+	margin-right: 0;
+	width: 164px;
+}
+

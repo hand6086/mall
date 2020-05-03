@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.BrandMerchOrderCloseStatisticsMapper">
+	<resultMap type="com.hand.base.charts.model.BrandMerchOrderCloseStatistics" id="brandMerchOrderCloseStatistics"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+			a.row_id AS id,
+			a.merchName AS merchName,
+			b.orderStatus AS orderStatus,
+			b.orderCloseCause AS orderCloseCause,
+			b.orderNumber AS orderNumber
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM
+			(
+				SELECT
+					t.ROW_ID AS row_id,
+					t4.store_name AS merchName,
+					t4.row_id AS Storeid
+				FROM
+					LNK_PAGE_FLOW t
+				LEFT JOIN lnk_enterprise t4 ON t. CODE = t4.row_id
+				WHERE
+					1 = 1
+				AND t. CODE IS NOT NULL
+				AND t. CODE != ''
+				AND t4.row_id IS NOT NULL
+				AND t4.row_id != ''
+				<if test="merchName != null and merchName != ''">
+					and t4.store_name LIKE CONCAT(CONCAT('%',#{merchName},'%'))
+				</if>
+				<if test="startTime != null and startTime != ''">
+					and t.CREATED &gt;= #{startTime}
+				</if>
+					
+				<if test="endTime != null and endTime != ''">
+					and t.CREATED &lt;= #{endTime}
+				</if>
+				
+				GROUP BY
+					t4.row_id
+			) a
+		LEFT JOIN (
+			SELECT
+				t1.attrib_41 AS Storeid,
+				GET_LOV_NAME (
+					'',
+					'BRAND_ORDER_STATUS',
+					t1.ATTRIB_48
+				) AS orderStatus,
+				cancel_reason AS orderCloseCause,
+				count(1) AS orderNumber
+			FROM
+				s_order_x t1
+			LEFT JOIN lnk_enterprise t2 ON t1.attrib_41 = t2.row_id
+			WHERE
+				t1.order_type = 'brand'
+			AND (
+				t1.ATTRIB_48 = 'Cancelled'
+				OR t1.ATTRIB_48 = 'Tran_Closed'
+				OR t1.ATTRIB_48 = 'Cancelling'
+			)
+			<if test="orderCloseCause != null and orderCloseCause != ''">
+					and t1.cancel_reason LIKE CONCAT(CONCAT('%',#{orderCloseCause},'%'))
+				</if>
+			GROUP BY
+				t1.ATTRIB_48,
+				t2.store_name,
+				t1.cancel_reason
+		) b ON a.Storeid = b.Storeid
+		WHERE
+			b.orderStatus IS NOT NULL
+		GROUP BY
+			b.orderStatus,
+			b.orderCloseCause
+		
+	</sql>
+	
+	<sql id="whereAllSql">
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.BrandMerchOrderCloseStatistics">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="brandMerchOrderCloseStatistics"
+		parameterType="com.hand.base.charts.model.BrandMerchOrderCloseStatistics">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="brandMerchOrderCloseStatistics"
+		parameterType="com.hand.base.charts.model.BrandMerchOrderCloseStatistics">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		
+	</select>
+	
+	<select id="brandQueryById" resultMap="brandMerchOrderCloseStatistics"
+		parameterType="com.hand.base.charts.model.BrandMerchOrderCloseStatistics">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="brandMerchOrderCloseStatistics"
+		parameterType="com.hand.base.charts.model.BrandMerchOrderCloseStatistics">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

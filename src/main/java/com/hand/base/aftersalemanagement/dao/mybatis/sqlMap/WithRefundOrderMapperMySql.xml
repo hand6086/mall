@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.aftersalemanagement.dao.mybatis.mapper.WithRefundOrderMapper">
+  <resultMap type="com.hand.base.aftersalemanagement.model.WithRefundOrder" id="withrefundorder"></resultMap>
+  
+
+
+	
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="withrefundorder"
+		parameterType="com.hand.base.aftersalemanagement.model.WithRefundOrder">
+SELECT
+    T1.ROW_ID as id,
+	date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T1.CREATED_BY as createdBy,
+	date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T1.LAST_UPD_BY as lastUpdatedBy,
+	t1.oRDER_NUM			orderNumber,
+	t2.ATTRIB_54			o2oExloderNumber,
+	t3.TYPE	    			 o2oPayInfoType,
+	t4.NAME	    			 account,
+	t4.oU_NUM				accountCode,
+	t4.MAIN_PH_NUM			mainPhoneNumber,
+	t2.ATTRIB_39			o2oStoreName,
+	t5.CoNTACT				o2oReceiverName,
+	t5.CoNTACT_PHoNE		o2oReceiverPhone,
+	t2.ATTRIB_36			o2oReceiverProvince,
+	t2.ATTRIB_37			o2oReceiverCity,
+	t2.ATTRIB_38			o2oReceiverDistrict,
+	t2.ATTRIB_01			o2oReceiverAddress,
+	ROUND(t5.GPS_LoNGITUDE,2)		o2oGPSLongitude,
+	ROUND(t5.GPS_LATITUDE,2)			o2oGPSLatitude,
+	ROUND(t2.ATTRIB_14,2)			o2omerchandiseprice,
+	ROUND(t2.ATTRIB_16,2)			o2oDeducedPrice,
+	ROUND(t2.ATTRIB_22,2)			o2oFreeGetPrice,
+	ROUND(t2.ATTRIB_21,2)			o2oFullCutAmount,
+	ROUND(t2.ATTRIB_20,2)			o2oCouponValue,
+	ROUND(t2.o2o_TIP,2)				o2oTip,
+	ROUND(t2.ATTRIB_17,2)			o2oorderTotalPrice,
+	t2.o2o_PAY_TYPE			o2oPayType,
+	t2.ATTRIB_47			o2oCustomerMsg,
+	t2.ATTRIB_40			o2oDeliveryType,
+	t2.ATTRIB_07			o2oLogisticsStatus,
+	t6.NAME					o2oDSRName,
+	t6.oU_NUM				o2oDSRCode,
+	t6.o2o_CoNTACT_PHoNE	o2oStoreCellphone,
+	t6.o2o_SToRE_TYPE		o2oDSRStoreType,
+		                	 #o2oDeliveryMan,
+	t7.ATTRIB_42			o2oDeliveryManphone,
+	t2.ATTRIB_44			o2oorderType,
+	t2.o2o_FoRCED_PICKUP	o2oIsForcedPickup,
+	t2.ATTRIB_50			o2oIsGroPurorder,
+	t2.ATTRIB_43			o2oCheckCode,
+	t2.ATTRIB_49			o2oCheckStatus,
+	date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') orderCreated,
+	date_format(t2.ATTRIB_26, '%Y-%m-%d %H:%i:%S') o2oPayBillTime,
+	date_format(t2.ATTRIB_27, '%Y-%m-%d %H:%i:%S') o2oorderPickedT,
+	date_format(t2.ATTRIB_28, '%Y-%m-%d %H:%i:%S') o2oStartDeliveryT,
+	date_format(t2.ATTRIB_29, '%Y-%m-%d %H:%i:%S') o2oReceivedTime,
+	t2.ATTRIB_48 			o2oorderStatus,
+	t2.ATTRIB_53			o2oorderSourceSystem,
+	t8.NAME	orderType,
+	t2.ATTRIB_09			o2oiso2oorder,
+	date_format(t2.ATTRIB_30, '%Y-%m-%d %H:%i:%S') o2o1stPushTime,
+	date_format(t2.ATTRIB_31, '%Y-%m-%d %H:%i:%S') o2o2ndPushTime,
+	date_format(t2.ATTRIB_32, '%Y-%m-%d %H:%i:%S') o2o3rdPushTime,
+	t12.row_id orgId
+FROM
+	S_ORDER t1 
+    inner join S_ORDER_X t2 on T1.ROW_ID = T2.PAR_ROW_ID 
+	left join lnk_accnt T4 on T1.ACCNT_ID = T4.ROW_ID
+	left join CX_O_PAY_INFO T3 on t2.X_ATTRIB_69 = T3.ROW_ID
+	left join S_CONTACT_X t7 on t2.ATTRIB_42 = t7.ROW_ID
+	left join lnk_accnt T6 on t2.ATTRIB_41 = T6.ROW_ID
+	left join S_ORDER_TYPE T8 on T1.ORDER_TYPE_ID = T8.ROW_ID
+	left join CX_O_ADDRESS T5 on t2.O2O_RECIEVER_ID = T5.ROW_ID
+	left join (CX_O_AREA t11  LEFT JOIN lnk_org_ext T12 ON T12.ROW_ID = T11.T_ATTR_05) on t11.row_id=t2.X_ATTRIB_68
+	where 1=1
+	and (T2.ATTRIB_09 = 'Y' AND T2.ATTRIB_44 = 'Platform Order' AND (T2.ATTRIB_48 = 'Refunding' OR T2.ATTRIB_48 = 'Refund Determined'))
+	<if test="attr1 != null and attr1 != ''">
+	and t1.CREATED &gt;= #{attr1}
+	</if>
+	<if test="attr2 != null and attr2 != ''">
+	and t1.CREATED &lt;= #{attr2}
+	</if>
+	<if test="attr3 != null and attr3 != ''">
+	and t2.ATTRIB_29 &gt;= #{attr3}
+	</if>
+	<if test="attr4 != null and attr4 != ''">
+	and t2.ATTRIB_29 &lt;= #{attr4}
+	</if>
+	<if test="o2oLogisticsStatus != null and o2oLogisticsStatus != ''">
+	and t2.ATTRIB_07 = #{o2oLogisticsStatus}
+	</if>
+	<if test="o2oorderStatus != null and o2oorderStatus != ''">
+	and t2.ATTRIB_48 = #{o2oorderStatus}
+	</if>
+	<if test="orderNumber != null and orderNumber != ''">
+	and t1.oRDER_NUM = #{orderNumber}
+	</if>
+		order by T1.LAST_UPD desc
+	</select>
+	
+	<!-- 根据条件查询记录 -->
+	<select id="brandQueryByExamplePage" resultMap="withrefundorder"
+		parameterType="com.hand.base.aftersalemanagement.model.WithRefundOrder">
+SELECT
+    T1.ROW_ID as id,
+	date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T1.CREATED_BY as createdBy,
+	date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T1.LAST_UPD_BY as lastUpdatedBy,
+	t1.oRDER_NUM			orderNumber,
+	t1.ATTRIB_54			o2oExloderNumber,
+	t3.TYPE	    			 o2oPayInfoType,
+	t4.NAME	    			 account,
+	t4.oU_NUM				accountCode,
+	t4.MAIN_PH_NUM			mainPhoneNumber,
+	t1.ATTRIB_39			o2oStoreName,
+	t5.CoNTACT				o2oReceiverName,
+	t5.CoNTACT_PHoNE		o2oReceiverPhone,
+	t1.ATTRIB_36			o2oReceiverProvince,
+	t1.ATTRIB_37			o2oReceiverCity,
+	t1.ATTRIB_38			o2oReceiverDistrict,
+	t1.ATTRIB_01			o2oReceiverAddress,
+	ROUND(t5.GPS_LoNGITUDE,2)		o2oGPSLongitude,
+	ROUND(t5.GPS_LATITUDE,2)			o2oGPSLatitude,
+	ROUND(t1.ATTRIB_14,2)			o2omerchandiseprice,
+	ROUND(t1.ATTRIB_16,2)			o2oDeducedPrice,
+	ROUND(t1.ATTRIB_22,2)			o2oFreeGetPrice,
+	ROUND(t1.ATTRIB_21,2)			o2oFullCutAmount,
+	ROUND(t1.ATTRIB_20,2)			o2oCouponValue,
+	ROUND(t1.o2o_TIP,2)				o2oTip,
+	ROUND(t1.ATTRIB_17,2)			o2oorderTotalPrice,
+	t1.o2o_PAY_TYPE			o2oPayType,
+	t1.ATTRIB_47			o2oCustomerMsg,
+	t1.ATTRIB_40			o2oDeliveryType,
+	t1.ATTRIB_07			o2oLogisticsStatus,
+	t6.NAME					o2oDSRName,
+	t6.oU_NUM				o2oDSRCode,
+	t6.o2o_CoNTACT_PHoNE	o2oStoreCellphone,
+	t6.o2o_SToRE_TYPE		o2oDSRStoreType,
+		                	 #o2oDeliveryMan,
+	t7.ATTRIB_42			o2oDeliveryManphone,
+	t1.ATTRIB_44			o2oorderType,
+	t1.o2o_FoRCED_PICKUP	o2oIsForcedPickup,
+	t1.ATTRIB_50			o2oIsGroPurorder,
+	t1.ATTRIB_43			o2oCheckCode,
+	t1.ATTRIB_49			o2oCheckStatus,
+	date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') orderCreated,
+	date_format(t1.ATTRIB_26, '%Y-%m-%d %H:%i:%S') o2oPayBillTime,
+	date_format(t1.ATTRIB_27, '%Y-%m-%d %H:%i:%S') o2oorderPickedT,
+	date_format(t1.ATTRIB_28, '%Y-%m-%d %H:%i:%S') o2oStartDeliveryT,
+	date_format(t1.ATTRIB_29, '%Y-%m-%d %H:%i:%S') o2oReceivedTime,
+	t1.ATTRIB_48 			o2oorderStatus,
+	t1.ATTRIB_53			o2oorderSourceSystem,
+	t1.ATTRIB_09			o2oiso2oorder,
+	date_format(t1.ATTRIB_30, '%Y-%m-%d %H:%i:%S') o2o1stPushTime,
+	date_format(t1.ATTRIB_31, '%Y-%m-%d %H:%i:%S') o2o2ndPushTime,
+	date_format(t1.ATTRIB_32, '%Y-%m-%d %H:%i:%S') o2o3rdPushTime,
+	t12.row_id orgId
+FROM
+	s_order_x t1 
+	left join lnk_accnt T4 on T1.ACCNT_ID = T4.ROW_ID
+	left join CX_O_PAY_INFO T3 on t1.X_ATTRIB_69 = T3.ROW_ID
+	left join S_CONTACT_X t7 on t1.ATTRIB_42 = t7.ROW_ID
+	left join lnk_accnt T6 on t1.ATTRIB_41 = T6.ROW_ID
+	left join CX_O_ADDRESS T5 on t1.O2O_RECIEVER_ID = T5.ROW_ID
+	left join (CX_O_AREA t11  LEFT JOIN lnk_org_ext T12 ON T12.ROW_ID = T11.T_ATTR_05) on t11.row_id=t1.X_ATTRIB_68
+	where 1=1
+	and t1.order_type = 'brand'
+	and (t1.ATTRIB_09 = 'Y' AND (t1.ATTRIB_48 = 'Cancelling' OR t1.ATTRIB_48 = 'Refunding'))
+	<if test="usersystemRole != 'super_administrator' ">
+		and t1.corp_id = #{usercorpid}
+	 </if>
+	 <if test="usersystemRole == 'super_administrator' ">
+		and t1.corp_id != '101'
+	 </if>
+	 <if test="id != null and id != ''">
+		and t1.row_id = #{id}
+	 </if>
+	 order by T1.LAST_UPD desc
+	</select>
+	
+	<select id="queryoOderGoodsPage" resultMap="withrefundorder"
+		parameterType="com.hand.base.aftersalemanagement.model.WithRefundOrder">
+		SELECT
+			T1.ROW_ID as id,
+			date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+			T1.CREATED_BY as createdBy,
+			date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+			T1.LAST_UPD_BY as lastUpdatedBy,
+			t2.O2O_DISPLAY_NAME merchandiseName, #商品名称
+			t2.O2O_INT_CODE merchandiseCode, #商品编码
+			round(t1.BASE_UNIT_PRI,2) basePrice, #报价
+			round(t1.QTY_REQ) quantityRequested, #数量
+			round(t3.ATTRIB_17,2) o2oOriMePrice, #报价总金额
+			round(t1.NET_PRI,2) netPrice, #成交价
+			round(t3.ATTRIB_19,2) o2oLineTotalPrice, #成交金额
+			t3.O2O_GP_PROD o2ooGPProd, #是否团购商品
+			t3.ATTRIB_11 o2oIsFreeMerchandise , #是否赠品
+		  	t1.ORDER_ID orderHeaderId,
+		  	t12.row_id orgId
+		FROM
+			S_ORDER_ITEM t1 
+			left join S_PROD_INT_X t2  on t1.PROD_ID = t2.row_id
+			left join S_ORDER_ITEM_X t3 on  t1.row_id = t3.par_row_id
+			left join S_ORDER_X t4 on t4.ROW_ID = t1.ORDER_ID
+			left join (CX_O_AREA t11  LEFT JOIN lnk_org_ext T12 ON T12.ROW_ID = T11.T_ATTR_05) on t11.row_id=t4.X_ATTRIB_68
+		WHERE 1=1
+	
+	</select>
+	
+	<select id="brandQueryoOderGoodsPage" resultMap="withrefundorder"
+		parameterType="com.hand.base.aftersalemanagement.model.WithRefundOrder">
+		SELECT
+			T1.ROW_ID as id,
+			date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+			T1.CREATED_BY as createdBy,
+			date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+			T1.LAST_UPD_BY as lastUpdatedBy,
+			t2.O2O_DISPLAY_NAME merchandiseName, /*商品名称*/
+			t2.O2O_INT_CODE merchandiseCode, /*商品编码*/
+			round(t1.BASE_UNIT_PRI,2) basePrice, /*报价*/
+			round(t1.QTY_REQ) quantityRequested, /*数量*/
+			round(t1.ATTRIB_17,2) o2oOriMePrice, /*报价总金额*/
+			round(t1.NET_PRI,2) netPrice, /*成交价*/
+			round(t1.ATTRIB_19,2) o2oLineTotalPrice, /*成交金额*/
+			t1.O2O_GP_PROD o2ooGPProd, /*是否团购商品*/
+			t1.ATTRIB_11 o2oIsFreeMerchandise , /*是否赠品*/
+		  	t1.ORDER_ID orderHeaderId,
+		  	t12.row_id orgId
+		FROM
+			s_order_item_x t1 
+			left join S_PROD_INT_X t2  on t1.PROD_ID = t2.row_id
+			left join S_ORDER_X t4 on t4.ROW_ID = t1.ORDER_ID
+			left join (CX_O_AREA t11  LEFT JOIN lnk_org_ext T12 ON T12.ROW_ID = T11.T_ATTR_05) on t11.row_id=t4.X_ATTRIB_68
+		WHERE 1=1
+	
+	</select>
+	
+	<!-- 售后管理 待退款页面   类型字段 -->
+	<select id="queryType" parameterType="com.hand.base.aftersalemanagement.model.WithRefundOrder" resultMap="withrefundorder">
+		SELECT NAME FROM S_ORDER_TYPE
+  	</select>
+</mapper>

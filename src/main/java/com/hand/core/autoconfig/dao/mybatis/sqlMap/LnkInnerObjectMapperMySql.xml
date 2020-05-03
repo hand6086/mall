@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.core.autoconfig.dao.mybatis.mapper.LnkInnerObjectMapper">
+	<resultMap type="com.hand.core.autoconfig.model.LnkInnerObject"
+		id="LnkInnerObject"></resultMap>
+
+	
+<sql id="queryAllSql">
+	select
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.row_id as id,
+		emp.fst_name createdByName,
+		T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,t1.name,-- 名称
+		t1.newflag,-- 新建
+		t1.updateflag,-- 更新
+		t1.deleteflag,-- 删除
+		t1.queryflag,-- 查询
+		t1.basetable,-- 基表
+		t1.basetablealais,-- 基表别名
+		t1.activeflag,-- 是否有效
+		t1.orderbyfield,-- 排序字段
+		t1.coms,-- 说明
+		attr01,-- 备注1
+		attr02,-- 备注2
+		attr03,-- 备注3
+		attr04,-- 备注4
+		attr05,-- 备注5
+		attr06,-- 备注6
+		attr07,-- 备注7
+		attr08,-- 备注8
+		attr09,-- 备注9
+		attr10,-- 备注10
+		attr11,-- 备注attr11
+		attr12,-- 备注attr12
+		attr13,-- 备注attr13
+		attr14,-- 备注attr14
+		attr15,-- 备注attr15
+		attr16,-- 备注attr16
+		attr17,-- 备注attr17
+		attr18,-- 备注attr18
+		attr19,-- 备注attr19
+		attr20,-- 备注attr20
+		attr21,-- 备注attr21
+		attr22,-- 备注attr22
+		attr23,-- 备注attr23
+		attr24,-- 备注attr24
+		attr25,-- 备注attr25
+		attr26,-- 备注attr26
+		attr27,-- 备注attr27
+		attr28,-- 备注attr28
+		attr29,-- 备注attr29
+		attr30-- 备注attr30
+	</sql>
+	<sql id="fromTableSql">
+	from LNK_INNER_OBJ t1 left join LNK_EMP_INFO emp on t1.created_by=emp.row_id
+	where 1=1
+	  and t1.corp_id = #{usercorpid}
+	</sql>
+	<sql id="orderByAllSql">
+	order by t1.created asc
+	</sql>	
+  	
+  	<sql id="whereAllSql">
+  	</sql>
+	
+	
+	
+	<delete id="deleteById" parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		DELETE FROM
+		LNK_INNER_OBJ WHERE ROW_ID = #{id}
+	</delete>
+	
+	
+	
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	<select id="queryById" resultMap="LnkInnerObject"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerObject">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and T1.ROW_ID=#{id}
+		
+	</select>
+	
+	
+	<select id="queryByInner" resultMap="LnkInnerObject"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and T1.ROW_ID=#{id}
+	</select>
+	<select id="queryAll" resultMap="LnkInnerObject"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+	<select id="queryByExamplePage" resultMap="LnkInnerObject"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+ 
+	<insert id="insert" parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		insert into
+		LNK_INNER_OBJ
+		(ROW_ID,
+		`name`,-- 名称
+		newflag,-- 新建
+		updateflag,-- 更新
+		deleteflag,-- 删除
+		queryflag,-- 查询
+		basetable,-- 基表
+		basetablealais,-- 基表别名
+		activeflag,-- 是否有效
+		orderbyfield,-- 排序字段
+		coms,-- 说明
+		attr01,-- 备注1
+		attr02,-- 备注2
+		attr03,-- 备注3
+		attr04,-- 备注4
+		attr05,-- 备注5
+		attr06,-- 备注6
+		attr07,-- 备注7
+		attr08,-- 备注8
+		attr09,-- 备注9
+		attr10,-- 备注10
+		attr11,-- 备注attr11
+		attr12,-- 备注attr12
+		attr13,-- 备注attr13
+		attr14,-- 备注attr14
+		attr15,-- 备注attr15
+		attr16,-- 备注attr16
+		attr17,-- 备注attr17
+		attr18,-- 备注attr18
+		attr19,-- 备注attr19
+		attr20,-- 备注attr20
+		attr21,-- 备注attr21
+		attr22,-- 备注attr22
+		attr23,-- 备注attr23
+		attr24,-- 备注attr24
+		attr25,-- 备注attr25
+		attr26,-- 备注attr26
+		attr27,-- 备注attr27
+		attr28,-- 备注attr28
+		attr29,-- 备注attr29
+		attr30-- 备注attr30		
+		)
+		values
+		(#{id},
+		#{name},-- 名称
+		#{newflag},-- 新建
+		#{updateflag},-- 更新
+		#{deleteflag},-- 删除
+		#{queryflag},-- 查询
+		upper(#{basetable}),-- 基表
+		upper(#{basetablealais}),-- 基表别名
+		#{activeflag},-- 是否有效
+		#{orderbyfield},-- 排序字段
+		#{coms},-- 说明
+		#{attr01},-- 备注1
+		#{attr02},-- 备注2
+		#{attr03},-- 备注3
+		#{attr04},-- 备注4
+		#{attr05},-- 备注5
+		#{attr06},-- 备注6
+		#{attr07},-- 备注7
+		#{attr08},-- 备注8
+		#{attr09},-- 备注9
+		#{attr10},-- 备注10
+		#{attr11},-- 备注attr11
+		#{attr12},-- 备注attr12
+		#{attr13},-- 备注attr13
+		#{attr14},-- 备注attr14
+		#{attr15},-- 备注attr15
+		#{attr16},-- 备注attr16
+		#{attr17},-- 备注attr17
+		#{attr18},-- 备注attr18
+		#{attr19},-- 备注attr19
+		#{attr20},-- 备注attr20
+		#{attr21},-- 备注attr21
+		#{attr22},-- 备注attr22
+		#{attr23},-- 备注attr23
+		#{attr24},-- 备注attr24
+		#{attr25},-- 备注attr25
+		#{attr26},-- 备注attr26
+		#{attr27},-- 备注attr27
+		#{attr28},-- 备注attr28
+		#{attr29},-- 备注attr29
+		#{attr30}-- 备注attr30
+		
+		)
+	</insert>
+	
+	
+
+
+	<update id="update" parameterType="com.hand.core.autoconfig.model.LnkInnerObject">
+		UPDATE
+		LNK_INNER_OBJ
+		SET
+		`name`=#{name},-- 名称
+		newflag=#{newflag},-- 新建
+		updateflag=#{updateflag},-- 更新
+		deleteflag=#{deleteflag},-- 删除
+		queryflag=#{queryflag},-- 查询
+		basetable=upper(#{basetable}),-- 基表
+		basetablealais=upper(#{basetablealais}),-- 基表别名
+		activeflag=#{activeflag},-- 是否有效
+		orderbyfield=upper(#{orderbyfield}),-- 排序字段
+		coms=#{coms},-- 说明
+		attr01=#{attr01},-- 备注1
+		attr02=#{attr02},-- 备注2
+		attr03=#{attr03},-- 备注3
+		attr04=#{attr04},-- 备注4
+		attr05=#{attr05},-- 备注5
+		attr06=#{attr06},-- 备注6
+		attr07=#{attr07},-- 备注7
+		attr08=#{attr08},-- 备注8
+		attr09=#{attr09},-- 备注9
+		attr10=#{attr10},-- 备注10
+		attr11=#{attr11},-- 备注attr11
+		attr12=#{attr12},-- 备注attr12
+		attr13=#{attr13},-- 备注attr13
+		attr14=#{attr14},-- 备注attr14
+		attr15=#{attr15},-- 备注attr15
+		attr16=#{attr16},-- 备注attr16
+		attr17=#{attr17},-- 备注attr17
+		attr18=#{attr18},-- 备注attr18
+		attr19=#{attr19},-- 备注attr19
+		attr20=#{attr20},-- 备注attr20
+		attr21=#{attr21},-- 备注attr21
+		attr22=#{attr22},-- 备注attr22
+		attr23=#{attr23},-- 备注attr23
+		attr24=#{attr24},-- 备注attr24
+		attr25=#{attr25},-- 备注attr25
+		attr26=#{attr26},-- 备注attr26
+		attr27=#{attr27},-- 备注attr27
+		attr28=#{attr28},-- 备注attr28
+		attr29=#{attr29},-- 备注attr29
+		attr30=#{attr30}-- 备注attr30		
+		WHERE ROW_ID = #{id}
+	</update>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

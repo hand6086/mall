@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.accountmanagement.dao.mybatis.mapper.MentionedCashMapper">
+	<resultMap type="com.hand.base.accountmanagement.model.BillInfo" id="mentionedcash">
+	</resultMap>
+	<sql id="queryAllSql">
+		SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid
+		,T1.ENTERPRISE_ID     as enterpId            /*企业id*/
+		,T1.BANK              as bank              /*开户行*/
+		,T1.FUNDING_DIRECTION as fundingDirection    /*资金往来方向*/
+		,T1.RECEIPT_CODE      as receiptCode         /*单据编号*/
+		,T1.RECEIPT_TYPE      as receiptType         /*单据类型*/
+		,T1.SERVICE_CHARGE    as serviceCharge     	 /*手续费*/
+		,T1.ARRIVED_AMOUNT    as arrivedAmount       /*到账金额*/
+		,T1.MONEY_TYPE        as moneyType           /*资金类型*/
+		,T1.MERCHANT_ACCOUNT  as merchantAccount   /*商家账户*/
+		,T1.LOG               as log                 /*日志*/
+		,T1.STATUS            as status              /*状态*/
+		,T1.bill_id   		  as billId      		 /*提现对账单号*/
+		,T1.REMARKS           as remarks             /*备注*/
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM LNK_BILL_INFO T1
+		WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="usercorpid !=null and usercorpid !=''"> 
+		 	AND T1.CORP_ID = #{usercorpid}
+		 </if>
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="mentionedcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		 AND T1.STATUS ='transfer_success'
+	</select>
+	<!-- 品牌馆查询 -->
+	<select id="brandQueryByExamplePage" resultMap="mentionedcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		 AND T1.STATUS ='transfer_success'
+	</select>
+	
+	<select id="queryById" resultMap="mentionedcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<!-- 品牌馆根据id进行查询 -->
+	<select id="brandQueryById" resultMap="mentionedcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="mentionedcash"
+		parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		INSERT INTO LNK_BILL_INFO(
+		 ROW_ID              /*记录ID*/
+		) values (
+		 #{id}               /*记录ID*/
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		UPDATE LNK_BILL_INFO SET
+		 ENTERPRISE_NAME     =#{enterpriseName}   /*商家名称*/
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.accountmanagement.model.BillInfo">
+		DELETE FROM LNK_BILL_INFO WHERE ROW_ID=#{id}
+	</delete>
+	
+</mapper>
+	

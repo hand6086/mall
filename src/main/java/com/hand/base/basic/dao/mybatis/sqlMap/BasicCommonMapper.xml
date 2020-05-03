@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.basic.dao.mybatis.mapper.BasicCommonMapper">
+	<resultMap type="com.hand.base.basic.model.ListOfValue" id="listOfValue"></resultMap>
+	<resultMap type="com.hand.base.basic.model.JobLog" id="jobLog"></resultMap>
+	<resultMap type="com.hand.base.basic.model.Job" id="job"></resultMap>
+	<resultMap type="com.hand.base.basic.model.ListValue" id="listValue"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT t1.row_id      id,
+		       t1.created_by  createdBy,
+		       t1.created created,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.corp_id     corpid,
+		       t3.name		  corpName,
+		       t1.name        name,
+		       t1.type        type,
+		       t1.val         val,
+		       to_number(t1.seq) seq,
+		       t1.lang_id     langId,
+		       t1.sap_val     sapVal,
+		       t1.parent_id   parentId,
+		       t2.name        parentName,
+		       t2.type        parentType,
+			   t2.val         parentVal,
+		       t1.active_flag activeFlag,
+		       t1.COMMENTS	  comments
+	</sql>
+
+	<sql id="fromTableSql">
+		  FROM LNK_LIST_OF_VAL t1, 
+		  	   LNK_LIST_OF_VAL t2,
+		  	   lnk_enterprise t3
+		 WHERE 1 = 1
+		   and t1.parent_id = t2.row_id(+)
+		   and t1.corp_id = t3.code(+)
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+		<if test="usercorpid != null and usercorpid != '' ">
+			and (t1.corp_id = #{usercorpid})
+		</if>
+		<if test="id != null and id != '' ">
+			and t1.row_id = #{id}
+		</if>
+		<if test="activeFlag != null and activeFlag != '' ">
+			and t1.active_flag = #{activeFlag}
+		</if>
+		<if test="type != null and type != '' ">
+			and t1.type = #{type}
+		</if>
+		<if test="name != null and name != '' ">
+			and t1.name = #{name}
+		</if>
+		<if test="val != null and val != '' ">
+			and t1.val = #{val}
+		</if>
+		<if test="parentId != null and parentId != '' ">
+			and t1.parent_id = #{parentId}
+		</if>
+		<if test="parentName != null and parentName != '' ">
+			and t2.name = #{parentName}
+		</if>
+		<if test="parentType != null and parentType != '' ">
+			and t2.type = #{parentType}
+		</if>
+		<if test="parentVal != null and parentVal != '' ">
+			and t2.val = #{parentVal}
+		</if>
+  	</sql>
+  	
+  	<sql id="orderByAllSql">
+		order by T1.type DESC, to_number(t1.seq) ASC
+	</sql>	
+  	
+	<select id="queryById" resultType="com.hand.base.basic.model.ListOfValue"
+		parameterType="com.hand.base.basic.model.ListOfValue">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录,不分页 -->
+	<select id="queryAll" resultMap="listOfValue"
+		parameterType="com.hand.base.basic.model.ListOfValue">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="listOfValue"
+		parameterType="com.hand.base.basic.model.ListOfValue">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+  
+	<delete id="deleteById" parameterType="com.hand.base.basic.model.ListOfValue">
+		DELETE FROM LNK_LIST_OF_VAL WHERE ROW_ID = #{id}
+	</delete>
+  
+  
+	<insert id="insert" parameterType="com.hand.base.basic.model.ListOfValue">
+  		INSERT INTO LNK_LIST_OF_VAL
+		  (row_id, type, val, seq, lang_id, name, parent_id, active_flag,COMMENTS)
+		VALUES
+		  (#{id},#{type},#{val},#{seq}, 'CHS',#{name},#{parentId},#{activeFlag},#{comments})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.basic.model.ListOfValue">
+  		update LNK_LIST_OF_VAL 
+		   set type        = #{type},
+		       val         = #{val},
+		       seq         = #{seq},
+		       lang_id     = #{langId},
+		       name        = #{name},
+		       CORP_ID	   = #{corpid},
+		       parent_id   = #{parentId},
+		       active_flag = #{activeFlag},
+		       COMMENTS	   = #{comments}
+		 where row_id = #{id}
+	</update>
+  
+   <select id="getLovName" resultType="com.hand.base.basic.model.ListOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT GET_LOV_NAME(#{usercorpid},#{type},#{val}) as name FROM DUAL
+  </select>
+  
+   <select id="getLovVal" resultType="com.hand.base.basic.model.ListOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT GET_LOV_VAL(#{usercorpid},#{type},#{name}) as val FROM DUAL
+  </select>
+  
+  <select id="queryLovByValAndType" resultType="com.hand.base.basic.model.ListOfValue"  
+  parameterType="com.hand.base.basic.model.ListOfValue">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	   and t1.corp_id = #{usercorpid}
+	   and t1.type=　#{type}
+	   and (t1.val =　#{val} OR t1.NAME =　#{val} )
+  </select>
+  
+   <select id="queryLovByNameAndType" resultType="com.hand.base.basic.model.ListOfValue"  
+  parameterType="com.hand.base.basic.model.ListOfValue">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	   and t1.corp_id = #{usercorpid}
+	   and t1.type=　#{type}
+	   and (t1.name=　#{name} OR T1.VAL=#{name})
+  </select>
+  
+  <!-- 外部接口调用 -->
+  <select id="queryLogisticsCompany" resultMap="listValue">
+  	select t.`name` logisticsCompany, t.val logisticsCode from LNK_LIST_OF_VAL t where t.type = 'LOGISTICS_COMPANY'
+  </select>
+  
+</mapper>

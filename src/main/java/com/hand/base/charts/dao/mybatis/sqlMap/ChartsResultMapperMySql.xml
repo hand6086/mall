@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.ChartsResultMapper">
+	<resultMap type="com.hand.base.charts.model.ChartsResult"
+		id="charts"></resultMap>
+	
+	<sql id="queryAllSql">
+SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.chart_name        as chartsName           /*报表名称*/
+		,T1.chart_table       as  chartTable        /*结果类型*/
+		,t1.chart_key         as  chartKey
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM lnk_chart_result T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	AND T1.corp_id = #{usercorpid}
+	
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.ChartsResult">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="charts"
+		parameterType="com.hand.base.charts.model.ChartsResult">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="charts"
+		parameterType="com.hand.base.charts.model.ChartsResult">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="charts"
+		parameterType="com.hand.base.charts.model.ChartsResult">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.charts.model.ChartsResult">
+		INSERT INTO lnk_chart_result(
+		 ROW_ID              /*记录ID*/
+		,chart_name                 
+		,chart_table  
+		,chart_key            
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{chartsName}        
+		,#{chartTable}  
+		,#{chartKey}    
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.charts.model.ChartsResult">
+		UPDATE lnk_chart_result SET
+		
+		chart_name=#{chartsName}          
+		,chart_table= #{chartTable}  
+		,chart_key =#{chartKey}
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.charts.model.ChartsResult">
+		DELETE FROM lnk_chart_result WHERE ROW_ID=#{id}
+	</delete>
+</mapper>

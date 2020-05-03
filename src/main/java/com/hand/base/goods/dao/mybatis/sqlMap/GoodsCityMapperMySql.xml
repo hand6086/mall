@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsCityMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSeriesCity" id="goodsSeriesCity"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.NOTES cityNotes,
+	t1.NAME cityName,
+	t.CITY_ID cityId,
+	t2.row_id orgId
+	</sql>
+
+	<sql id="fromSql">
+	from CX_O_CITY t
+	left join (CX_O_AREA t1  LEFT JOIN lnk_org_ext T2 ON T2.ROW_ID = T1.T_ATTR_05) on t1.row_id=t.CITY_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and t1.T_ATTR_02 = 'Y'
+	    and t1.name != ''
+	    <if test="cityId != null and cityId != ''">
+	    	and t.city_id = #{cityId}
+	    </if>
+		<if test="usersystemRole != 'super_administrator' ">
+			and t.corp_id = #{usercorpid}
+		</if>
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSeriesCity" resultMap="goodsSeriesCity">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSeriesCity"
+		parameterType="com.hand.base.goods.model.GoodsSeriesCity">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		insert into CX_O_CITY
+		  (ROW_ID, notes , CITY_ID)
+		values
+		  (#{id},#{cityNotes},#{cityId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		update CX_O_CITY t
+		   set t.notes = #{cityNotes}, t.CITY_ID = #{cityId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		DELETE FROM CX_O_CITY WHERE ROW_ID = #{id}
+	</delete>
+  	
+	<select id="queryCityPKByPage" parameterType="com.hand.base.goods.model.GoodsSeriesCity" resultMap="goodsSeriesCity">
+	select
+		T.ROW_ID as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY as lastUpdatedBy,
+		t.CODE code,
+		t.NAME name,
+		t1.NAME parentName,
+		t2.row_id orgId
+	from CX_O_AREA t
+	LEFT JOIN CX_O_AREA t1 on t1.ROW_ID=t.PARENT_ID
+	LEFT JOIN lnk_org_ext t2 ON t2.ROW_ID = t.T_ATTR_05
+	where t.T_ATTR_02 = 'Y'
+	and t.type='City'
+	order by t.CREATED desc
+	</select>
+  	
+</mapper>

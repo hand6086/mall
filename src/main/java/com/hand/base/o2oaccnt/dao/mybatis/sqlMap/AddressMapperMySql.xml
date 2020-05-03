@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaccnt.dao.mybatis.mapper.AddressMapper">
+	<resultMap type="com.hand.base.o2oaccnt.model.Address" id="address"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+		T1.ROW_ID id
+		,T1.CREATED created 
+		,T1.CREATED_BY as createdBy
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d
+		%H:%i:%S') as lastUpdated
+		,T1.LAST_UPD_BY as lastUpdatedBy
+		,T1.CUSTOMER_ID  custId	
+		,T2.`NAME`	custmName/*消费者名称*/
+		,T2.OU_NUM	custmCode/*消费者编码*/
+		,T2.MAIN_PH_NUM	custmPhone/*消费者电话*/
+		,T1.IS_PREDEFAULT	isPredefault/*是否默认地址*/
+		,T1.PROVICE	province/*省/直辖市*/
+		,T1.CITY	city/*城市*/
+		,T1.DISTRICT district/*区/县*/
+		,T1.ADDRESS	address/*详细地址*/
+		,T1.CONTACT contact/*收货人姓名*/
+		,T1.CONTACT_PHONE	contPhone/*收货人电话*/
+		,T1.GPS_LONGITUDE	gpsLong/*GPS经度*/
+		,T1.GPS_LATITUDE	gpsLat/*GPS纬度*/
+		,T1.T_ATTR_01	postCode/*邮政编码*/
+		,T3.LABEL_NAME labelName/*地址标签*/
+		,T1.T_ATTR_03 labelId/*地址Id*/
+		,T1.T_ATTR_02	status/*状态*/
+		,t5.row_id orgId
+	<!-- 	,T1.T_ATTR_03/**/
+		,T1.T_ATTR_04/**/
+		,T1.COUNTRY/**/
+		,T1.CUSTOMER_ID/**/
+		,T4.T_ATTR_05/**/ -->
+		
+	</sql>
+
+
+	<sql id="fromTableSql">
+		FROM CX_O_ADDRESS T1
+		LEFT JOIN lnk_accnt T2 ON T1.CUSTOMER_ID = T2.ROW_ID
+		LEFT JOIN CX_O_ADDR_LBL T3 ON T3.ROW_ID= T1.T_ATTR_03
+		left join (CX_O_AREA t4  LEFT JOIN lnk_org_ext T5 ON T5.ROW_ID = T4.T_ATTR_05) on t4.row_id = T1.T_ATTR_04
+	</sql>
+
+	<sql id="whereAllSql">
+		WHERE 1 = 1
+	</sql>
+
+	<select id="queryById" resultMap="address" parameterType="com.hand.base.o2oaccnt.model.Address">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		and t1.row_id = #{id}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="address"
+		parameterType="com.hand.base.o2oaccnt.model.Address">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+	
+	<!-- brand根据条件查询记录 -->
+	<select id="brandQueryByExamplePage" resultMap="address"
+		parameterType="com.hand.base.o2oaccnt.model.Address">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		WHERE 1 = 1
+		<if test=" attr1 = 'afterSale' ">
+			AND	T1.ADDRESS_TYPE = 'AFTER_SERVICE'
+			AND T1.T_ATTR_02 = 'Active'
+			AND T1.CORP_ID = #{corpid}
+			order by T1.CREATED
+		</if>
+	</select>
+	
+	<update id="update" 
+	 parameterType="com.hand.base.o2oaccnt.model.Address">
+	 UPDATE CX_O_ADDRESS 
+	 SET
+	 	IS_PREDEFAULT		=GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isPredefault})/*是否默认地址*/
+		,PROVICE			=#{province}/*省/直辖市*/
+		,CITY				=#{city}/*城市*/
+		,DISTRICT 			=#{district}/*区/县*/
+		,ADDRESS			=#{address}/*详细地址*/
+		,CONTACT 			=#{contact}/*收货人姓名*/
+		,CONTACT_PHONE		=#{contPhone}/*收货人电话*/
+		<if test=" gpsLong != '' ">
+		,GPS_LONGITUDE		=#{gpsLong}/*GPS经度*/
+		</if>
+		<if test=" gpsLat != '' ">
+		,GPS_LATITUDE		=#{gpsLat}/*GPS纬度*/
+		</if>
+		,T_ATTR_01			=#{postCode}/*邮政编码*/
+		,T_ATTR_02			=#{status}/*状态*/
+		,T_ATTR_03			=#{labelId}/*标签*/
+	 	,CUSTOMER_ID 		=#{custId}
+	 WHERE ROW_ID = #{id}
+	</update>
+	
+	<update id="brandUpdate" 
+	 parameterType="com.hand.base.o2oaccnt.model.Address">
+	 UPDATE CX_O_ADDRESS 
+	 SET
+	 	ROW_ID = #{id}
+	 	<if test="isPredefault != null and isPredefault != ''">
+	 		,IS_PREDEFAULT		=GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isPredefault})/*是否默认地址*/
+	 	</if>
+	 	<if test="province != null and province != ''">
+		,PROVICE			=#{province}/*省/直辖市*/
+		</if>
+	 	<if test="city != null and city != ''">
+		,CITY				=#{city}/*城市*/
+		</if>
+	 	<if test="district != null and district != ''">
+		,DISTRICT 			=#{district}/*区/县*/
+		</if>
+	 	<if test="address != null and address != ''">
+		,ADDRESS			=#{address}/*详细地址*/
+		</if>
+	 	<if test="contact != null and contact != ''">
+		,CONTACT 			=#{contact}/*收货人姓名*/
+		</if>
+	 	<if test="contPhone != null and contPhone != ''">
+		,CONTACT_PHONE		=#{contPhone}/*收货人电话*/
+		</if>
+		<if test=" gpsLong != '' ">
+		,GPS_LONGITUDE		=#{gpsLong}/*GPS经度*/
+		</if>
+		<if test=" gpsLat != '' ">
+		,GPS_LATITUDE		=#{gpsLat}/*GPS纬度*/
+		</if>
+	 	<if test="postCode != null and postCode != ''">
+		,T_ATTR_01			=#{postCode}/*邮政编码*/
+		</if>
+	 	<if test="status != null and status != ''">
+		,T_ATTR_02			=#{status}/*状态*/
+		</if>
+	 	<if test="labelId != null and labelId != ''">
+		,T_ATTR_03			=#{labelId}/*标签*/
+		</if>
+	 	<if test="custId != null and custId != ''">
+	 	,CUSTOMER_ID 		=#{custId}
+	 	</if>
+	 WHERE ROW_ID = #{id}
+	</update>
+	
+	<insert id="insert" 
+	 parameterType="com.hand.base.o2oaccnt.model.Address">
+	 insert into CX_O_ADDRESS ( 
+	 	row_id
+	 	,IS_PREDEFAULT		
+		,PROVICE			
+		,CITY				
+		,DISTRICT 			
+		,ADDRESS			
+		,CONTACT 			
+		,CONTACT_PHONE		
+		,GPS_LONGITUDE		
+		,GPS_LATITUDE		
+		,T_ATTR_01			
+		,T_ATTR_02			
+	 	,CUSTOMER_ID 		
+	 	)values(
+	 		#{id}
+	 		,GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isPredefault})
+	 		,#{province}
+	 		,#{city}
+	 		,#{district}
+	 		,#{address}
+	 		,#{contact}
+	 		,#{contPhone}
+	 		,if(#{gpsLong} ='',null,#{gpsLong})	
+	 		,if(#{gpsLat} ='',null,#{gpsLat}) 		
+	 		,#{postCode}
+	 		,GET_LOV_val(#{usercorpid}, 'TB_O2O_AREA_TYPE',#{status})
+	 		,#{custId}
+	 		)
+	</insert>
+	
+	<insert id="brandInsert" 
+	 parameterType="com.hand.base.o2oaccnt.model.Address">
+	 insert into CX_O_ADDRESS ( 
+	 	row_id
+	 	,IS_PREDEFAULT		
+		,PROVICE			
+		,CITY				
+		,DISTRICT 			
+		,ADDRESS			
+		,CONTACT 			
+		,CONTACT_PHONE		
+		,GPS_LONGITUDE		
+		,GPS_LATITUDE		
+		,T_ATTR_01			
+		,T_ATTR_02			
+	 	,CUSTOMER_ID
+	 	,ADDRESS_TYPE 		
+	 	)values(
+	 		#{id}
+	 		,GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isPredefault})
+	 		,#{province}
+	 		,#{city}
+	 		,#{district}
+	 		,#{address}
+	 		,#{contact}
+	 		,#{contPhone}
+	 		,if(#{gpsLong} ='',null,#{gpsLong})	
+	 		,if(#{gpsLat} ='',null,#{gpsLat}) 		
+	 		,#{postCode}
+	 		,GET_LOV_val(#{usercorpid}, 'TB_O2O_AREA_TYPE',#{status})
+	 		,#{custId}
+	 		,#{addressType}
+	 		)
+	</insert>
+	
+	<delete id="deleteById" parameterType="com.hand.base.o2oaccnt.model.Address">
+		DELETE FROM
+		CX_O_ADDRESS WHERE row_id = #{id}
+	</delete>
+	
+	<select id="custmNamePickListPage" resultMap="address"
+		parameterType="com.hand.base.o2oaccnt.model.Address">
+		SELECT 
+			t1.row_id  id
+			,T1.OU_NUM  custmCode/*消费者编码*/
+			,T1.MAIN_PH_NUM   custmPhone/*电话号码*/
+			,T1.`NAME`	custmName/*姓名*/
+		FROM lnk_accnt T1
+		WHERE T1.OU_NUM IS NOT NULL
+	</select>
+	
+	<select id="labelNamePickListAll" resultMap="address"
+		parameterType="com.hand.base.o2oaccnt.model.Address">
+		SELECT 
+			T1.ROW_ID id
+			,T1.CREATED created 
+			,T1.CREATED_BY as createdBy
+			,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d
+			%H:%i:%S') as lastUpdated
+			,T1.LAST_UPD_BY as lastUpdatedBy
+			,t1.label_name labelName
+		FROM CX_O_ADDR_LBL T1
+		WHERE LABEL_ACTIVE = 'Y'
+	</select>
+</mapper>

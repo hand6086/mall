@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charge.dao.mybatis.mapper.PayInfoMapper">
+	<resultMap type="com.hand.base.charge.model.PayInfo" id="payInfo"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+			t1.ROW_ID id,/*id*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.PAYMENT_NUMBER paymentNumber,/*支付流水号*/
+			t1.T_ATTR_01 attr01,/*交易类型*/
+			t1.PAYMENT_ACCT paymentAcct,/*支付账号*/
+			t1.RECEIVE_ACCT receiveAcct,/*收款账号*/
+			t1.AMOUNT amount,/*交易金额*/
+			t1.STATUS status,/*状态*/
+			t1.TYPE type,/*支付方式*/
+			date_format(t1.CREATED,'%Y-%m-%d %H:%i:%s') tradeTime,/*交易时间,日期格式先转成字符输出，否则页面显示格式不对如下：2015-09-30 23:44:35.0*/
+			t2.ORDER_NUM orderNum,/*订单编号*/
+			date_format(t2.CREATED,'%Y-%m-%d %H:%i:%s') orderTime,/*下单时间*/
+			date_format(t3.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			t3.ATTRIB_48 attrib48,/*订单状态*/
+			t3.ATTRIB_07 attrib07,/*物流状态*/
+			t4.OU_NUM ouNum,/*商户编码*/
+			t4.NAME name,/*商户名称*/
+			t5.CITY city,/*城市*/
+			t4.O2O_CONTACT o2oContact,/*联系人*/
+			t4.O2O_CONTACT_PHONE o2oContactPhone,/*联系人电话*/
+			t4.O2O_CREDIT_CARD o2oCreditCard,/*银行卡号*/
+			t4.O2O_ALIPAY o2oAlipay,/*支付宝账号*/
+			t4.O2O_ACCONT_NAME accontName,/*开户人*/
+			t4.O2O_BANK o2oBank/*发卡银行*/
+			,t100.T_ATTR_05 orgId
+	</sql>
+
+	<sql id="fromTableSql">
+		FROM CX_O_PAY_INFO t1
+		LEFT JOIN S_ORDER t2 on t2.ROW_ID = t1.ORDER_ID
+		LEFT JOIN (S_ORDER_X t3 join cx_o_area t100 on t3.x_attrib_68 = t100.row_id )on t3.ROW_ID = t1.ORDER_ID
+		LEFT JOIN LNK_ACCNT t4 ON t4.ROW_ID = t3.ATTRIB_41
+		LEFT JOIN CX_O_ADDRESS t5 on t5.ROW_ID = t3.O2O_RECIEVER_ID
+	</sql>
+
+	<select id="queryByExamplePage" resultMap="payInfo"
+		parameterType="com.hand.base.charge.model.PayInfo">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		WHERE 1 = 1
+		<if test="attr1 != null and attr1 != ''">
+		and t2.CREATED &gt;= #{attr1}
+		</if>
+		<if test="attr2 != null and attr2 != ''">
+		and t2.CREATED &lt;= #{attr2}
+		</if>
+		<if test="attr3 != null and attr3 != ''">
+		and t3.ATTRIB_29 &gt;= #{attr3}
+		</if>
+		<if test="attr4 != null and attr4 != ''">
+		and t3.ATTRIB_29 &lt;= #{attr4}
+		</if>
+		<if test="attr6 != null and attr6 != ''">
+		and t1.CREATED &gt;= #{attr6}
+		</if>
+		<if test="attr7 != null and attr7 != ''">
+		and t1.CREATED &lt;= #{attr7}
+		</if>
+		<if test="attr01 != null and attr01 != ''">
+		and t1.T_ATTR_01 = #{attr01}
+		</if>
+		<if test="attr5 != null and attr5 != ''">
+		and t1.STATUS = #{attr5}
+		</if>
+		<if test="type != null and type != ''">
+		and t1.TYPE = #{type}
+		</if>
+		<if test="orderNum != null and orderNum != ''">
+		and t2.ORDER_NUM LIKE CONCAT('%',#{orderNum},'%')
+		</if>
+		<if test="attrib48 != null and attrib48 != ''">
+		and t3.ATTRIB_48 = #{attrib48}
+		</if>
+		<if test="attrib07 != null and attrib07 != ''">
+		and t3.ATTRIB_07 = #{attrib07}
+		</if>
+	</select>
+
+	<!-- 查询订单编号PickList -->
+	<select id="queryOrderNumPage" resultMap="payInfo" parameterType="com.hand.base.charge.model.PayInfo">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.ORDER_NUM orderNum,/*订单编号*/
+			date_format(t1.ORDER_DT,'%Y-%m-%d %H:%i:%s') orderDt,/*订单日期*/
+			t2.OU_NUM ouNum,/*消费者编码*/
+			t2.NAME name /*消费者*/
+		FROM
+			S_ORDER t1
+		LEFT JOIN LNK_ACCNT t2 ON t2.row_id = t1.ACCNT_ID
+		LEFT JOIN S_ORDER_X t3 ON t3.par_row_id = t1.row_id
+		where 1=1
+		AND t3.ATTRIB_09 = 'Y'
+		AND (t3.ATTRIB_48 != '已删除' or t3.ATTRIB_48 != 'Deleted')
+		order by t1.CREATED desc
+	</select>
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.brandWorkbench.dao.mybatis.mapper.ClassifyMapper">
+	<resultMap type="com.hand.base.brandWorkbench.model.Classify" id="classify"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T.ROW_ID            as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY        as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+		T.corp_id      as corpId,
+	    t.name name,
+	    t.is_display isDisplay,
+		t.display_order displayOrder
+	</sql>
+
+	<sql id="fromSql">
+		from lnk_brand_classify t
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.brandWorkbench.model.Classify" resultMap="classify">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		<if test=" name != '' and name != null ">
+		and t.name = #{name}
+		and t.row_id != #{id}
+		</if>
+		<if test=" noName != '' and noName != null ">
+		and t.name != #{noName}
+		</if>
+		<if test="pageFlag == false">
+		order by t.display_order
+		</if>
+		<if test="pageFlag != false">
+		order by t.CREATED desc
+		</if>
+  	</select>
+  	
+  	<select id="brandQueryByExamplePage" parameterType="com.hand.base.brandWorkbench.model.Classify" resultMap="classify">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		<if test=" name != '' and name != null ">
+		and t.name = #{name}
+		and t.row_id != #{id}
+		</if>
+		<if test=" noName != '' and noName != null ">
+		and t.name != #{noName}
+		</if>
+		<if test="pageFlag == false">
+		order by t.display_order
+		</if>
+		<if test="pageFlag != false">
+		order by t.CREATED desc
+		</if>
+  	</select>
+  	 	
+	<select id="queryById" resultType="com.hand.base.brandWorkbench.model.Classify"
+		parameterType="com.hand.base.brandWorkbench.model.Classify">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultType="com.hand.base.brandWorkbench.model.Classify"
+		parameterType="com.hand.base.brandWorkbench.model.Classify">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		insert into lnk_brand_classify
+		  (ROW_ID, name, is_display,display_order)
+		values
+		  (#{id},#{name},#{isDisplay},#{displayOrder})
+	</insert>
+  
+  	<insert id="brandInsert" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		insert into lnk_brand_classify
+		  (ROW_ID, name, is_display,display_order)
+		values
+		  (#{id},#{name},#{isDisplay},#{displayOrder})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		update lnk_brand_classify t
+		   set t.name = #{name}, t.is_display = #{isDisplay}, t.display_order = #{displayOrder}
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		update lnk_brand_classify t
+		   set t.name = #{name}, t.is_display = #{isDisplay}, t.display_order = #{displayOrder}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		DELETE FROM lnk_brand_classify WHERE ROW_ID = #{id}
+	</delete>
+  	
+</mapper>

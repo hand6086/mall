@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.core.autoconfig.dao.mybatis.mapper.LnkInnerLinkMapper">
+	<resultMap type="com.hand.core.autoconfig.model.LnkInnerLink"
+		id="LnkInnerLink"></resultMap>
+<resultMap type="com.hand.base.basic.model.ListOfValue"
+		id="listOfValue"></resultMap>
+
+	<delete id="deleteById" parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		DELETE FROM
+		LNK_INNER_LINK WHERE ROW_ID = #{id}
+	</delete>
+	
+	
+	
+<sql id="queryAllSql">
+	select
+		created,
+		row_id as id,
+		T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,
+		name,--名称
+		tablename,--表
+		outerflag,--外连接
+		parentid,--父亲id
+		linkcoms,--连接条件
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+	</sql>
+	
+	<sql id="fromTableSql">
+	from LNK_INNER_LINK t1
+	where 1 = 1
+      and t1.CORP_ID = #{usercorpid}
+	</sql>
+	
+	 
+	
+	<sql id="orderByAllSql">
+	order by t1.created asc
+	</sql>	
+	
+	
+	
+ 
+<select id="queryObjectLink" resultMap="listOfValue"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		select
+		created,
+		row_id as id,
+		name as name,--名称
+		name as val
+		from LNK_INNER_LINK where parentid=#{parentid}
+	</select>
+	
+	
+	
+	
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	<select id="queryById" resultMap="LnkInnerLink"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerLink">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+	<select id="queryByInner" resultMap="LnkInnerLink"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and T1.parentid =#{parentid}
+	</select>
+	
+	
+	<select id="queryAllPage" resultMap="LnkInnerLink"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	<select id="queryByExamplePage" resultMap="LnkInnerLink"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	 
+	</select>
+	
+	 
+
+
+	<insert id="insert" parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		insert into
+		LNK_INNER_LINK
+		(ROW_ID,
+		name,--名称
+		tablename,--表
+		outerflag,--外连接
+		parentid,--父亲id
+		linkcoms,--连接条件
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+		)
+		values
+		(#{id},
+		#{name},--名称
+		UPPER(#{tablename}),--表
+		#{outerflag},--外连接
+		#{parentid},--父亲id
+		UPPER(#{linkcoms}),--连接条件
+		#{coms},--说明
+		#{attr01},--备注1
+		#{attr02},--备注2
+		#{attr03},--备注3
+		#{attr04},--备注4
+		#{attr05},--备注5
+		#{attr06},--备注6
+		#{attr07},--备注7
+		#{attr08},--备注8
+		#{attr09},--备注9
+		#{attr10}--备注10
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.core.autoconfig.model.LnkInnerLink">
+		UPDATE
+		LNK_INNER_LINK
+		SET
+		name=#{name},--名称
+		tablename=#{tablename},--表
+		outerflag=#{outerflag},--外连接
+		parentid=#{parentid},--父亲id
+		linkcoms=#{linkcoms},--连接条件
+		coms=#{coms},--说明
+		attr01=#{attr01},--备注1
+		attr02=#{attr02},--备注2
+		attr03=#{attr03},--备注3
+		attr04=#{attr04},--备注4
+		attr05=#{attr05},--备注5
+		attr06=#{attr06},--备注6
+		attr07=#{attr07},--备注7
+		attr08=#{attr08},--备注8
+		attr09=#{attr09},--备注9
+		attr10=#{attr10}--备注10
+		WHERE ROW_ID = #{id}
+	</update>
+
+</mapper>

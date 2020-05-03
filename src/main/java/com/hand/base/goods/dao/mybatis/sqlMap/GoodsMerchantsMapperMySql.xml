@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsMerchantsMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsPrice" id="goodsPrice"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.PROD_PRICE_ID prodPriceId,
+	t1.OU_NUM merchantCode,
+	t1.NAME merchantName,
+	t1.O2O_FORCED_STORE o2oForcedStore,
+	t1.O2O_DISTRICT o2oDistrict
+	</sql>
+
+	<sql id="fromSql">
+	FROM
+	CX_O_PROD_MRCHT t
+    LEFT JOIN lnk_accnt t1 ON t1.ROW_ID = t.MERCHANT_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsPrice" resultMap="goodsPrice">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsPrice"
+		parameterType="com.hand.base.goods.model.GoodsPrice">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsPrice">
+		insert into CX_O_PROD_MRCHT
+		  (ROW_ID, MERCHANT_ID , PROD_PRICE_ID)
+		values
+		  (#{id},#{merchantId},#{prodPriceId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsPrice">
+		update CX_O_PROD_MRCHT t
+		   set t.MERCHANT_ID = #{merchantId}, t.PROD_PRICE_ID = #{prodPriceId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsPrice">
+		DELETE FROM CX_O_PROD_MRCHT WHERE ROW_ID = #{id}
+	</delete>
+	
+</mapper>

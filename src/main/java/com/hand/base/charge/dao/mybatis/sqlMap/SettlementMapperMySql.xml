@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charge.dao.mybatis.mapper.SettlementMapper">
+	<resultMap type="com.hand.base.charge.model.Settlement" id="settlement"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+			t1.ROW_ID id,/*id*/
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.NOTES notes,/*说明*/
+			t1.CITY_ID cityId,/*与子级关联字段*/
+			t2.NAME cityName /*城市名*/
+	</sql>
+
+	<sql id="fromTableSql">
+		FROM
+			CX_O_CITY t1
+		LEFT JOIN CX_O_AREA t2 ON t2.ROW_ID = t1.CITY_ID
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1 = 1 
+		AND  t2.ROW_ID IS NOT NULL
+	</sql>
+	
+	<sql id="queryDetailSql">
+		SELECT
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			date_format(t1.START_DATE,'%Y-%m-%d %H:%i:%s') startDate,/*开始日期*/
+			date_format(t1.END_DATE,'%Y-%m-%d %H:%i:%s') endDate,/*结束日期*/
+			t1.IS_GENERATED isGenerated,/*是否生成批次*/
+			t1.T_ATTR_10 tAttr10,/*状态*/
+			t1.CITY_ID cityId,/*与父级关联字段*/
+			t1.ROW_ID id, /*与子级关联字段*/
+			t3.row_id orgId
+		FROM
+			CX_O_COLECT_SET t1
+			left join (CX_O_AREA t2  LEFT JOIN lnk_org_ext T3 ON T3.ROW_ID = T2.T_ATTR_05) on t2.row_id=t1.CITY_ID
+	</sql>
+	
+	<sql id="querySettlementDetailSql">
+		SELECT
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t2.OU_NUM ouNum,/*商户编码*/
+			t2.NAME name,/*商户名称*/
+			t2.O2O_CONTACT_PHONE o2oContactPhone,/*商户电话*/
+			t2.O2O_ALIPAY o2oAlipay,/*支付宝账户*/
+			t2.O2O_BANK o2oBank,/*开户银行*/
+			t2.O2O_ACCONT_NAME o2oAccontName,/*开户人*/
+			t2.O2O_CREDIT_CARD o2oCreditCard,/*银行卡号*/
+			t1.T_ATTR_04 tAttr04,/*结算总金额*/
+			date_format(t1.SETTLE_TIME,'%Y-%m-%d %H:%i:%s') settleTime,/*结算时间*/
+			t1.STATUS status, /*状态*/
+			t1.HEAD_ID headId,/*与父级关联字段*/
+			t1.ROW_ID id /*与子级关联字段*/
+		FROM
+			CX_O_CO_SE_LINE t1
+		LEFT JOIN LNK_ACCNT t2 ON t2.ROW_ID = t1.store_id
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		GROUP BY t2.NAME
+	</select>
+	
+	<!-- 查询城市picklist -->
+	<select id="queryCityPage" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CODE code,/*编码*/
+			t1.NAME cityName,/*城市*/
+			t2.NAME NAME/*省*/
+		FROM CX_O_AREA t1
+		LEFT JOIN CX_O_AREA t2 ON t2.row_id = t1.PARENT_ID
+		WHERE t1.T_ATTR_02 = 'Y'
+		AND (t1.TYPE = '城市' OR t1.TYPE = 'City' )
+	</select>
+	
+	<!-- 根据头的cityId得到第一个行结构 -->
+	<select id="queryDetailPage" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">
+		<include refid="queryDetailSql" />
+	</select>
+	
+	<!-- 第二个行结构 -->
+	<select id="querySettlementDetailPage" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">
+		<include refid="querySettlementDetailSql" />
+	</select>
+	<!-- 第三个行结构 -->
+	<select id="querySettlementSubDetailPage" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.COL_SET_LINE_ID colSetLineId,/*与父级关联字段*/
+			t2.PAYMENT_NUMBER paymentNumber,/*支付流水号*/
+			t2.PAYMENT_ACCT paymentAcct,/*支付账号*/
+			t2.RECEIVE_ACCT receiveAcct,/*收款账号*/
+			t2.AMOUNT amount,/*交易金额*/
+			t2.T_ATTR_01 tAttr01,/*交易类型*/
+			t2.TYPE type,/*支付方式*/
+			t2.STATUS status,/*支付状态*/
+			t3.ORDER_NUM orderNum,/*订单编号*/
+			t3.CREATED created,/*下单时间*/
+			t5.OU_NUM ouNum,/*商户编码*/
+			t5.NAME name,/*商户名称*/
+			date_format(t4.ATTRIB_27,'%Y-%m-%d %H:%i:%s') attrib27,/*接单时间*/
+			date_format(t4.ATTRIB_26,'%Y-%m-%d %H:%i:%s') attrib26,/*付款时间*/
+			date_format(t4.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			date_format(t4.ATTRIB_28,'%Y-%m-%d %H:%i:%s') attrib28,/*配送时间*/
+			date_format(t4.ATTRIB_33,'%Y-%m-%d %H:%i:%s') attrib33,/*结算时间*/
+			t4.ATTRIB_46 attrib46 /*结算状态*/
+		FROM CX_O_COLECT_PAY t1
+		LEFT JOIN CX_O_PAY_INFO t2 ON t1.PAY_INFO_ID = t2.ROW_ID
+		LEFT JOIN S_ORDER t3 ON t3.row_id = t2.ORDER_ID
+		LEFT JOIN S_ORDER_X t4 ON t4.row_id = t2.ORDER_ID
+		LEFT JOIN LNK_ACCNT t5 ON t5.row_id = t4.ATTRIB_41
+	</select>
+   
+   <insert id="insertCity" parameterType="com.hand.base.charge.model.Settlement">
+		INSERT INTO CX_O_CITY (
+					ROW_ID,
+					CREATED, 
+					CREATED_BY, 
+					LAST_UPD, 
+					LAST_UPD_BY,
+					CORP_ID,
+					NOTES, 
+					CITY_ID, 
+					MODIFICATION_NUM, 
+					CONFLICT_ID
+				  )
+		VALUES(
+				#{id},
+				now(),
+				#{createdBy},
+				now(),
+				#{createdBy},
+				#{corpid},
+				#{notes},
+				#{cityId},
+				0,
+				'0'
+			)
+   </insert>
+	
+   <select id="queryById" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">		
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		AND t1.ROW_ID = #{id}
+		GROUP BY t2.NAME
+   </select>
+   
+  <update id="update" parameterType="com.hand.base.charge.model.Settlement">
+		UPDATE CX_O_CITY
+		SET 
+			CITY_ID = #{cityId},
+			NOTES = #{notes}
+		WHERE ROW_ID = #{id}
+   </update>
+   
+   <delete id="deleteById" parameterType="com.hand.base.charge.model.Settlement">
+		DELETE FROM CX_O_CITY WHERE ROW_ID = #{id}
+   </delete>
+   
+   <select id="queryDetailById" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">		
+		<include refid="queryDetailSql" />
+		where t1.ROW_ID = #{id}
+  </select>
+  
+  <insert id="add" parameterType="com.hand.base.charge.model.Settlement">
+		INSERT INTO CX_O_COLECT_SET (
+					ROW_ID,
+					CREATED, 
+					CREATED_BY, 
+					LAST_UPD, 
+					LAST_UPD_BY,
+					CORP_ID,
+					MODIFICATION_NUM, 
+					CONFLICT_ID,
+					DB_LAST_UPD,
+					END_DATE,
+					IS_GENERATED,
+					START_DATE,
+					CITY_ID,
+					T_ATTR_10
+				  )
+		VALUES(
+				#{id},
+				now(),
+				#{createdBy},
+				now(),
+				#{createdBy},
+				#{corpid},
+				0,
+				'0',
+				NOW(),
+				#{endDate},
+				#{isGenerated},
+				#{startDate},
+				#{cityId},
+				#{tAttr10}
+			)
+   </insert>
+   
+   <update id="updateDetail" parameterType="com.hand.base.charge.model.Settlement">
+		UPDATE CX_O_COLECT_SET
+		SET 
+		   START_DATE = #{startDate},
+		   END_DATE = #{endDate},
+		   T_ATTR_10 = #{tAttr10},
+		   IS_GENERATED = #{isGenerated}
+		WHERE ROW_ID = #{id}
+   </update>
+   
+   <delete id="deleteDetailById" parameterType="com.hand.base.charge.model.Settlement">
+		DELETE FROM CX_O_COLECT_SET WHERE ROW_ID = #{id}
+   </delete>
+   
+   <update id="updateSubDetail" parameterType="com.hand.base.charge.model.Settlement">
+		update CX_O_CO_SE_LINE 
+		set STATUS = #{status}
+		<if test="status == 'To Be Determined'">
+			,SETTLE_TIME = now()
+		</if>
+		<if test="status == 'No Settled'">
+			,SETTLE_TIME = null
+		</if>
+		where ROW_ID = #{id}
+   </update>
+   
+   <select id="querySubDetailById" resultMap="settlement" parameterType="com.hand.base.charge.model.Settlement">		
+		<include refid="querySettlementDetailSql" />
+		WHERE 1 = 1 
+		AND t1.ROW_ID = #{id}
+   </select>
+</mapper>

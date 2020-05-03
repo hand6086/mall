@@ -1,0 +1,19 @@
+cd jars
+nohup java -jar lnkcrm-core.jar \
+--server.port=8080 \
+--spring.datasource.url='jdbc:mysql://o2ouatinstance.czewsmdparip.rds.cn-north-1.amazonaws.com.cn:3306/o2ouat?useUnicode=true&characterEncoding=utf-8' \
+--spring.datasource.username=o2ouser \
+--spring.datasource.password=o2ousertest \
+--spring.redis.host=o2ouatredis.ffqw6d.0001.cnn1.cache.amazonaws.com.cn \
+--spring.redis.password= \
+--spring.redis.port=6379 \
+--application.database=mysql \
+--application.uploadfile.portal.share=/home/o2ouser/app/server/portal \
+--application.uploadfile.portal.httpshare=http://o2ouatelb-102495983.cn-north-1.elb.amazonaws.com.cn:9999/qingpi/portal \
+--application.uploadfile.pic.share=/home/o2ouser/app/server/pic \
+--application.uploadfile.pic.httpshare=http://o2ouatelb-102495983.cn-north-1.elb.amazonaws.com.cn:9999//qingpi/pic \
+--application.io.temporary.share=/home/o2ouser/app/server/io \
+--application.io.temporary.httpshare=http://o2ouatelb-102495983.cn-north-1.elb.amazonaws.com.cn:9999//qingpi/io \
+--application.user.refund.url=http://218.58.50.45:8011/qingpiapi/order/userRefund \
+--logging.config=classpath:log4j2-cloud-test.xml \
+&

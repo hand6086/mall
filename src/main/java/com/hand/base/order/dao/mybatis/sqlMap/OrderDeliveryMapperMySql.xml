@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.OrderDeliveryMapper">
+	<resultMap type="com.hand.base.order.model.OrderDelivery" id="orderDelivery"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.order_number orderNumber,/*订单编号*/
+			t1.shipping_address shippingAddress,/*收货地址*/
+			t1.logistics_company logisticsCompany,/*物流公司*/
+			t1.logistics_odd_number logisticsOddNumber,/*物流单号*/
+			t1.shipping_time shippingTime,/*发运时间*/
+			t1.check_status checkStatus,/*校验状态*/
+			t1.error_message errorMessage /*校验结果*/
+	</sql>
+	        
+	<sql id="fromTableSql">
+		from s_order_temp t1
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1 = 1
+		<if test="usersystemRole!= 'super_administrator' ">
+			and t1.CREATED_BY = #{createdBy}
+		</if>
+		<if test=" usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101'
+		</if>
+		and (t1.IMPORT_STATUS != 'Import Ok' or t1.IMPORT_STATUS is null)
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="orderDelivery" parameterType="com.hand.base.order.model.OrderDelivery">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="orderDelivery" parameterType="com.hand.base.order.model.OrderDelivery">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+	</select>
+	
+	<select id="queryById" resultMap="orderDelivery" parameterType="com.hand.base.order.model.OrderDelivery">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		WHERE t1.ROW_ID = #{id}
+	</select>
+	
+	<select id="brandQueryById" resultMap="orderDelivery" parameterType="com.hand.base.order.model.OrderDelivery">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		WHERE t1.ROW_ID = #{id}
+	</select>
+	
+	<select id="queryOrderId" resultMap="orderDelivery" parameterType="com.hand.base.order.model.OrderDelivery">
+		select t2.ATTRIB_48 attrib48
+		from s_order t1
+		left join s_order_x t2 on t1.row_id=t2.par_row_id
+		WHERE t1.ORDER_NUM = #{orderNumber}
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.order.model.OrderDelivery">
+		INSERT INTO s_order_temp(
+			ROW_ID,
+			order_number,
+			shipping_address,
+			logistics_company,
+			logistics_odd_number,
+			shipping_time 
+		)
+		VALUES(
+			#{id},
+			#{orderNumber},
+			#{shippingAddress},
+			#{logisticsCompany},
+			#{logisticsOddNumber},
+			lnk_blank_str_to_null(#{shippingTime,jdbcType=TIMESTAMP})
+		)
+	</insert>
+	<insert id="brandInsert" parameterType="com.hand.base.order.model.OrderDelivery">
+		INSERT INTO s_order_temp(
+			ROW_ID,
+			order_number,
+			shipping_address,
+			logistics_company,
+			logistics_odd_number,
+			shipping_time 
+		)
+		VALUES(
+			#{id},
+			#{orderNumber},
+			#{shippingAddress},
+			#{logisticsCompany},
+			#{logisticsOddNumber},
+			lnk_blank_str_to_null(#{shippingTime,jdbcType=TIMESTAMP})
+		)
+	</insert>
+<!--      <insert id ="batchInsertList" parameterType="java.util.List" >
+           insert into s_order_temp(
+           ROW_ID,
+           created,
+           created_by,
+           last_upd,
+           last_upd_by,
+			order_number,
+			shipping_address,
+			logistics_company,
+			logistics_odd_number,
+			shipping_time 
+			
+			)
+           values
+            <foreach collection ="list" item="orderTemp" index= "index" separator =",">
+                (
+                S_SEQUENCE_PKG_GET_NEXT_ROWID(),now(),'0-1',now(),'0-1', #{orderTemp.orderNumber},
+                #{orderTemp.shippingAddress},
+                #{orderTemp.logisticsCompany},
+                #{orderTemp.logisticsOddNumber}, lnk_blank_str_to_null(#{orderTemp.shippingTime,jdbcType=TIMESTAMP})
+                )
+            </foreach >
+     </insert > -->
+	
+	<update id="update" parameterType="com.hand.base.order.model.OrderDelivery">
+		update s_order_temp t
+		   set t.order_number = #{orderNumber},
+		       t.shipping_address = #{shippingAddress},
+		       t.logistics_company=#{logisticsCompany},
+		       t.logistics_odd_number = #{logisticsOddNumber},
+		       t.shipping_time=lnk_blank_str_to_null(#{shippingTime,jdbcType=TIMESTAMP})
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.order.model.OrderDelivery">
+		update s_order_temp t
+		   set t.order_number = #{orderNumber},
+		       t.shipping_address = #{shippingAddress},
+		       t.logistics_company=#{logisticsCompany},
+		       t.logistics_odd_number = #{logisticsOddNumber},
+		       t.shipping_time=lnk_blank_str_to_null(#{shippingTime,jdbcType=TIMESTAMP})
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="logisticsUpdate" parameterType="com.hand.base.order.model.OrderDelivery">
+		UPDATE s_order t1
+		SET t1.logistics_company = (
+			SELECT
+				logistics_company_val
+			FROM
+				s_order_temp
+			WHERE
+				order_number = t1.order_num
+		),
+		 t1.logistics_odd_number = (
+			SELECT
+				logistics_odd_number
+			FROM
+				s_order_temp
+			WHERE
+				order_number = t1.order_num
+		),
+		 t1.shipping_time = (
+			SELECT
+				shipping_time_val
+			FROM
+				s_order_temp
+			WHERE
+				order_number = t1.order_num
+		)
+		WHERE
+			t1.order_num in
+			<foreach collection="ordnumArray" item="orderNumber" open="(" separator=", " close=")">
+	        #{orderNumber}
+	        </foreach>
+	</update>
+	
+	<update id="orderUpdate" parameterType="com.hand.base.order.model.OrderDelivery">
+		UPDATE S_ORDER_X
+		SET
+			ATTRIB_48=#{attrib48}
+			,ATTRIB_07=#{attrib07}
+		WHERE PAR_ROW_ID in (select row_id from s_order where order_num in 
+							<foreach collection="ordnumArray" item="orderNumber" open="(" separator=", " close=")">
+								#{orderNumber}
+	       					</foreach>
+							)
+	</update>
+	
+	<delete id="deleteByArray" parameterType="com.hand.base.order.model.OrderDelivery">
+		DELETE FROM s_order_temp 
+		WHERE order_number in
+			<foreach collection="ordnumArray" item="orderNumber" open="(" separator=", " close=")">
+	        #{orderNumber}
+	        </foreach>
+    </delete>
+	
+	<delete id="deleteById" parameterType="com.hand.base.order.model.OrderDelivery">
+		DELETE FROM s_order_temp WHERE ROW_ID = #{id}
+    </delete>
+  
+	 <select id="runOrderCheck" statementType="CALLABLE">
+		CALL CHECK_O2O_ORDER(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     		 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+ 	 </select>
+  
+	 <select id="runOrderImport" statementType="CALLABLE">
+		CALL IMPORT_O2O_ORDER(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     		 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+ 	 </select>
+</mapper>

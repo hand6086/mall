@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.rongcloud.dao.mybatis.mapper.RcsManagerMapper">
+	<resultMap type="com.hand.base.rongcloud.model.RcsManager" id="rcsManager"></resultMap>
+	<resultMap type="com.hand.base.rongcloud.model.RcsEmail" id="rcsEmail"></resultMap>
+
+	<sql id="queryTableSql">
+		SELECT
+			t1.row_id id,
+			t1.fst_name name,
+			t1.rong_token managerToken,
+			t3.path   portrait,
+		    t1.zh_mail   zhMail
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM lnk_emp_info t1
+		LEFT JOIN (
+		 lnk_enterprise t2
+		  LEFT JOIN cx_o_img t3 on t2.store_logo=t3.row_id
+		 ) ON  t1.corp_id = t2.`code`
+		WHERE 1=1
+	</sql>
+	
+	<sql id="whereTableSql">
+		<if test=" merchantId != null and merchantId != ''">
+			AND t2.row_id = #{merchantId}
+			AND t1.zh_mail is not null
+		</if>
+	</sql>
+	<select id="queryByExamplePage" resultMap="rcsManager" parameterType="com.hand.base.rongcloud.model.RcsManager">
+		<include refid="queryTableSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+	</select>
+
+    <select id="queryMsgList" resultMap="rcsEmail" parameterType="com.hand.base.rongcloud.model.RcsEmail">
+		SELECT
+			t1.row_id id,
+			t1.store_id storeId,
+			t1.user_id userId,
+			t1.cid cid,
+		    t1.store_logo storeLogo,
+		    t1.store_name storeName,
+		    t1.staff_id staffId,
+		    t1.msg msg,
+		    t1.time `time`
+		FROM lnk_zc_msg_list t1
+		WHERE 1=1
+        <if test=" userId != null and userId != ''">
+            AND t1.user_id = #{userId}
+        </if>
+        <if test=" storeId != null and storeId != ''">
+            AND t1.store_id = #{storeId}
+        </if>
+	</select>
+
+    <select id="queryLastMsg" resultMap="rcsEmail" parameterType="com.hand.base.rongcloud.model.RcsEmail">
+		SELECT
+			t1.row_id id,
+            IF ( t1.senderType = '客服', t1.sender, t1.receiver ) staffId,
+			t1.msg msg,
+		    t1.time `time`
+		FROM lnk_zc_email_online t1
+		WHERE 1=1
+            AND t1.partnerIdFlag IS NULL
+            AND t1.partnerId = ''
+        <if test=" cid != null and cid != ''">
+            AND t1.cid = #{cid}
+        </if>
+            ORDER BY t1.time DESC
+            LIMIT 1
+	</select>
+	
+	<select id="queryById" resultMap="rcsManager" parameterType="com.hand.base.rongcloud.model.RcsManager">
+		<include refid="queryTableSql"/>
+		<include refid="fromTableSql"/>
+		AND t1.ROW_ID = #{id}
+	</select>
+	
+	<update id="update" parameterType="com.hand.base.rongcloud.model.RcsManager">
+		update lnk_emp_info t
+		   set t.rong_token = #{managerToken}
+		 where t.row_id = #{id}
+	</update>
+	<insert id="insertZc"  parameterType="com.hand.base.rongcloud.model.RcsEmail">
+         insert into  lnk_zc_email_online (
+                row_id,
+                created,
+                created_by,
+                last_upd,
+                last_upd_by,
+                CORP_ID,
+                type,
+                companyId,
+                cid,
+                source,
+                startTime,
+                endTime,
+                partnerId,
+                partnerIdFlag,
+                conversationDuration,
+                staffEmail,
+                staffName,
+                chatWithRobotMsgCount,
+                robotReplyMsgCount,
+                chatWithStaffMsgCount,
+                staffReplyMsgCount,
+                is2Human,
+                is2HumanSucc,
+                queueTime,
+                ip,
+                area,
+                os,
+                visitorId,
+                sessionQueueState,
+                lastGroupId,
+                lastGroupName,
+                timems,
+                time,
+                senderName,
+                sender,
+                receiverName,
+                receiver,
+                senderType,
+                receiverType,
+                msg,
+                staffId,
+                adminName,
+                isRobot,
+                remark,
+                tag,
+                score,
+                datetime,
+                userId,
+                telphone,
+                email,
+                qq,
+                userName,
+                params,
+                serviceId,
+                serviceName,
+                serviceNick,
+                serviceEmail
+         )
+         values (
+                #{id},
+                now(),
+                '0-1',
+                now(),
+                '0-1',
+                '000',
+                #{type},
+                #{companyId},
+                #{cid},
+                #{source},
+                #{startTime},
+                #{endTime},
+                #{partnerId},
+                #{partnerIdFlag},
+                #{conversationDuration},
+                #{staffEmail},
+                #{staffName},
+                #{chatWithRobotMsgCount},
+                #{robotReplyMsgCount},
+                #{chatWithStaffMsgCount},
+                #{staffReplyMsgCount},
+                #{is2Human},
+                #{is2HumanSucc},
+                #{queueTime},
+                #{ip},
+                #{area},
+                #{os},
+                #{visitorId},
+                #{sessionQueueState},
+                #{lastGroupId},
+                #{lastGroupName},
+                #{timems},
+                #{time},
+                #{senderName},
+                #{sender},
+                #{receiverName},
+                #{receiver},
+                #{senderType},
+                #{receiverType},
+                #{msg},
+                #{staffId},
+                #{adminName},
+                #{isRobot},
+                #{remark},
+                #{tag},
+                #{score},
+                #{datetime},
+                #{userId},
+                #{telphone},
+                #{email},
+                #{qq},
+                #{userName},
+                #{params},
+                #{serviceId},
+                #{serviceName},
+                #{serviceNick},
+                #{serviceEmail}
+         )
+
+	</insert>
+
+    <insert id="insertZcList"  parameterType="com.hand.base.rongcloud.model.RcsEmail">
+         insert into  lnk_zc_msg_list (
+                row_id,
+                created,
+                created_by,
+                last_upd,
+                last_upd_by,
+                CORP_ID,
+                store_id,
+                user_id,
+                cid,
+                store_logo,
+                store_name,
+                staff_id,
+                msg,
+                `time`,
+                delete_flag
+         )
+         values (
+                #{id},
+                now(),
+                '0-1',
+                now(),
+                '0-1',
+                '000',
+                #{storeId},
+                #{userId},
+                #{cid},
+                #{storeLogo},
+                #{storeName},
+                #{staffId},
+                #{msg},
+                #{time},
+                'N'
+         )
+	</insert>
+
+    <update id="updateZcList" parameterType="com.hand.base.rongcloud.model.RcsEmail">
+		update lnk_zc_msg_list t
+		   set  t.last_upd = now()
+		        ,t.store_id = #{storeId}
+		        ,t.user_id = #{userId}
+		        ,t.cid = #{cid}
+		        ,t.store_logo = #{storeLogo}
+		        ,t.store_name = #{storeName}
+		        ,t.staff_id = #{staffId}
+		        ,t.msg = #{msg}
+		        ,t.time = #{time}
+		        ,t.delete_flag = 'N'
+		 where t.row_id = #{id}
+	</update>
+
+    <update id="updateZcByCid" parameterType="com.hand.base.rongcloud.model.RcsEmail">
+		update lnk_zc_msg_list t
+		   set  t.last_upd = now()
+		        ,t.msg = #{msg}
+		        ,t.time = #{time}
+		        ,t.delete_flag = 'N'
+		 where t.cid = #{cid}
+	</update>
+</mapper>

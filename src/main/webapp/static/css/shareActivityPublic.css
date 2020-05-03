@@ -1,0 +1,155 @@
+body{
+	/* font-size:2em; */
+	color:black;
+	margin:0px;
+	 
+}
+.mytitle{
+	font-size:1.5em;
+}
+* {
+    font-family: "Microsoft YaHei", Helvetica, "Hiragino Sans GB", Arial, sans-serif £¡important;
+}
+
+.submitbtn{
+	background-color: RGB(106,186,46);
+    letter-spacing: 10px;
+    font-size:1.5em;
+    color:#ffffff;
+    text-align: center;
+    margin-left:10%;
+    margin-top:30px;
+	border-radius:5px;
+	width:60%;
+	 -webkit-appearance : none ;
+	 height:2.5em;
+}
+.input_text {
+	    float: left;
+    border: 1px solid #cccccc;
+    outline: none;
+    width: 6em;
+    line-height:1.5em;
+    height: 1.5em;
+    margin: 3px 0 3px 5px;
+    padding: 3px 4px 3px 6px;
+    border-radius: 5px;
+    color: black;
+    font-size: 1.5em;
+    -webkit-appearance: none;
+}
+.textarea{
+	float: left;
+    width:60%;
+    line-height:1em;
+    height: 4em;
+    margin-top:5px;
+    font-size: 1em;
+    border: 1px solid #d3d3d3;
+    background-color: white !important;
+    -webkit-appearance: none;
+}
+.select{
+	margin-top: 10px;
+    width:28%;
+    float:left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.item1{
+    padding-top:8px;
+    width:15%;
+    float:left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.item2{
+    width:85%;
+    float:left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.item3{
+    padding-top:8px;
+    width:25%;
+    float:left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.item4{
+    width:75%;
+    float:left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.tip{
+    font-size:1em;
+    color:red;
+}
+.load_c{
+    background-color: rgba(0,0,0,0.7);
+    width:40%;
+    margin-left:30%;
+    border-radius: 5px;
+}
+.button1{
+    background-color: RGB(106,186,46);
+    width:60%;
+    letter-spacing: 10px;
+    font-size:1em;
+}
+.button2{
+    background-color: RGB(106,186,46);
+    margin-top:40px;
+    width:80%;
+    letter-spacing: 10px;
+    font-size:1.5px;
+}
+.div{
+    margin:20px 0 20px 4%;
+    /* height:2.0em; */
+}
+.div
+{
+    /* height:4em !important; */
+    overflow:hidden;
+}
+input[type="radio"]
+{
+    font-size: 1em;
+    width: 1em;
+    height: 1em;
+}
+input[type="checkbox"] 
+{
+    font-size: 1em;
+    width: 1em;
+    height: 1em;
+}
+.singselectdiv_1,.singselectdiv_2{
+	/* height:4em !important; */
+}
+
+.mulselectdiv_1,.mulselectdiv_2,.mulselectdiv_3{
+	/* height:4em !important; */
+}
+.mulselectdiv_4,.mulselectdiv_5,.mulselectdiv_6{
+	/* height:6em !important; */
+}
+.headertitle{
+	font-size:1.5em;
+	font-weight: bold;
+}
+
+.comsinputdiv
+{
+	/* height:6em !important; */
+}
+
+

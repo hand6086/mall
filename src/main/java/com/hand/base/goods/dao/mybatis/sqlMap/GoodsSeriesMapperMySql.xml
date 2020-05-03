@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsSeriesMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSeries" id="goodsSeries"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T.ROW_ID            as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY        as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+	    t.code     code,
+		t.name    name,
+		t.status status,
+		t.notes    notes,
+		t.pic_id picId,
+		t.type channelType /*新增字段 频道类型*/
+
+	</sql>
+
+	<sql id="fromSql">
+		 from CX_PROD_SERIES t
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and t.type = 'fast shopping'
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSeries" resultMap="goodsSeries">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	<select id="queryByPkAll" parameterType="com.hand.base.goods.model.GoodsSeries" resultMap="goodsSeries">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where (t.STATUS='有效' or t.STATUS='Active')
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSeries"
+		parameterType="com.hand.base.goods.model.GoodsSeries">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSeries">
+		insert into CX_PROD_SERIES
+		  (ROW_ID, code, name,status,notes,pic_id,type)
+		values
+		  (#{id},TB_O2O_ACCTIVITYCODE(),#{name},#{status},#{notes},#{picId},'fast shopping')
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSeries">
+		update CX_PROD_SERIES t
+		   set t.code = #{code}, t.name = #{name}, t.status = #{status}, t.notes = #{notes}, t.pic_id = #{picId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSeries">
+		DELETE FROM CX_PROD_SERIES WHERE ROW_ID = #{id}
+	</delete>
+  	
+  	<update id="goodsSeriesImageUpdate" parameterType="com.hand.base.goods.model.GoodsSeries">
+	 	UPDATE CX_PROD_SERIES t
+		   SET t.pic_id  = #{picId}
+		 WHERE t.row_id = #{id}
+    </update>
+  
+</mapper>

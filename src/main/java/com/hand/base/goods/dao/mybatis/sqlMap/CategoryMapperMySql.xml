@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.CategoryMapper">
+	<resultMap type="com.hand.base.goods.model.Category" id="category"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+		T.cid as cid,
+		T.cname as cname
+	</sql>
+
+	<sql id="fromSql">
+	from category T
+  	</sql>
+
+  	<sql id="whereAllSql">
+  		where 1 = 1
+		<if test="cid != null and cid != '' ">
+			and T.cid = #{cid}
+		 </if>
+		<if test="cname != null and cname != '' ">
+			and T.cname = #{cname}
+		</if>
+  	</sql>
+
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.Category" resultMap="category">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+
+  	<select id="queryById" resultType="com.hand.base.goods.model.Category"
+		parameterType="com.hand.base.goods.model.Category">
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.cname=#{cname}
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.goods.model.Category">
+		insert into category
+		  (cid, cname)
+		values
+		  (#{cid},#{cname})
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.goods.model.Category">
+		update category t
+		   set t.cid = #{cid}, t.cname = #{cname}
+		 where t.cid = #{cid}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.Category">
+		DELETE FROM category WHERE cid = #{cid}
+	</delete>
+
+
+	<select id="queryAll" resultMap="category"
+			parameterType="com.hand.base.goods.model.Category">
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<select id="queryAllCategory" resultMap="category"
+			parameterType="com.hand.base.goods.model.Category">
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+</mapper>

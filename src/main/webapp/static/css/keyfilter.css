@@ -1,0 +1,150 @@
+/*! Custom define css
+* In-place editing with Twitter Bootstrap, jQuery UI or pure jQuery
+* http://www.hand-china.com
+* Copyright (c) 2013 Vitaliy Potapov; Licensed MIT 
+* Author Ashen  */
+
+/*Add by liucan 
+ *2017/4/6 
+ *ºÊ»›ie9+
+ */
+*[hidden] { 
+	display: none; 
+}
+
+.fixed-keyfilter {
+	clear: both;
+	width:100%;
+	float:none;
+}
+
+.fixed-keyfilter-title {
+	padding-top:5px;
+    font-weight: 700;
+	width:10%;
+	float:none;
+	text-align: right;
+}
+
+.fixed-keyfilter-body {
+	width:78%;
+}
+
+.fixed-keyfilter-more {
+	padding-top:7px;
+	width:12%;
+}
+
+.fixed-keyfilter-fileds {
+	width:100%;
+	float:none;
+}
+
+.fixed-keyfilter-select {
+	clear: both;
+	width:100%;
+	float:none;
+	align:center;
+	text-align:center;
+}
+
+.fixed-keyfilter-select button {
+	margin-left:5px;
+	margin-right:5px;
+}
+
+.fixed-keyfilter-title,.fixed-keyfilter-body,.fixed-keyfilter-more {
+	float: left;
+}
+
+.value-filter a {
+    color: #469ce7;
+    cursor: pointer;
+}
+
+.value-filter {
+    float: left;
+    margin-right: 20px;
+}
+
+.fixed-keyfilter-value-list .filter-selected a{ 
+	background-color: #469ce7;
+    color: #ffffff;
+    padding:4px;
+}
+
+.fixed-keyfilter-checkBox {
+}
+
+ .fixed-keyfilter ul, li {
+    list-style: none outside none;
+    text-align: left;
+    margin-bottom: 4px;
+    padding-bottom:4px;
+    /*margin-top: 4px;
+    line-height:12px;*/
+}
+
+.keyfilter-border{
+	border-top:0px;
+	border-bottom:1px #ddd;
+	border-right:0px;
+	border-left:0px;
+	border-style:solid;
+	min-height:30px;
+}
+
+.selectMore{
+	float:right;
+	padding:0 2px;
+	margin-right:4px;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 0px;
+    width:50px;
+	border: 1px solid  #eee;
+}
+.showMore{
+	float:right;
+	padding:0 2px;
+	margin-right:3px;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 0px;
+    width:50px;
+	border: 1px solid  #eee;
+}
+
+.x-fieldset{
+	    font-size: 12px;
+	border: 1px solid #ddd;
+	padding: 0 15px;
+	margin: 0 5px 0 5px;
+	display: block;
+	position: relative;
+}
+.x-fieldset-header{
+    /*font: 14px/16px bold helvetica, arial, verdana, sans-serif;*/
+    color: black;
+    width: auto !important;
+   /* padding: 1px 0;*/
+}
+.x-fieldset-title{
+	padding:0 10px;
+}
+fieldset div:last-child
+{ 
+border:0px;
+}
+fieldset{
+	    border: 1px groove threedface;
+}
+
+fieldset legend {
+     
+    background-color: #ffffff;
+}
+
+.tabs li a.tabs-inner {
+    border-radius: 0px 0px 0 0;
+}

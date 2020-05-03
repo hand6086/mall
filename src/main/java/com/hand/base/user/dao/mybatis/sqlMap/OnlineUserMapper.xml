@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.OnlineUserMapper">
+  <resultMap type="com.hand.base.user.model.OnlineUser" id="onlineUser"></resultMap>
+  
+  <sql id="querySql">
+  SELECT 
+  		T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       t1.ip_address ipAddress,
+		       TO_CHAR(t1.login_time, 'yyyy-MM-dd HH24:MI:ss') loginTime,
+		       TO_CHAR(t1.logout_time, 'yyyy-MM-dd HH24:MI:ss') logoutTime,
+		       t1.login_type loginType,
+		       t2.row_id	empId,
+		       t2.username username,
+		       t2.fst_name firstName,
+		        t2.emp_type empType
+		  FROM lnk_emp_online t1, lnk_emp_info t2
+		 where t1.emp_id = t2.row_id(+)
+  </sql>
+  <select id="queryByExamplePage" resultMap="onlineUser" parameterType="com.hand.base.user.model.OnlineUser">
+		<include refid="querySql"></include>
+  </select>
+  <select id="countByExample" parameterType="com.hand.base.user.model.OnlineUser" resultType="int">
+  	select count(1) from (
+  	<include refid="querySql"></include>
+  	)
+  </select>
+  <select id="queryAll" resultMap="onlineUser" parameterType="com.hand.base.user.model.OnlineUser">
+		<include refid="querySql"></include>
+  </select>
+  
+  <select id="querySessionIdListPage" resultMap="onlineUser" parameterType="com.hand.base.user.model.OnlineUser">
+		SELECT 
+		T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       t1.emp_id		empId,
+			   t1.session_id 	sessionId
+		  FROM lnk_emp_online t1
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.user.model.OnlineUser">
+		insert into LNK_EMP_ONLINE t
+		  (t.ROW_ID, t.emp_id, t.ip_address, t.login_type, t.session_id)
+		values
+		  (#{id},#{empId},#{ipAddress},#{loginType},#{sessionId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.user.model.OnlineUser">
+		DELETE FROM lnk_emp_online WHERE ROW_ID = #{id}
+  </delete>
+</mapper>

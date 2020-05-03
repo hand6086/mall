@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.orgnization.dao.mybatis.mapper.OrgImportMapper">
+  <resultMap type="com.hand.base.orgnization.model.Orgnization" id="orgnization"></resultMap>
+  
+  <sql id="queryAllSql">
+  	select  
+  		T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+        t1.org_code      orgCode,
+        t1.org_name      text,
+        t1.org_type orgType,
+        t1.PARENT_ORG_NAME parentOrgName,
+        t1.is_org isOrg,
+         t1.status status,
+        t1.error_message errorMessage
+		  
+  </sql>
+  
+  <sql id="fromTableSql">
+	from  LNK_ORG_TEMP t1
+	where  1 = 1 
+	and t1.corp_id=#{usercorpid}
+	AND t1.parent_org_name is not null
+	AND (t1.status != 'IMP_SUCCESS' OR t1.status IS NULL)
+  </sql>
+  
+  <sql id="whereAllSql">
+		<if test="status != null and status != '' ">
+			and  t1.status = #{status}
+		</if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+  </sql>
+  
+  	<select id="queryById" resultMap="orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	
+		<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_org_id is not null
+	</select>
+  
+  <insert id="insert" parameterType="com.hand.base.orgnization.model.Orgnization">
+	  	INSERT INTO LNK_ORG_TEMP
+		  (row_id,
+		  PARENT_ORG_NAME,
+		  org_code,
+		  org_name,
+		  org_type,
+		  is_org,
+		  STATUS
+		  )
+		VALUES
+		  (#{id},
+		   #{parentOrgName},
+		   #{orgCode},
+		   #{text},
+		   #{orgType},
+		   #{isOrg},
+		   GET_LOV_VAL(#{usercorpid},'IMP_STATUS', '新建')
+		   )
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.orgnization.model.Orgnization">
+	 	UPDATE LNK_ORG_TEMP
+		   SET  org_code    = #{orgCode},
+			    org_name    = #{text},
+			    org_type    = #{orgType},
+  		        PARENT_ORG_NAME = #{parentOrgName},
+  		        is_org		= #{isOrg} 
+		 WHERE row_id = #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.orgnization.model.Orgnization">
+  		DELETE FROM LNK_ORG_TEMP WHERE row_id = #{id}
+  </delete>
+  
+  <select id="runOrganizationCheck" statementType="CALLABLE">
+			CALL RUN_ORG_IMP_CHECK(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="runNewOrganizationForimp" statementType="CALLABLE">
+			CALL RUN_ORG_IMP_INSERT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+
+</mapper>

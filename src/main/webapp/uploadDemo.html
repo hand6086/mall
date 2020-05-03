@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>jQuery带删除功能多图片上传预览插件</title>
+
+<link href="static/css/common.css" type="text/css" rel="stylesheet">
+
+</head>
+<body>
+	
+	<br/>
+	<section class="img-section">
+		<div class="z_photo upimg-div clear" >
+		
+			 <section class="z_file fl">
+			 	<form>
+					<img src="static/images/a11.png" class="add-img">
+					<input type="file" name="file" id="file" class="file" multiple />
+			  	</form>
+			 </section>
+			 
+		 </div>
+	 </section>
+	 
+	 <br/>
+	 <input type="text" id="fileId" hidden/>
+	 
+
+<script src="static/js/jquery-3.1.0.min.js"></script>
+<script src="static/js/jquery.image.js"></script>
+<script src="static/js/jquery.form.js"></script>
+<script type="text/javascript">
+
+$(function() {
+	$('#file').BobImage({
+		upLoadUrl : '/action/portal/myFile/uploadImg',
+		myComplete : function (success, result, message){
+			// 自定义操作
+			$('#fileId').val(result.id);
+		}
+	});
+})
+
+</script>
+
+
+</body>
+</html>
+

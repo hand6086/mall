@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.CancelOrderMapper">
+	<resultMap type="com.hand.base.order.model.CancelOrder" id="cancelOrder"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,/*Id*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.ORDER_NUM orderNum,/*订单编号*/
+			t1.ORDER_CITY orderCity,/*订单城市*/
+			t1.DETERMINE_CANCEL determineCancel,/*是否确认取消*/
+			date_format(t1.DETERMINE_TIME,'%Y-%m-%d %H:%i:%s') determineTime,/*确认取消时间*/
+			t1.ALREADY_CANCEL alreadyCancel,/*是否已取消*/
+			date_format(t1.CANCEL_TIME,'%Y-%m-%d %H:%i:%s') cancelTime,/*实际取消时间*/
+			t1.CANCEL_COMMENTS cancelComments,/*说明*/
+			t1.created created,/*创建时间*/
+			<!-- CONCAT(t2.LAST_NAME, t2.FST_NAME) operator /*操作人员*/ -->
+			t2.fst_name operator, /*操作人员*/
+			t100.T_ATTR_05 orgId
+		FROM
+			CX_O_ORDER_CNCL t1
+		<!-- LEFT JOIN S_CONTACT t2 ON t2.row_id = t1.created_by -->
+		LEFT JOIN lnk_emp_info t2 ON t2.row_id = t1.created_by
+		left join S_ORDER t3 on t3.ORDER_NUM = t1.ORDER_NUM
+		LEFT JOIN (S_ORDER_X t4 join cx_o_area t100 on t4.x_attrib_68 = t100.row_id) ON t3.ROW_ID = t4.PAR_ROW_ID
+	</sql>
+	<select id="queryByExamplePage" resultMap="cancelOrder" parameterType="com.hand.base.order.model.CancelOrder">
+		<include refid="queryTableSql"/>
+	</select>
+	
+	<select id="queryByOrderNum" resultMap="cancelOrder" parameterType="String">
+		<include refid="queryTableSql"/>
+		WHERE 1 = 1
+		<if test="_parameter != null and _parameter != '' ">
+			AND t1.ORDER_NUM = #{_parameter}
+		</if>
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.order.model.CancelOrder">
+		INSERT INTO CX_O_ORDER_CNCL(
+			ROW_ID,
+			ORDER_NUM,
+			ORDER_CITY,
+			DETERMINE_CANCEL,
+			DETERMINE_TIME,
+			ALREADY_CANCEL,
+			CANCEL_TIME,
+			CANCEL_COMMENTS,
+			MODIFICATION_NUM, 
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			DB_LAST_UPD_SRC
+		)
+		VALUES(
+			#{id},
+			#{orderNum},
+			#{orderCity},
+			#{determineCancel},
+			#{determineTime},
+			#{alreadyCancel},
+			#{cancelTime},
+			#{cancelComments},
+			0,
+			'0',
+			now(),
+			'User'
+		)
+	</insert>
+	<parameterMap type="hashmap" id="cancelMap">
+	 	<parameter property="X_RETURN_STATUS" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="X_MSG_DATA" jdbcType="VARCHAR" mode="OUT"/>
+		<parameter property="P_PARA_1" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="P_PARA_2" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="P_PARA_3" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="P_PARA_4" jdbcType="VARCHAR" mode="IN"/>
+		<parameter property="P_PARA_5" jdbcType="VARCHAR" mode="IN"/>
+	</parameterMap>
+	<update id="confirmCancel" parameterMap="cancelMap" statementType="CALLABLE" >
+	  	{call CANCEL_ORDER(?,?,?,?,?,?,?)}
+	</update>
+  
+	<delete id="deleteById" parameterType="com.hand.base.order.model.CancelOrder">
+		DELETE FROM CX_O_ORDER_CNCL WHERE ROW_ID = #{id}
+	</delete>
+	
+	<select id="queryById" resultMap="cancelOrder" parameterType="com.hand.base.order.model.CancelOrder">
+		<include refid="queryTableSql"/>
+		Where t1.ROW_ID = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charge.dao.mybatis.mapper.ChargeVerificationMapper">
+	<resultMap type="com.hand.base.charge.model.ChargeVerification" id="chargeVerification"></resultMap>
+	
+	<!-- 头结构 -->
+	<sql id="queryTableSql">
+		SELECT
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.NOTES notes,/*说明*/
+			t1.CITY_ID cityId,/*城市id*/
+			t2.NAME cityName, /*城市名*/
+			t1.ROW_ID id /**与子级关联字段*/
+		FROM
+			CX_O_CITY t1
+		LEFT JOIN CX_O_AREA t2 ON t2.ROW_ID = t1.CITY_ID
+		WHERE 1 = 1
+	</sql>
+	
+	<!-- 第一个行结构 -->
+	<sql id="queryDetailDateSql">
+		SELECT
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			date_format(t1.START_DATE,'%Y-%m-%d %H:%i:%s') startDate,/*开始日期*/
+			date_format(t1.END_DATE,'%Y-%m-%d %H:%i:%s') endDate,/*结束日期*/
+			t1.IS_GENERATED isGenerated, /*是否生成批次*/
+			t1.CITY_ID cityId,/*与父级相关联字段*/
+			t1.ROW_ID id/*与子级相关联字段*/
+		FROM
+			CX_O_EXP_VERIFI t1
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		<include refid="queryTableSql" />
+		AND  t2.ROW_ID IS NOT NULL
+		GROUP BY t2.NAME
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.charge.model.ChargeVerification">
+		INSERT INTO CX_O_CITY (
+					ROW_ID,
+					NOTES, 
+					CITY_ID, 
+					MODIFICATION_NUM, 
+					CONFLICT_ID
+				  )
+		VALUES(
+				#{id},
+				#{notes},
+				#{cityId},
+				0,
+				'0'
+			)
+	</insert>
+	<update id="update" parameterType="com.hand.base.charge.model.ChargeVerification">
+		UPDATE CX_O_CITY 
+		SET 
+			NOTES = #{notes},
+			CITY_ID = #{cityId}
+		WHERE 
+			ROW_ID = #{id}
+	</update>
+	
+	<select id="queryById" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		<include refid="queryTableSql" />
+		AND t1.ROW_ID = #{id}
+		GROUP BY t2.NAME
+	</select>
+	
+    <delete id="deleteById" parameterType="com.hand.base.charge.model.ChargeVerification">
+		DELETE FROM CX_O_CITY WHERE ROW_ID = #{id}
+    </delete>	
+   
+	<select id="queryChargeDatePage" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		<include refid="queryDetailDateSql" />
+	</select>
+	
+	<insert id="insertDetail" parameterType="com.hand.base.charge.model.ChargeVerification">
+		INSERT INTO CX_O_EXP_VERIFI (
+				ROW_ID,
+				CREATED,
+				CREATED_BY,
+				LAST_UPD,
+				CORP_ID,
+				LAST_UPD_BY,
+				MODIFICATION_NUM, 
+				CONFLICT_ID,
+				DB_LAST_UPD,
+				START_DATE,
+				END_DATE,
+				IS_GENERATED,
+				CITY_ID,
+				T_ATTR_10
+			  )
+		VALUES(
+				#{id},
+				now(),
+				#{createdBy},
+				now(),
+				#{corpid},
+				#{createdBy},
+				0,
+				'0',
+				now(),				
+				#{startDate},
+				#{endDate},
+				#{isGenerated},
+				#{cityId},
+				'待确认'
+			)
+	</insert>
+	<update id="updateDetail" parameterType="com.hand.base.charge.model.ChargeVerification">
+		UPDATE CX_O_EXP_VERIFI 
+		SET 
+			START_DATE = #{startDate},
+			END_DATE = #{endDate},
+			IS_GENERATED = #{isGenerated},
+			LAST_UPD_BY = #{createdBy}
+		WHERE 
+			ROW_ID = #{id}
+	</update>
+	
+	<select id="queryDetailById" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		<include refid="queryDetailDateSql" />
+		WHERE 1 = 1
+		AND t1.ROW_ID = #{id}
+	</select>
+	
+    <delete id="deleteDetailById" parameterType="com.hand.base.charge.model.ChargeVerification">
+		DELETE FROM CX_O_EXP_VERIFI WHERE ROW_ID = #{id}
+    </delete>	
+    
+	<select id="queryChargeDetailPage" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		SELECT
+			t1.ROW_ID id, /*与子级相关联字段*/
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.T_ATTR_04 tAttr04,/*核销总金额*/
+			t1.STATUS status,/*核销状态*/
+			t2.OU_NUM ouNum,/*商户编码*/
+			t2.NAME name,/*商户名称*/
+			t2.O2O_CONTACT_PHONE o2oContactPhone,/*商户电话*/
+			t2.O2O_ALIPAY o2oAlipay,/*支付宝账户*/
+			t2.O2O_BANK o2oBank,/*开户银行*/
+			t2.O2O_ACCONT_NAME o2oAccontName,/*开户人*/
+			t2.O2O_CREDIT_CARD o2oCreditCard, /*银行卡号*/
+			t1.HEAD_ID headId /*与父级相关联字段*/
+		FROM
+			CX_O_EXP_VRF_LN t1 
+		LEFT JOIN LNK_ACCNT t2 on t2.ROW_ID = t1.STORE_ID
+	</select>
+	
+	<select id="queryChargeOrderDetailPage" resultMap="chargeVerification" parameterType="com.hand.base.charge.model.ChargeVerification">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.EXP_VRF_LN_ID expVrfLnId,/*与父级相关联字段*/
+			t2.ORDER_NUM orderNum,/*订单编号*/
+			date_format(t2.CREATED,'%Y-%m-%d %H:%i:%s') created,/*下单时间*/
+			t4.OU_NUM ouNum,/*商户编码*/
+			t4.NAME name,/*商户名称*/
+			date_format(t3.ATTRIB_27,'%Y-%m-%d %H:%i:%s') attrib27,/*接单时间*/
+			date_format(t3.ATTRIB_26,'%Y-%m-%d %H:%i:%s') attrib26,/*付款时间*/
+			date_format(t3.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			date_format(t3.ATTRIB_28,'%Y-%m-%d %H:%i:%s') attrib28,/*配送时间*/
+			date_format(t3.X_ATTRIB_66,'%Y-%m-%d %H:%i:%s') xAttrib66,/*费用核销确认时间*/
+			(
+				IFNULL(t3.ATTRIB_16, 0) + IFNULL(t3.ATTRIB_20, 0) + IFNULL(t3.ATTRIB_22, 0) + IFNULL(t3.ATTRIB_21, 0)
+			) - (
+				IFNULL(t3.ATTRIB_23, 0) + IFNULL(t3.ATTRIB_59, 0) + IFNULL(t3.ATTRIB_25, 0) + IFNULL(t3.ATTRIB_24, 0)
+			) sumCharge /*需核销费用总额*/
+		FROM
+			CX_O_EXP_VF_ORD t1
+		LEFT JOIN S_ORDER t2 ON t2.row_id = t1.ORDER_ID
+		LEFT JOIN S_ORDER_X t3 ON t3.row_id = t1.ORDER_ID
+		LEFT JOIN LNK_ACCNT t4 ON t4.row_id = t3.ATTRIB_41
+	</select>
+</mapper>

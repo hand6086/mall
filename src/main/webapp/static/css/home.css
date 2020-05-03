@@ -1,0 +1,121 @@
+@charset "UTF-8";
+/* CSS Document */
+*{ margin: 0; padding: 0;}
+body{ font-family: "微软雅黑"; margin: 0; padding: 0;font-size:16px;}
+a{ text-decoration: none;}
+p,h1,h2,h3,h4,h5,h6{ padding: 0; margin: 0;}
+img{ border: none;}
+ul,li{ list-style: none;}
+.header{ height:96px; background:#fff; overflow:hidden;}
+.header_juti{ width:1200px; margin:0 auto; overflow:hidden;}
+.header_juti_left{ width:200px; height:98px; background:url(../img/logo.png) no-repeat left center; float:left;}
+.header_juti_right{ width:900px; overflow:hidden; float:left;}
+.header_juti_right1{ margin:10px; height:78px; width:50px; border-left:1px solid #eff0f1; background:url(../img/10.png) no-repeat right center; float:right;}
+.erji{ background:#469ce7; height:50px; overflow:hidden; font-size:14px;}
+.erji_juti{ width:1200px; margin:0 auto;}
+.erji_juti_right{ margin:10px; width:50px; height:30px; border-left:1px solid #6bb0ec; background:url(../img/33.png) no-repeat right center; float:right;}
+.erji_juti_right1{ width:1100px; float:right; height:50px;}
+.erji_juti_right1 li{ width:130px; text-align:center; height:50px; line-height:50px; float:right;}
+.erji_juti_right1 li a{ margin:10px; height:30px; line-height:30px; text-align:center; display:block; color:#fff;}
+.erji_juti_right1 li a:hover{ margin:10px; height:30px; line-height:30px; text-align:center; display:block; background:#fff; color:#469ce7; border-radius:5px;}
+.weizhi{ background:#e8eaed; padding-top:30px;}
+.kuaisu{ width:1200px; margin:0 auto; overflow:hidden; *background:url(../img/12.png) repeat-x; height:48px; }
+.dangqian_juti{ padding:0 30px; overflow:hidden; color:#7a8094; font-size:14px;}
+.dangqian_juti_left{ height:48px; line-height:48px; width:50%; float:left;}
+.dangqian_juti_right{ height:48px; line-height:48px; width:50%; float:right; text-align:right;}
+.rukou{ background:#fff; width:1200px; margin:0 auto; overflow:hidden;}
+.rukou_juti{ padding-top:10px; padding-left:30px; overflow:hidden;font-weight:bold;}
+.xiadan{ margin-top:10px; overflow:hidden;}
+.xiadan li{ width:25%; text-align:center; line-height:24px; float:left; padding-left:5px;padding-right:5px;}
+.daohuo{ margin-top:10px; padding:0px 10px; overflow:hidden;}
+.daohuo_left{ width:50%; float:left;}
+.daohuo_right{width:50%; float:right; text-align:right; color:#469ce7; font-size:14px;}
+.daohuo_juti{border:1px solid #ecedf1; /* padding:30px;  */overflow:hidden; margin-bottom:30px;}
+.message{ width:33%; /* padding:18px; */ line-height:24px; float:left; font-size:16px;}
+.blue{ color:#469ce7;}
+.ziti{ font-size:14px; color:#6b6f7b;}
+.banquan{ text-align:center; color:#7a8094; padding:15px 0px; font-size:14px;}
+.caidan{ height:98px; overflow:hidden;}
+.caidan li{ float:left; width:100px; font-size:14px;}
+
+.panel-static{
+	height:80px;
+	color: #fff;
+	padding-top:15px;
+	font-size:14px;
+}
+.number-static{
+	font-size:28px;
+}
+
+.bg-yellow {
+    background-color: #f9c13a;
+}
+
+.bg-green {
+    background-color: #9ccb59;
+}
+
+.bg-teal {
+    background-color: #02a7a9;
+}
+
+.bg-blue {
+    background-color: #38BBE3;
+}
+
+.bg-byellow {
+	background-color:#F69217;
+}
+
+
+
+
+.kuaisu{ width:98%; margin:0 auto; overflow:hidden; 
+    background-color: #ffffff;
+ 	height:38px; 
+ 	}
+.dangqian_juti{ 
+	padding-left: 5px;
+	/*padding:0 30px;*/ 
+	overflow:hidden; color:#7a8094; font-size:14px;
+	}
+.dangqian_juti_left{ height:38px; line-height:38px; width:50%; float:left;}
+.dangqian_juti_right{ height:38px; line-height:38px; width:50%; float:right; text-align:right;}
+
+.head_notice_div { 
+    width:38px; 
+    position:relative; 
+    float:right;
+} 
+.head_notice_div :hover { 
+    box-shadow: 0px 1px 3px rgba(34, 25, 25, 0.2);
+} 
+.head_notice_img { 
+    width:21px; 
+    height:28px; 
+    margin-top:5px;
+    /*border:1px solid #000; */
+    background:url(../images/bell_28.png) no-repeat center;
+} 
+.head_notice_point { 
+    width:18px; 
+    height:18px; 
+    line-height:18px; 
+    font-size:10px; 
+    color:#fff; 
+    text-align:center; 
+    background-color:#f00; 
+    border-radius:50%; 
+    position:absolute; 
+    right:-0px; 
+    top:-0px; 
+}
+.head_notice_div :hover .head_notice_point{ 
+    width:22px; 
+    height:22px; 
+    line-height:22px; 
+    box-shadow: 0px 1px 3px rgba(34, 25, 25, 0.2);
+} 
+
+

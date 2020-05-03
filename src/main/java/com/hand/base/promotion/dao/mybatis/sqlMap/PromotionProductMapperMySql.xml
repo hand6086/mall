@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.promotion.dao.mybatis.mapper.PromotionProductMapper">
+  <resultMap type="com.hand.base.promotion.model.PromotionProduct" id="promotionProduct"></resultMap>
+	<sql id="querySql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format( t1.LAST_UPD, '%Y-%m-%d %H:%i:%s' ) lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1. NAME activityName,/*活动名称*/
+			t2.name cityName,/*城市名*/
+			t1.TYPE type,/*促销类型*/
+			t4.O2O_DISPLAY_NAME buyMerchName,/*商品名称*/
+			t4.O2O_INT_CODE merchCode,/*商品编码*/
+			t3.PMO_PRICE promotionPrice,/*活动价*/
+			t3.T_ATTR_09 totalQty,/*限购总量*/
+			t3.T_ATTR_10 purchasedQty,/*已售数量*/
+			t3.LMT_AMT lmtAmt,/*单人限购数量*/
+			t3.STATUS status,/*商品状态*/
+			date_format(t3.T_ATTR_13,'%Y-%m-%d %H:%i:%s') startTime,/*商品开始时间*/
+			date_format(t3.T_ATTR_14,'%Y-%m-%d %H:%i:%s') endTime, /*商品结束时间*/
+			t3.display_seq displaySeq, /*显示顺序*/
+			t3.row_id rowId,
+			t6.row_id orgId 
+	</sql>
+	
+	<sql id="fromSql">
+		FROM
+			CX_O_PMO_SP t1
+		LEFT JOIN (CX_O_AREA t2 LEFT JOIN lnk_org_ext t6 ON t6.ROW_ID = t2.T_ATTR_05) ON t1.CITY_ID = t2.ROW_ID
+		LEFT JOIN (
+			CX_O_PMO_SP_LN t3
+			LEFT JOIN S_PROD_INT_X t4 ON t3.MERCHANDISE_ID = t4.ROW_ID
+			LEFT JOIN S_PROD_INT_X t5 ON t3.FREE_MERCH_ID = t5.row_id
+		) ON t1.row_id = t3.head_id
+	</sql>
+	
+	<sql id="whereSql">
+		WHERE 1=1
+		AND ( t1.type = 'Limited Purchase' OR t1.type = 'Free Buy' )
+		AND t1.STATUS = 'Active'
+		AND t1.delete_flg != 'Y'
+		AND now() BETWEEN t1.start_time AND t1.end_time
+		AND t4.ROW_ID != ''
+		<if test="usersystemRole != 'super_administrator' ">
+			AND t1.corp_id = #{usercorpid}
+		</if>
+	</sql>
+
+	<select id="queryByExamplePage" resultMap="promotionProduct" parameterType="com.hand.base.promotion.model.PromotionProduct">
+		<include refid="querySql"/>
+		<include refid="fromSql"/>
+		<include refid="whereSql"/>
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryById" resultMap="promotionProduct" parameterType="com.hand.base.promotion.model.PromotionProduct">
+		<include refid="querySql"/>
+		<include refid="fromSql"/>
+		<include refid="whereSql"/>
+		AND t3.ROW_ID=#{rowId}
+	</select>
+	
+	<update id="update" parameterType="com.hand.base.promotion.model.PromotionProduct">
+		update 
+			CX_O_PMO_SP_LN
+		set 
+			status=#{status},
+			display_seq = #{displaySeq}
+		where row_id = #{rowId}
+	</update>
+</mapper>

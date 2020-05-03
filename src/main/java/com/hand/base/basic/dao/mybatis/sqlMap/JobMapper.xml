@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.basic.dao.mybatis.mapper.JobMapper">
+  <resultMap type="com.hand.base.basic.model.JobLog" id="jobLog"></resultMap>
+  <resultMap type="com.hand.base.basic.model.Job" id="job"></resultMap>
+  
+  
+  <insert id="addJobLog" parameterType="com.hand.base.basic.model.JobLog">
+  	insert into LNK_JOB_LOG
+	  (row_id,created,created_by,last_upd,last_upd_by, start_date, end_date, r_type, r_number, r_message, head_id)
+	VALUES
+	  (s_sequence_pkg.get_next_rowid(), sysdate, '0-1',sysdate, '0-1',#{startDate},#{endDate},#{rType},#{rNumber},#{rMessage},#{headId})
+  </insert>
+  
+  <select id="queryAllJobListPage" resultMap="job" parameterType="com.hand.core.basic.query.QueryParams">
+  		select 
+  		T.ROW_ID            as id,
+		T.CREATED as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+		T.CORP_ID corpid,
+  				t.job_name || t.job_group key,
+		       t.sched_name schedName,
+		       t.job_name jobName,
+		       t.job_group jobGroup,
+		       t.trigger_name triggerName,
+		       t.trigger_group triggerGroup,
+		       to_char(to_date('1970-01-01', 'yyyy-MM-dd') +
+		               t.next_fire_time / 86400000,
+		               'yyyy-mm-dd hh24:mi:ss') nextFireTime,
+		       to_char(to_date('1970-01-01', 'yyyy-MM-dd') +
+		               t.prev_fire_time / 86400000,
+		               'yyyy-mm-dd hh24:mi:ss') prevFireTime,
+		       to_char(to_date('1970-01-01', 'yyyy-MM-dd') +
+		               t.start_time / 86400000,
+		               'yyyy-mm-dd hh24:mi:ss') startTime,
+		       to_char(to_date('1970-01-01', 'yyyy-MM-dd') + t.end_time / 86400000,
+		               'yyyy-mm-dd hh24:mi:ss') endTime,
+		        t.trigger_state triggerState,
+		       t.description description,
+		       t.priority priority,
+		       t.trigger_type triggerType,
+		       t.calendar_name calendarName,
+		       x.cron_expression cronExpression
+		  from QRTZ_TRIGGERS t, QRTZ_CRON_TRIGGERS x
+		 where t.sched_name = x.sched_name
+		   and t.trigger_name = x.trigger_name
+		   and t.trigger_group = x.trigger_group
+  </select>
+  
+  
+</mapper>

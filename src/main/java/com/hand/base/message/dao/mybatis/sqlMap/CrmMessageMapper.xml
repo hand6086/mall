@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.message.dao.mybatis.mapper.CrmMessageMapper">
+	<resultMap type="com.hand.base.message.model.CrmMessage" id="message"></resultMap>
+	  <resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+	  
+	<sql id="queryAllSql">
+		SELECT
+		   T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		   T1.msg_code AS msgCode,
+	       T1.msg_title AS msgTitle,
+	       T1.msg_content AS msgContent,
+	        T1.MSG_IMPORTANCE importance,
+	       T1.msg_type AS msgType,
+	       T1.msg_receive_type AS msgReceiveType,
+	       T1.is_delete AS isDelete,
+	       T1.is_send AS isSend,
+	       TO_CHAR(T1.MSG_SEND_TIME,'YYYY-MM-DD HH24:MI') AS sendTime,
+	       T1.SEND_BY AS sendBy,
+	       t1.at_msg_Orign atOriginal,
+	       T1.SENDBY_ID AS sendById
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM LNK_MESSAGE T1
+	   WHERE T1.is_delete='N'
+	     AND T1.corp_id = #{usercorpid}
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!-- <if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid}
+		</if> -->
+	</sql>
+	
+	<sql id="orderByAllSql">
+		ORDER BY t1.created DESC
+  	</sql>
+	
+	<select id="queryById" resultMap="message"
+		parameterType="com.hand.base.message.model.CrmMessage">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.message.model.CrmMessage">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="message"
+		parameterType="com.hand.base.message.model.CrmMessage">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="message"
+		parameterType="com.hand.base.message.model.CrmMessage">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>  
+	  
+    <insert id="insert" parameterType="com.hand.base.message.model.CrmMessage">
+	  	INSERT INTO LNK_MESSAGE
+		  (row_id,
+	       msg_code,
+	       msg_title,
+	       msg_content,
+	       msg_importance,
+	       msg_type,
+	       msg_receive_type,
+	       is_send,
+	       send_by,
+	       sendby_id,
+	       AT_MSG_ORIGN,
+	       MSG_SEND_TIME
+		  )
+		VALUES
+		  (#{id},
+		  #{msgCode},
+		  #{msgTitle},
+		  #{msgContent},
+		  GET_LOV_VAL(#{usercorpid},'ACTIVITY_IMPORTANT',#{importance}),
+		  #{msgType},
+		  #{msgReceiveType},
+		  #{isSend},
+		  #{sendBy},
+		  #{sendById},
+		  #{atOriginal},
+		  sysdate
+		 )
+    </insert>
+    <!--更新记录-->
+    <update id="update" parameterType="com.hand.base.message.model.CrmMessage">
+  	 UPDATE LNK_MESSAGE
+        SET
+           msg_code = #{msgCode},
+	       msg_title = #{msgTitle},
+	       msg_content = #{msgContent},
+	       msg_importance = GET_LOV_VAL(#{usercorpid},'ACTIVITY_IMPORTANT',#{importance}),
+	       msg_type = #{msgType},
+	       msg_receive_type = #{msgReceiveType},
+	       is_send = #{isSend},
+	       AT_MSG_ORIGN = #{atOriginal},
+	       MSG_SEND_TIME = sysdate
+      WHERE row_id = #{id}
+    </update>
+    
+    <!--删除记录 根据ROW_ID-->
+    <update id="deleteById" parameterType="com.hand.base.message.model.CrmMessage">
+  	 UPDATE LNK_MESSAGE
+        SET
+        is_delete = 'Y'
+     WHERE ROW_ID = #{id}
+    </update>
+    
+    <!-- 插入消息到移动端消息推送表 -->
+    <insert id="mobileMsgInsert" parameterType="com.hand.base.message.model.UserMessage">
+    INSERT INTO LNK_PUSH_NOTE 
+    (
+    ROW_ID,
+    LOGIN,
+    PUSH_TYPE,
+    PUSH_NOTE
+    ) 
+    VALUES 
+    (
+    #{id},
+    #{userId},
+    'App推送',
+    #{msgContent}
+    )
+    </insert>
+    
+    <!-- 查询未添加到消息发送列表的用户 -->
+    <select id="queryUnSelectUserListPage" resultMap="user" parameterType="com.hand.base.message.model.UserMessage">
+   		SELECT 
+   		T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       T1.username AS username,
+		       T1.fst_name AS firstName,
+		        t1.emp_type empType,
+		       0	errorTimes
+		 FROM LNK_EMP_INFO T1
+		WHERE not exists (
+			  SELECT 1
+			  FROM LNK_MSG_USER T2
+			  WHERE T2.msg_id = #{attr1}
+			  and T1.row_id = T2.user_id)
+		 AND  T1.ROW_ID <![CDATA[<>]]> #{attr2}
+		 <if test="userName != null and userName != '' ">
+			and T1.username = #{userName}
+		</if>
+  </select>
+</mapper>

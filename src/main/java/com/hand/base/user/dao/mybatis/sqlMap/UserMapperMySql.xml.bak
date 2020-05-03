@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.UserMapper">
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+	<resultMap type="com.hand.base.duty.model.Duty" id="duty"></resultMap>
+	<resultMap type="com.hand.base.user.model.UserDes" id="userDes"></resultMap>
+	
+	<!-- 更新最后登录时间 -->
+	<update id="lastLoginDateUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO t
+		SET t.last_login_date = now()
+		WHERE t.row_id = #{id}
+	</update>
+	
+	<sql id="querySql">
+		select t1.row_id id,
+	      date_format(t1.created, '%Y-%m-%d %H:%k:%S') created,
+	      t1.username username,
+	      '' password,
+	      t1.fst_name firstName,
+	       t1.company_code companyCode,
+	      GET_SAP_LOV_VAL('COMPANY_CODE', t1.company_code) companyCodeLovType,
+	      t5.org_id as orgId,
+	      t2.org_name orgName,
+	      t1.postn_id postnId,
+	      t3.postn_name postnName,
+	      t1.duty_id dutyId,
+	      t4.name dutyName,
+	       t1.emp_role role,
+	      t1.emp_role roleLovType,
+	      t1.emp_contact contact,
+	      t1.emp_tel contactPhone,
+	      t1.emp_mail email,
+	       t1.emp_status status,
+	      t1.emp_type empTypeLovType,
+	       t1.emp_type empType,
+	      0 errorTimes,
+	      t1.corp_id corpid,
+	      t1.app_resp appResp,
+	      t1.BASE_NAME as basename,
+	      t1.FORMULA_DATE as formuladate,
+	      t1.HOME_TOWN as hometown,
+	      t1.JOB_LEVEL as joblevel,
+	      t1.JOIN_DATE as joindate,
+	      t1.JOIN_GROUP_DATE as joingroupdate,
+	      t1.NEXT_PROJ as nextproj,
+	      t1.POSITION_NAME as positionname,
+	      t1.TRIAL_DATE as trialdate,
+	      t5.org_name as unitname,
+	      t1.WORK_DATE as workdate,
+	      t1.SCANCARD_FLAG as scancardFlag,
+	      t6.acct_name acctName,
+	           t1.app_role as appRole
+	     from (select * from LNK_EMP_INFO 
+	          where 1 = 1 
+	          and corp_id = #{usercorpid}
+	         <if test="empTypeLovType != null and empTypeLovType != '' ">
+	              and emp_type = #{empTypeLovType}
+	          </if>) t1
+	          left join(
+	               LNK_POSTN_EXT t3 left join
+	                  ( 
+	                    LNK_ORG_EXT t5 left join LNK_ORG_EXT t2 on t5.org_id = t2.row_id
+	                  )on t3.dept_id = t5.row_id
+	           ) on t1.postn_id = t3.row_id
+	      left join LNK_DUTY t4 on t1.duty_id = t4.row_id
+	      left join LNK_ACCNT t6 on t1.acct_id = t6.row_id
+	</sql>
+	
+	<select id="queryById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select t1.row_id id,
+	      date_format(t1.created, '%Y-%m-%d %H:%k:%S') created,
+	      t1.username username,
+	      '' password,
+	      t1.fst_name firstName,
+	       t1.company_code companyCode,
+	      GET_SAP_LOV_VAL('COMPANY_CODE', t1.company_code) companyCodeLovType,
+	      t5.org_id as orgId,
+	      t2.org_name orgName,
+	      t1.postn_id postnId,
+	      t3.postn_name postnName,
+	      t1.duty_id dutyId,
+	      t4.name dutyName,
+	       t1.emp_role role,
+	      t1.emp_role roleLovType,
+	      t1.emp_contact contact,
+	      t1.emp_tel contactPhone,
+	      t1.emp_mail email,
+	       t1.emp_status status,
+	      t1.emp_type empTypeLovType,
+	       t1.emp_type empType,
+	      0 errorTimes,
+	      t1.corp_id corpid,
+	      t1.app_resp appResp,
+	      t1.BASE_NAME as basename,
+	      t1.FORMULA_DATE as formuladate,
+	      t1.HOME_TOWN as hometown,
+	      t1.JOB_LEVEL as joblevel,
+	      t1.JOIN_DATE as joindate,
+	      t1.JOIN_GROUP_DATE as joingroupdate,
+	      t1.NEXT_PROJ as nextproj,
+	      t1.POSITION_NAME as positionname,
+	      t1.TRIAL_DATE as trialdate,
+	      t5.org_name as unitname,
+	      t1.WORK_DATE as workdate,
+	      t1.SCANCARD_FLAG as scancardFlag,
+	      t6.acct_name acctName,
+	           t1.app_role as appRole
+	     from (select * from LNK_EMP_INFO 
+	          where 1 = 1 
+	          and corp_id = #{usercorpid}
+	         <if test="empTypeLovType != null and empTypeLovType != '' ">
+	              and emp_type = #{empTypeLovType}
+	          </if>
+	          and row_id = #{id}) t1
+	          left join(
+	               LNK_POSTN_EXT t3 left join
+	                  ( 
+	                    LNK_ORG_EXT t5 left join LNK_ORG_EXT t2 on t5.org_id = t2.row_id
+	                  )on t3.dept_id = t5.row_id
+	           ) on t1.postn_id = t3.row_id
+	      left join LNK_DUTY t4 on t1.duty_id = t4.row_id
+	      left join LNK_ACCNT t6 on t1.acct_id = t6.row_id
+   </select>
+   
+   <update id="update" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO
+		   SET acct_id         = #{acctId},
+		       username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       company_code    = GET_LOV_val(#{usercorpid},'COMPANY_CODE',#{companyCode}),
+		       emp_role        = GET_LOV_val(#{usercorpid}, 'ROLE',#{role}),
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       JOIN_GROUP_DATE = #{joingroupdate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       UNIT_NAME       = #{unitname},
+		       WORK_DATE       = #{workdate},
+		       corp_id         = #{corpid},
+		       emp_status      = GET_LOV_VAL(#{usercorpid}, 'USER_STATUS',#{status}),
+		       app_role        = GET_LOV_val(#{usercorpid},'EMP_APP_ROLE',#{appRole}),
+		       app_resp 	   = #{appResp},
+		       POSTN_ID        = #{postnId},
+		       DUTY_ID		   = #{dutyId},
+		       SCANCARD_FLAG = #{scancardFlag}
+		 WHERE row_id = #{id}
+	</update>
+	
+	<select id="queryByExamplePage" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		  <include refid="querySql"></include>
+	   	  order by T1.row_id asc, T1.username asc
+   </select>
+   
+   <delete id="deleteById" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_EMP_INFO WHERE row_id = #{id}
+	</delete>
+
+	<select id="queryByUsername" parameterType="com.hand.base.user.model.User"
+		resultType="com.hand.base.user.model.User">
+		select id,
+		username,
+		firstName,
+		password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		deptId,
+		deptName,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		dutyName,
+		acctAgencyName
+		from LNK_EMP_INFO_v
+		where
+		username = #{username}
+	</select>
+
+	<select id="queryByUserId" parameterType="com.hand.base.user.model.User"
+		resultType="com.hand.base.user.model.User">
+		select id,
+		username,
+		firstName,
+		password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		dutyName,
+		acctAgencyName
+		from LNK_EMP_INFO_v
+		where
+		id = #{id}
+	</select>
+	
+	<select id="queryListByUserId" 
+		resultMap="user">
+		select id,
+		username,
+		firstName,
+		password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		dutyName,
+		acctAgencyName
+		from LNK_EMP_INFO_v
+		where
+		<foreach collection="array" item="id" open="(" separator=" or " close=")">
+			id = #{id}
+		</foreach>
+	</select>
+	
+	<select id="queryListByUserIdPage"  parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select id,
+		username,
+		firstName,
+		password,
+		status,
+		role,
+		acctId,
+		acctCode,
+		acctName,
+		acctType,
+		orgId,
+		orgName,
+		postnId,
+		postnName,
+		errorTimes,
+		acctGroup,
+		contact,
+		contactPhone,
+		email,
+		entryDate,
+		empType,
+		dutyId,
+		corpid,
+		dutyName,
+		acctAgencyName
+		from LNK_EMP_INFO_v
+	</select>
+
+
+	<select id="queryUserByUserId" parameterType="com.hand.base.user.model.User"
+		resultType="com.hand.base.user.model.User">
+		SELECT t.row_id id, t.duty_id dutyId
+		FROM LNK_EMP_INFO t
+		WHERE 1 = 1
+		AND ROW_ID = #{id}
+	</select>
+
+	<update id="changeUserPasswordUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+	</update>
+	
+	<update id="resetUserPassword">
+		 <if test="password!=null and password!='' and id!=null and id!=''">  
+            UPDATE LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+        </if>  
+	</update>
+
+	<update id="changeUserPassword" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		LNK_EMP_INFO SET passwd = #{password} WHERE ROW_ID = #{id}
+	</update>
+
+	<select id="queryUserListPage" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select t1.row_id id,
+			t1.username username,
+			'' password,
+			t1.fst_name firstName,
+			 t1.company_code companyCode,
+			GET_SAP_LOV_VAL('COMPANY_CODE', t1.company_code) companyCodeLovType,
+			t5.org_id as orgId,
+			t2.org_name orgName,
+			t1.postn_id postnId,
+			t3.postn_name postnName,
+			t1.duty_id dutyId,
+			t4.name dutyName,
+			 t1.emp_role role,
+			t1.emp_role roleLovType,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			t1.emp_mail email,
+			 t1.emp_status status,
+			t1.emp_type empTypeLovType,
+			 t1.emp_type empType,
+			0 errorTimes,
+			t1.corp_id corpid,
+			t1.app_resp appResp,
+			t1.BASE_NAME as basename,
+			t1.FORMULA_DATE as formuladate,
+			t1.HOME_TOWN as hometown,
+			t1.JOB_LEVEL as joblevel,
+			t1.JOIN_DATE as joindate,
+			t1.JOIN_GROUP_DATE as joingroupdate,
+			t1.NEXT_PROJ as nextproj,
+			t1.POSITION_NAME as positionname,
+			t1.TRIAL_DATE as trialdate,
+			t1.UNIT_NAME as unitname,
+			t1.WORK_DATE as workdate,
+			t6.acct_name acctName,
+      		 t1.app_role as appRole	
+	  from
+		(
+			select * from LNK_EMP_INFO where 1 = 1
+			and corp_id = #{usercorpid}
+		) t1
+		 left join LNK_DUTY t4
+		 on (t1.duty_id = t4.row_id)
+		 left join LNK_ACCNT t6
+		 on (t1.acct_id = t6.row_id)
+		 left join (
+			LNK_POSTN_EXT t3
+			 left join (
+				LNK_ORG_EXT t5
+				 left join LNK_ORG_EXT t2
+				 on (t5.org_id = t2.row_id)
+			)
+			 on (t3.dept_id = t5.row_id)
+		)
+		 on (t1.postn_id = t3.row_id)
+   		order by T1.row_id asc, T1.username asc
+	</select>
+	
+	<select id="queryUserListSelect" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select t1.row_id id,
+		    date_format(t1.created,'%Y-%m-%d %T') created,
+			t1.username username,
+			'' password,
+			t1.fst_name firstName,
+			t1.company_code companyCode,
+			t1.company_code companyCodeLovType,
+			t2.org_name orgName,
+			t1.postn_id
+			postnId,
+			t3.postn_name postnName,
+			t1.duty_id dutyId,
+			t4.name dutyName,
+			 t1.emp_role role,
+			t1.emp_role
+			roleLovType,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			t1.emp_mail email,
+			t1.emp_status status,
+			t1.emp_type empTypeLovType,
+			 t1.emp_type empType,
+			0 errorTimes,
+			t1.corp_id corpid,
+			t1.BASE_NAME as basename,
+			t1.FORMULA_DATE as formuladate,
+			t1.HOME_TOWN as hometown,
+			t1.JOB_LEVEL
+			as joblevel,
+			t1.JOIN_DATE as joindate,
+			t1.JOIN_GROUP_DATE as
+			joingroupdate,
+			t1.NEXT_PROJ as nextproj,
+			t1.POSITION_NAME as
+			positionname,
+			t1.TRIAL_DATE as trialdate,
+			t1.UNIT_NAME as unitname,
+			t1.WORK_DATE as workdate,
+			t1.app_resp appResp,
+			t6.acct_name acctName,
+      		 t1.app_role as appRole
+		from LNK_EMP_INFO t1,
+			LNK_ORG_EXT t2,
+			LNK_POSTN_EXT t3,
+			LNK_DUTY t4,
+			LNK_ORG_EXT t5,
+			LNK_ACCNT t6
+		where t1.postn_id = t3.row_id(+) and
+			t1.corp_id=#{usercorpid}
+			and t1.duty_id = t4.row_id(+)
+			and t3.dept_id =
+			t5.row_id(+)
+			and t5.org_id = t2.row_id(+)
+			and t1.duty_id = t4.row_id(+)
+			and t1.acct_id = t6.row_id(+)
+		order by T1.row_id asc, T1.username asc
+	</select>
+
+	<insert id="userInsert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		acct_id,
+		company_code,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_status,
+		emp_type,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		JOIN_GROUP_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		UNIT_NAME,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_ID,
+		DUTY_ID
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{acctId},
+		GET_LOV_val(#{usercorpid},'COMPANY_CODE',
+		#{companyCode}),
+		GET_LOV_val(#{usercorpid},'ROLE' ,#{role}),
+		#{contact},
+		#{contactPhone},
+		#{email},
+		GET_LOV_val(#{usercorpid},'USER_STATUS' ,#{status}),
+		GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{joingroupdate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{unitname},
+		#{workdate},
+		GET_LOV_val(#{usercorpid},'EMP_APP_ROLE' ,#{appRole}),
+		#{appResp},
+		#{postnId},
+		#{dutyId}
+		)
+	</insert>
+	
+	<insert id="openIdInsert" parameterType="com.hand.base.user.model.UserDes">
+		INSERT INTO LNK_EMP_INFO_DES
+		(row_id,
+		user_id,
+		open_id
+		)
+		VALUES
+		(s_sequence_pkg_get_next_rowid(),
+		#{userId},
+		#{openId}
+		)
+	
+	</insert>
+
+	<select id="queryInterDutyUserByUserIdAndDutyId" resultType="com.hand.base.user.model.User"
+		parameterType="com.hand.base.user.model.User">
+		select t.user_id id, t.duty_id dutyId from
+		LNK_INTER_DUTY_USER t where
+		t.row_id = #{id} and t.duty_id = #{dutyId}
+	</select>
+
+
+	<update id="userUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO
+		   SET acct_id         = #{acctId},
+		       username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       company_code    = GET_LOV_val(#{usercorpid},'COMPANY_CODE',#{companyCode}),
+		       emp_role        = GET_LOV_val(#{usercorpid}, 'ROLE',#{role}),
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       JOIN_GROUP_DATE = #{joingroupdate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       UNIT_NAME       = #{unitname},
+		       WORK_DATE       = #{workdate},
+		       corp_id         = #{corpid},
+		       emp_status      = GET_LOV_VAL(#{usercorpid}, 'USER_STATUS',#{status}),
+		       app_role        = GET_LOV_val(#{usercorpid},'EMP_APP_ROLE',#{appRole}),
+		       app_resp 	   = #{appResp},
+		       POSTN_ID        = #{postnId},
+		       DUTY_ID		   = #{dutyId}
+		 WHERE row_id = #{id}
+	</update>
+
+	<delete id="delUserById" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_EMP_INFO WHERE row_id = #{id}
+	</delete>
+
+
+	<update id="updatePostnOfUser" parameterType="com.hand.base.user.model.User">
+		update
+		LNK_EMP_INFO t set t.postn_id = #{postnId} where t.row_id = #{id}
+	</update>
+
+
+	<update id="updateDutyOfUser" parameterType="com.hand.base.user.model.User">
+		update
+		LNK_EMP_INFO t set t.duty_id = #{dutyId} where t.row_id = #{id}
+	</update>
+
+
+	<update id="updateAcctOfUser" parameterType="com.hand.base.user.model.User">
+		update
+		LNK_EMP_INFO t set t.acct_id = #{acctId} where t.row_id = #{id}
+	</update>
+
+
+	<!-- MVG -->
+
+
+	<update id="defaultPostnUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE
+		LNK_EMP_INFO t
+		SET t.postn_id = #{postnId}
+		WHERE t.row_id = #{id}
+	</update>
+
+	<update id="postnOfUserUpdate" parameterType="com.hand.base.position.model.Position">
+		UPDATE
+		LNK_EMP_INFO t
+		SET t.postn_id = ''
+		WHERE t.row_id = #{userId}
+	</update>
+
+
+	<select id="querySelectedUserByPostnIdListPage" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select t1.row_id interId,
+		t1.user_Id id,
+		date_format (t1.created,'%Y-%m-%d %T') created,
+		t3.username username,
+		t3.fst_name firstName,
+		t3.emp_status status,
+		1
+		errorTimes,
+		(case when t2.user_id = t3.row_id then 'Y' else 'N' end)
+		isDefault,
+		t1.postn_id postnId
+		from LNK_INTER_USER_POSTN t1,
+		LNK_POSTN_EXT t2, LNK_EMP_INFO t3
+		where t1.postn_id = t2.row_id
+		and
+		t1.user_id = t3.row_id
+	</select>
+
+	<select id="querySelectedUserByPostnIdListSelect" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select t1.row_id interId,
+		t1.user_Id id,
+		t3.username username,
+		t3.fst_name firstName,
+		t3.emp_status status,
+		1
+		errorTimes,
+		(case when t2.user_id = t3.row_id then 'Y' else 'N' end)
+		isDefault,
+		t1.postn_id postnId
+		from LNK_INTER_USER_POSTN t1,
+		LNK_POSTN_EXT t2, LNK_EMP_INFO t3
+		where t1.postn_id = t2.row_id
+		and
+		t1.user_id = t3.row_id
+	</select>
+
+	<select id="queryUnSelectedUserByPostnIdListPage" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+	 select t1.row_id id,
+			t1.username username,
+			t1.fst_name firstName,
+			 t1.company_code companyCode,
+			t1.company_code companyCodeLovType,
+			t1.emp_status status,
+			t1.emp_type empType,
+			t1.emp_role role,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			1 errorTimes
+	   from LNK_EMP_INFO t1
+	  where not exists (
+				select t2.user_id
+				from LNK_INTER_USER_POSTN t2
+				where
+				t1.row_id = t2.user_id
+				and t2.postn_id = #{attr1})
+	</select>
+
+	<insert id="userOfPostnListInsert" parameterType="com.hand.base.user.model.User">
+		insert into
+		LNK_INTER_USER_POSTN
+		(row_id,
+		postn_id,
+		user_id)
+		values
+		(s_sequence_pkg_get_next_rowid(),
+		#{postnId},
+		#{id})
+	</insert>
+
+
+	<insert id="allUserOfPostnListInsert" parameterType="com.hand.base.user.model.User">
+		insert into
+		LNK_INTER_USER_POSTN
+		(ROW_ID, created, created_by, last_upd,
+		last_upd_by, postn_id, user_id)
+		SELECT s_sequence_pkg_get_next_rowid(),
+		sysdate,
+		#{acctId},
+		sysdate,
+		#{acctId},
+		#{postnId},
+		t1.row_id
+		from
+		LNK_EMP_INFO t1
+		where not exists (select t2.user_id
+		from
+		LNK_INTER_USER_POSTN t2
+		where t1.row_id = t2.user_id
+		and t2.postn_id =
+		#{userId})
+	</insert>
+
+	<select id="queryUserInInter" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select t.row_id id
+		from LNK_INTER_USER_POSTN t
+		where t.postn_id
+		= #{postnId}
+	</select>
+
+	<!-- <select id="queryAllPosition" parameterType="com.hand.base.user.model.User" 
+		resultMap="user"> select t.row_id id from LNK_POSTN_EXT t </select> -->
+
+	<delete id="userByIdOfPostnListDel" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_INTER_USER_POSTN
+		WHERE user_id = #{id}
+		and postn_id = #{postnId}
+	</delete>
+
+	<delete id="allUserByIdOfPostnListDel" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_INTER_USER_POSTN
+		WHERE postn_id = #{postnId}
+	</delete>
+
+	<select id="queryDefaultUser" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select t.user_id id
+		from LNK_POSTN_EXT t
+		where t.row_id =
+		#{postnId}
+	</select>
+
+
+	<update id="defaultUserByUserUpdate" parameterType="com.hand.base.user.model.User">
+		update
+		LNK_POSTN_EXT t
+		set t.user_id = ''
+		where t.user_id = #{id}
+	</update>
+
+	<delete id="deleteDutyOfUser" parameterType="com.hand.base.common.model.InterObject">
+		delete from
+		LNK_INTER_DUTY_USER t where t.duty_id = #{rearObjId} and
+		t.user_id =
+		#{preObjId}
+	</delete>
+
+	<insert id="dutyOfUserInsert" parameterType="com.hand.base.common.model.InterObject">
+		insert into
+		LNK_INTER_DUTY_USER
+		(row_id, duty_id, user_id)
+		values
+		(s_sequence_pkg_get_next_rowid(),#{rearObjId},#{preObjId})
+	</insert>
+
+	<select id="queryDutyCountByUserIdAndDutyId" parameterType="com.hand.base.common.model.InterObject"
+		resultMap="duty">
+		select t.duty_id id
+		from LNK_INTER_DUTY_USER t
+		where t.user_id
+		= #{preObjId}
+	</select>
+
+
+	<!-- <select id="queryUserByDefaultPostn" parameterType="com.hand.base.user.model.User" 
+		resultMap="user"> select t.row_id id from LNK_EMP_INFO t where t.postn_id 
+		= #{postnId} </select> -->
+
+	<update id="defaultDutyUpdate" parameterType="com.hand.base.common.model.InterObject">
+		UPDATE
+		LNK_EMP_INFO t
+		SET t.duty_id = #{rearObjId}
+		WHERE t.row_id =
+		#{preObjId}
+	</update>
+
+
+	<select id="queryDefaultDutyOfUser" parameterType="com.hand.base.common.model.InterObject"
+		resultMap="duty">
+		select t.duty_id id
+		from LNK_EMP_INFO t
+		where t.row_id =
+		#{preObjId}
+	</select>
+
+	<update id="delDutyOfUserUpdate" parameterType="com.hand.base.common.model.InterObject">
+		UPDATE
+		LNK_EMP_INFO t
+		SET t.duty_id = ''
+		WHERE t.row_id = #{preObjId}
+	</update>
+
+	<update id="userOrgUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO t
+		SET t.org_id = #{orgId} WHERE t.row_id = #{id}
+	</update>
+	
+	<select id="querySampleUserById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select t1.row_id as id,
+		date_format(t1.created, '%Y-%m-%d %H:%k:%S') created,
+		t1.CREATED_BY        as createdBy,
+		date_format(t1.last_upd, '%Y-%m-%d %H:%k:%S') lastUpdated,
+		t1.LAST_UPD_BY       as lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.username username,
+		t1.fst_name firstName
+		from LNK_EMP_INFO t1
+		where  t1.row_id=#{id}
+   </select>
+   
+   	<insert id="insert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		acct_id,
+		company_code,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_status,
+		emp_type,
+		SCANCARD_FLAG,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		JOIN_GROUP_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		UNIT_NAME,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_ID,
+		DUTY_ID
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{acctId},
+		GET_LOV_val(#{usercorpid},'COMPANY_CODE',
+		#{companyCode}),
+		GET_LOV_val(#{usercorpid},'ROLE' ,#{role}),
+		#{contact},
+		#{contactPhone},
+		#{email},
+		GET_LOV_val(#{usercorpid},'USER_STATUS' ,#{status}),
+		GET_LOV_val(#{usercorpid},'EMP_TYPE' ,#{empType}),
+		#{scancardFlag},
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{joingroupdate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{unitname},
+		#{workdate},
+		GET_LOV_val(#{usercorpid},'EMP_APP_ROLE' ,#{appRole}),
+		#{appResp},
+		#{postnId},
+		#{dutyId}
+		)
+	</insert>
+	
+	<select id="queryByUserIdAndOpenId" parameterType="com.hand.base.user.model.UserDes" resultMap="userDes">
+		select row_id id, open_id openId, user_id userId from lnk_emp_info_des t where t.user_id = #{userId} and t.open_id = #{openId}
+	</select>
+
+</mapper>

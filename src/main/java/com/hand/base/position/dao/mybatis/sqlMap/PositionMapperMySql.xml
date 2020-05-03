@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.position.dao.mybatis.mapper.PositionMapper">
+  <resultMap type="com.hand.base.position.model.Position" id="position"></resultMap>
+  
+	<sql id="queryAllSql">
+		select T1.ROW_ID as id,
+		       t1.created as created,
+		       T1.CREATED_BY as createdBy,
+		       DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		       T1.LAST_UPD_BY as lastUpdatedBy,
+		       T1.CORP_ID corpid,
+		       t1.postn_type positionType,
+		       t1.postn_name text,
+		       t1.postn_name postnName,
+		       t1.is_effective isEffective,
+		       t1.parent_postin_id parentPositionId,
+		       t2.postn_name parentPositionName,
+		       t1.dept_id deptId,
+		       t3.org_name deptName,
+		       t3.org_id orgId,
+		       t4.org_name orgName,
+		       t5.fst_name fstName,
+		       t5.username username,
+		       t5.emp_tel empTel,
+		       t1.user_id userId,
+		       t1.integration_id integrationId,
+		       t1.source source,
+		       t6.name corpName
+	</sql>
+
+	<sql id="fromTableSql">
+		  from LNK_POSTN_EXT t1
+		  left join LNK_POSTN_EXT t2
+		    on t1.parent_postin_id = t2.row_id
+		  left join LNK_ORG_EXT t3
+		    on t1.dept_id = t3.row_id
+		  left join LNK_ORG_EXT t4
+		    on t3.org_id = t4.row_id
+		  left join LNK_EMP_INFO t5
+		    on t1.user_id = t5.row_id
+		  left join lnk_enterprise t6 
+		  	on t1.corp_id = t6.code
+		 where 1 = 1
+		   and t1.corp_id = #{usercorpid}
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+		<if test="id != null and id != '' ">
+			and t1.row_id = #{id}
+		</if>
+		<if test="isEffective != null and isEffective != '' ">
+			and t2.is_effective = GET_LOV_VAL(#{usercorpid}, 'IS_EFFECTIVE',#{isEffective})
+		</if>
+		<if test="parentPositionId != null and parentPositionId != '' ">
+			and t1.parent_postin_id = #{parentPositionId}
+		</if>
+		<if test="text != null and text != '' ">
+			and t1.postn_name = #{text}
+		</if>
+		<if test="parentPositionName != null and parentPositionName != '' ">
+			and t2.postn_name = #{parentPositionName}
+		</if>
+		<if test="integrationId != null and integrationId != '' ">
+			and t1.integration_Id = #{integrationId}
+		</if>
+  	</sql>
+  	
+	<select id="queryById" resultType="com.hand.base.position.model.Position"
+		parameterType="com.hand.base.position.model.Position">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.position.model.Position">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录,不分页 -->
+	<select id="queryAll" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_postin_id is not null
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_postin_id is not null
+	</select>
+  
+	<delete id="deleteById" parameterType="com.hand.base.position.model.Position">
+		DELETE FROM LNK_POSTN_EXT WHERE ROW_ID = #{id}
+	</delete>
+  
+	<insert id="insert" parameterType="com.hand.base.position.model.Position">
+		insert into LNK_POSTN_EXT
+		  (ROW_ID,
+		   postn_name,
+		   postn_type,
+		   parent_postin_id,
+		   dept_id,
+		   is_effective,
+		   USER_ID)
+		values
+		  (#{id},
+		   #{text},
+		   GET_LOV_val(#{usercorpid},'POSTN_TYPE',#{positionType}),
+		   #{parentPositionId},
+		   #{deptId},
+		   GET_LOV_val(#{usercorpid},'IS_EFFECTIVE' ,#{isEffective}),
+		   #{userId}
+		   )
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.position.model.Position">
+		UPDATE LNK_POSTN_EXT
+		   SET postn_name       = #{text},
+		       postn_type       = GET_LOV_val(#{usercorpid}, 'POSTN_TYPE',#{positionType}),
+		       is_effective     = GET_LOV_val(#{usercorpid},'IS_EFFECTIVE' ,#{isEffective}),
+		       parent_postin_id = #{parentPositionId},
+		       dept_id          = #{deptId},
+		       USER_ID          = #{userId}
+		 WHERE row_id = #{id}
+	</update>
+
+	<select id="queryRoot" resultType="com.hand.base.position.model.Position" parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	  	and (t1.parent_postin_id is null or t1.parent_postin_id = '')
+	</select>
+  
+	<!-- 查询非子职位 -->
+	<select id="queryPositionListRemoveIdAndChildrenPage" resultMap="position" parameterType="com.hand.base.position.model.Position">
+		select t1.row_id     id,
+		       t1.created    created,
+		       t1.postn_name text,
+		       t1.dept_id    deptId,
+		       t3.org_id     orgId,
+		       t1.postn_type positionType,
+		       t2.username   username,
+		       t1.user_id    userId,
+		       t2.fst_name   fstName,
+		       t3.org_name   deptName,
+		       t4.org_name   orgName
+		  from LNK_POSTN_EXT t1
+		  left join LNK_EMP_INFO t2
+		    on t1.user_id = t2.row_id
+		  left join LNK_ORG_EXT t3
+		    on t1.dept_id = t3.row_id
+		  left join LNK_ORG_EXT t4
+		    on t3.org_id = t4.row_id
+		 where 1 = 1
+		   and t1.corp_id = #{usercorpid}
+		   and t1.is_effective = 'Y'
+		   and t1.row_id != #{attr3}
+		   and FIND_IN_SET(t1.row_id, #{attr6}) = 0
+		<!-- select m.id id,
+		       m.created created,
+		       m.text text,
+		       m.userId userId,
+		       m.username username,
+		       m.fstName fstName,
+		       (SELECT org_name FROM LNK_ORG_EXT where row_id = m.orgId) orgName,
+		       (SELECT org_name FROM LNK_org_EXT where row_id = m.deptId) deptName,
+		        m.positionType positionType
+		  from (select t1.row_id id,
+		               t1.created created,
+		               t1.postn_name text,
+		               t1.dept_id deptId,
+		               (SELECT org_id FROM LNK_org_EXT where row_id = t1.dept_id) orgId,
+		               t1.postn_type positionType,
+		               t2.username username,
+		               t1.user_id userId,
+		               t2.fst_name fstName
+		          from LNK_POSTN_EXT t1 left join LNK_EMP_INFO t2 on t1.user_id = t2.row_id
+		         where t1.is_effective = 'Y'
+		           and t1.corp_id = #{usercorpid}
+		           and FIND_IN_SET(t1.row_id, GET_POSTN_CHILD_LIST(#{attr3})) = 0
+		                ) m
+		 where m.id != #{attr3} -->
+		 order by t1.CREATED desc
+	</select>
+	
+	<select id="getPostnChildStr" resultType="String">
+		select get_postn_child_str(#{id},#{usercorpid}) str from dual
+	</select>
+	
+	<!-- 通过用户ID查询用户的职位 -->
+	<select id="queryByUserPage" resultMap="position"
+		parameterType="com.hand.base.position.model.Position">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	   and exists (SELECT 1
+	          FROM LNK_INTER_USER_POSTN c1
+	         where c1.user_id = #{userId}
+	           and c1.postn_id = t1.row_id)
+	</select>
+  
+  	<update id="mainUserUpdate" parameterType="com.hand.base.position.model.Position">
+		UPDATE LNK_POSTN_EXT
+		   SET USER_ID          = #{userId}
+		 WHERE row_id = #{id}
+	</update>
+</mapper>

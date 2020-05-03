@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.UserImpMapper">
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+
+	<select id="queryByUsername" parameterType="com.hand.base.user.model.User" resultType="com.hand.base.user.model.User">
+		 select t1.row_id id,
+				t1.created created,
+				t1.username username,
+				'' password,
+				t1.fst_name firstName,
+				t1.postn_name postnName,
+				t1.duty_name dutyName,
+				t1.emp_role role,
+				t1.emp_contact contact,
+				t1.emp_tel contactPhone,
+				t1.emp_mail email,
+				t1.emp_type empType,
+				0 errorTimes,
+				t1.corp_id corpid,
+				t1.app_resp appResp,
+				t1.BASE_NAME as basename,
+				t1.FORMULA_DATE as formuladate,
+				t1.HOME_TOWN as hometown,
+				t1.JOB_LEVEL as joblevel,
+				t1.JOIN_DATE as joindate,
+				t1.NEXT_PROJ as nextproj,
+				t1.POSITION_NAME as positionname,
+				t1.TRIAL_DATE as trialdate,
+				t1.WORK_DATE as workdate,
+	      		t1.app_role as appRole,
+	      		 t1.status status,
+	      		t1.ERROR_MESSAGE as errorMessage
+		   from LNK_EMP_INFO_temp t1
+		  where t1.username = #{username}
+	</select>
+	
+	<sql id="querySql">
+	select 
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+			t1.username username,
+			'' password,
+			t1.fst_name firstName,
+			t1.postn_name postnName,
+			t1.duty_name dutyName,
+			t1.emp_role role,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			t1.emp_mail email,
+			t1.emp_type empType,
+			0 errorTimes,
+			t1.app_resp appResp,
+			t1.BASE_NAME as basename,
+			t1.FORMULA_DATE as formuladate,
+			t1.HOME_TOWN as hometown,
+			t1.JOB_LEVEL as joblevel,
+			t1.JOIN_DATE as joindate,
+			t1.NEXT_PROJ as nextproj,
+			t1.POSITION_NAME as positionname,
+			t1.TRIAL_DATE as trialdate,
+			t1.WORK_DATE as workdate,
+      		t1.app_role as appRole,
+      		 t1.status status,
+	      	t1.ERROR_MESSAGE as errorMessage
+	   from LNK_EMP_INFO_temp t1
+	  where t1.corp_id=#{usercorpid}
+	    AND (t1.status != 'IMP_SUCCESS' OR t1.status IS NULL)
+	</sql>
+	<select id="queryByExamplePage" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		<include refid="querySql"></include>
+		<if test="status != null and status != '' ">
+			and  t1.status = #{status}
+		</if>
+   		order by T1.row_id asc, T1.username asc
+	</select>
+	
+	<select id="countByExample" parameterType="com.hand.base.user.model.User" resultType="int">
+	select count(1) from (<include refid="querySql"></include>)
+	</select>
+	<select id="queryById" parameterType="com.hand.base.user.model.User"
+		resultMap="user">
+		select 
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+			t1.username username,
+			'' password,
+			t1.fst_name firstName,
+			t1.postn_name postnName,
+			t1.duty_name dutyName,
+			t1.emp_role role,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			t1.emp_mail email,
+			t1.emp_type empType,
+			0 errorTimes,
+			t1.corp_id corpid,
+			t1.app_resp appResp,
+			t1.BASE_NAME as basename,
+			t1.FORMULA_DATE as formuladate,
+			t1.HOME_TOWN as hometown,
+			t1.JOB_LEVEL as joblevel,
+			t1.JOIN_DATE as joindate,
+			t1.NEXT_PROJ as nextproj,
+			t1.POSITION_NAME as positionname,
+			t1.TRIAL_DATE as trialdate,
+			t1.WORK_DATE as workdate,
+      		t1.app_role as appRole,
+      		 t1.status status,
+	      	t1.ERROR_MESSAGE as errorMessage
+	   from LNK_EMP_INFO_temp t1
+	  where t1.row_id=#{id}
+	</select>
+	<insert id="insert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO_TEMP
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_type,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_NAME,
+		DUTY_NAME,
+		`STATUS`
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{role},
+		#{contact},
+		#{contactPhone},
+		#{email},
+		#{empType},
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{workdate},
+		#{appRole},
+		#{appResp},
+		#{postnName},
+		#{dutyName},
+		GET_LOV_VAL(#{usercorpid},'IMP_STATUS', '新建')
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO_TEMP
+		   SET username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       emp_role        = #{role},
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       emp_type		   = #{empType},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       WORK_DATE       = #{workdate},
+		       corp_id         = #{corpid},
+		       app_role        = #{appRole},
+		       app_resp 	   = #{appResp},
+		       POSTN_NAME      = #{postnName},
+		       DUTY_NAME	   = #{dutyName}
+		 WHERE row_id = #{id}
+	</update>
+
+	<delete id="deleteById" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_EMP_INFO_TEMP WHERE row_id = #{id}
+	</delete>
+    <select id="runUserCheck" statementType="CALLABLE">
+		CALL RUN_USER_IMP_CHECK(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+    </select>
+  
+    <select id="runNewUserForimp" statementType="CALLABLE">
+		CALL RUN_USER_IMP_INSERT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+    </select>
+</mapper>
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.UserImpMapper">
+	<resultMap type="com.hand.base.user.model.User" id="user"></resultMap>
+
+	<select id="queryByUsername" parameterType="com.hand.base.user.model.User" resultType="com.hand.base.user.model.User">
+		 select t1.row_id id,
+				date_format (t1.created,''%Y-%m-%d %H:%i:%S'') created,
+				t1.username username,
+				'' password,
+				t1.fst_name firstName,
+				t1.postn_name postnName,
+				t1.duty_name dutyName,
+				t1.emp_role role,
+				t1.emp_contact contact,
+				t1.emp_tel contactPhone,
+				t1.emp_mail email,
+				t1.emp_type empType,
+				0 errorTimes,
+				t1.corp_id corpid,
+				t1.app_resp appResp,
+				t1.BASE_NAME as basename,
+				t1.FORMULA_DATE as formuladate,
+				t1.HOME_TOWN as hometown,
+				t1.JOB_LEVEL as joblevel,
+				t1.JOIN_DATE as joindate,
+				t1.NEXT_PROJ as nextproj,
+				t1.POSITION_NAME as positionname,
+				t1.TRIAL_DATE as trialdate,
+				t1.WORK_DATE as workdate,
+	      		t1.app_role as appRole,
+	      		 t1.status status,
+	      		t1.ERROR_MESSAGE as errorMessage
+		   from LNK_EMP_INFO_temp t1
+		  where t1.username = #{username}
+	</select>
+	
+	<select id="queryUserListPage" parameterType="com.hand.core.basic.query.QueryParams"
+		resultMap="user">
+		select t1.row_id id,
+			date_format (t1.created,''%Y-%m-%d %H:%i:%S'') created,
+			t1.username username,
+			'' password,
+			t1.fst_name firstName,
+			t1.postn_name postnName,
+			t1.duty_name dutyName,
+			t1.emp_role role,
+			t1.emp_contact contact,
+			t1.emp_tel contactPhone,
+			t1.emp_mail email,
+			t1.emp_type empType,
+			0 errorTimes,
+			t1.corp_id corpid,
+			t1.app_resp appResp,
+			t1.BASE_NAME as basename,
+			t1.FORMULA_DATE as formuladate,
+			t1.HOME_TOWN as hometown,
+			t1.JOB_LEVEL as joblevel,
+			t1.JOIN_DATE as joindate,
+			t1.NEXT_PROJ as nextproj,
+			t1.POSITION_NAME as positionname,
+			t1.TRIAL_DATE as trialdate,
+			t1.WORK_DATE as workdate,
+      		t1.app_role as appRole,
+      		 t1.status status,
+	      	t1.ERROR_MESSAGE as errorMessage
+	   from LNK_EMP_INFO_temp t1
+	  where t1.corp_id=#{usercorpid}
+	    AND (t1.status != 'IMP_SUCCESS' OR t1.status IS NULL)
+   order by T1.row_id asc, T1.username asc
+	</select>
+
+	<insert id="userInsert" parameterType="com.hand.base.user.model.User">
+		INSERT INTO LNK_EMP_INFO_TEMP
+		(row_id,
+		username,
+		passwd,
+		fst_name,
+		emp_role,
+		emp_contact,
+		emp_tel,
+		emp_mail,
+		emp_type,
+		BASE_NAME,
+		FORMULA_DATE,
+		HOME_TOWN,
+		JOB_LEVEL,
+		JOIN_DATE,
+		NEXT_PROJ,
+		POSITION_NAME,
+		TRIAL_DATE,
+		WORK_DATE,
+		APP_ROLE,
+		app_resp,
+		POSTN_NAME,
+		DUTY_NAME,
+		STATUS
+		)
+		VALUES
+		(#{id},
+		upper(#{username}),
+		#{password},
+		#{firstName},
+		#{role},
+		#{contact},
+		#{contactPhone},
+		#{email},
+		#{empType},
+		#{basename},
+		#{formuladate},
+		#{hometown},
+		#{joblevel},
+		#{joindate},
+		#{nextproj},
+		#{positionname},
+		#{trialdate},
+		#{workdate},
+		#{appRole},
+		#{appResp},
+		#{postnName},
+		#{dutyName},
+		GET_LOV_VAL(#{usercorpid},'IMP_STATUS', '新建')
+		)
+	</insert>
+
+	<update id="userUpdate" parameterType="com.hand.base.user.model.User">
+		UPDATE LNK_EMP_INFO_TEMP
+		   SET username        = upper(#{username}),
+		       fst_name        = #{firstName},
+		       emp_role        = #{role},
+		       emp_contact     = #{contact},
+		       emp_tel         = #{contactPhone},
+		       emp_mail        = #{email},
+		       emp_type		   = #{empType},
+		       BASE_NAME       = #{basename},
+		       FORMULA_DATE    = #{formuladate},
+		       HOME_TOWN       = #{hometown},
+		       JOB_LEVEL       = #{joblevel},
+		       JOIN_DATE       = #{joindate},
+		       NEXT_PROJ       = #{nextproj},
+		       POSITION_NAME   = #{positionname},
+		       TRIAL_DATE      = #{trialdate},
+		       WORK_DATE       = #{workdate},
+		       corp_id         = #{corpid},
+		       app_role        = #{appRole},
+		       app_resp 	   = #{appResp},
+		       POSTN_NAME      = #{postnName},
+		       DUTY_NAME	   = #{dutyName}
+		 WHERE row_id = #{id}
+	</update>
+
+	<delete id="delUserById" parameterType="com.hand.base.user.model.User">
+		DELETE FROM
+		LNK_EMP_INFO_TEMP WHERE row_id = #{id}
+	</delete>
+    <select id="runUserCheck" statementType="CALLABLE">
+		CALL RUN_USER_IMP_CHECK(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+    </select>
+  
+    <select id="runNewUserForimp" statementType="CALLABLE">
+		CALL RUN_USER_IMP_INSERT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+     			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+    </select>
+</mapper> -->

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsSeriesCityMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSeriesCity" id="goodsSeriesCity"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.CITY_ID
+	cityId,
+	t1.CODE code,
+	t1.NAME name,
+	t.FP_DISPLAY fpDisplay,
+	t.DISPLAY_ORDER displayOrder,
+	t.STATUS status,
+	t.NOTES notes,
+	t.O2O_SERIES_ID o2oSeriesId,
+	t3.row_id orgId
+	</sql>
+
+	<sql id="fromSql">
+	FROM
+	CX_O_PROD_SE_CT t
+	LEFT JOIN CX_PROD_SERIES t1 ON t.O2O_SERIES_ID = t1.ROW_ID
+	left join (CX_O_AREA t2  LEFT JOIN lnk_org_ext T3 ON T3.ROW_ID = T2.T_ATTR_05) on t2.row_id=t.CITY_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSeriesCity" resultMap="goodsSeriesCity">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSeriesCity"
+		parameterType="com.hand.base.goods.model.GoodsSeriesCity">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		insert into CX_O_PROD_SE_CT
+		  (ROW_ID, CITY_ID, FP_DISPLAY , DISPLAY_ORDER,STATUS,NOTES,O2O_SERIES_ID)
+		values
+		  (#{id},#{cityId},#{fpDisplay},lnk_blank_str_to_null(#{displayOrder,jdbcType=FLOAT}),#{status},#{notes},#{o2oSeriesId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		update CX_O_PROD_SE_CT t
+		   set t.FP_DISPLAY = #{fpDisplay}, t.DISPLAY_ORDER = lnk_blank_str_to_null(#{displayOrder,jdbcType=FLOAT}),t.STATUS = #{status},
+		    t.NOTES = #{notes},t.O2O_SERIES_ID = #{o2oSeriesId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSeriesCity">
+		DELETE FROM CX_O_PROD_SE_CT WHERE ROW_ID = #{id}
+	</delete>
+	
+</mapper>

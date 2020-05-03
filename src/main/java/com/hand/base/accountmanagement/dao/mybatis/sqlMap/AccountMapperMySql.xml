@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.accountmanagement.dao.mybatis.mapper.AccountMapper">
+	<resultMap type="com.hand.base.accountmanagement.model.Account"
+		id="account"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            			as id                  /*记录编号*/
+		,T1.CREATED           			as created             /*创建时间*/
+		,T1.CREATED_BY      		  	as createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       			as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           			as corpid              /*公司账套*/
+		,T1.NAME   						as enterpriseName      /*商家名称*/
+		,T1.DEPOSIT_PAID				as deposit             /*押金*/
+		,T1.SERVICE_CHARGE_PROPORTION   as servChargeProportion /*手续费比例*/
+		,T1.NO_ARRIVAL_MONEY			as noArrivalMoney  		/*未入账金额*/ 
+		,T1.WITHDRAWALS_MONEY			as withdrawalsMoney		/*可提现金额*/ 
+		,T1.APPLY_MONEY 				as applyMoney			/*申请中金额*/ 
+		,T1.APPLY_SERVICE_CHARGE		as applyServCharge		/*申请中手续费*/ 
+		,T1.BEEN_WITHDRAWN_MONEY		as beenWithdrawalsMoney /*已提现金额*/ 
+		,T1.TOTAL_SERVICE_MONEY         as totalServiceMoney	/*手续费总计*/ 
+		,T1.SERVICE_CHARGE				as serviceCharge		/*手续费*/
+		,T1.APPLICANT_PHONE				as applicantPhone       /*手机号*/
+		,T1.APPLICANT_NAME 				as applicantName        /*姓名*/
+		,T1.BANK_ACCOUNT_ID				as bankAcctId           /*银行账户id*/   
+		,T2.CARD_NUMBER      			as cardNum				/*银行卡号*/
+		,T2.ACCOUNT_HOLDER   			as accntHolder			/*开户人*/
+		,T2.BANK             			as bank                 /*开户行*/
+		,T2.IS_DEFAULT					as isDefault            /*是否默认账户*/
+		,CONCAT(GET_LOV_NAME('101', 'TB_O2O_BANK',t2.bank),'-',t2.card_number) merchantAccount /*提现账户*/
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_ENTERPRISE T1
+	LEFT JOIN LNK_ENTERPRISE_ACCOUNT T2 ON T1.BANK_ACCOUNT_ID= T2.ROW_ID
+	WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!-- <if test="usercorpid !=101">
+		AND CORP_ID =#{usercorpid} 
+		</if> -->
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.accountmanagement.model.Account">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		order by T1.CREATED desc
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExample" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		AND T1.CODE =#{usercorpid}
+	</select>
+	
+	<select id="queryById" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<!-- 商家新建银行账户 -->
+	<insert id="accountInsert" parameterType="com.hand.base.accountmanagement.model.Account">
+		INSERT INTO LNK_ENTERPRISE_ACCOUNT(
+		 ROW_ID             /*记录ID*/
+		,CARD_NUMBER      	/*银行卡号*/
+		,ACCOUNT_HOLDER   	/*开户人ID*/
+		,BANK				/*银行独立源代码*/
+		,TYPE				/*支付方式 Alipay|Bankcard*/
+		,SEQUENCE			/*默认1*/
+		,BANK_TEL			/*银行预留手机号*/
+		) values (
+		 #{id}            
+		 ,#{cardNum}
+		 ,#{accntHolder}
+		 ,GET_LOV_val(#{usercorpid}, 'TB_O2O_BANK',#{bank})
+		 ,#{type}
+		 ,#{sequence}
+		 ,#{applicantPhone}
+		)
+	</insert>
+	
+	<!-- 商家修改银行账户 -->
+	<update id="accountUpdate" parameterType="com.hand.base.accountmanagement.model.Account">
+		UPDATE LNK_ENTERPRISE_ACCOUNT
+		SET        
+			row_id = #{id}      
+			<if test=" cardNum != null and cardNum != ''">
+			,CARD_NUMBER = #{cardNum}     	/*银行卡号*/
+			</if>
+			<if test=" accntHolder != null and accntHolder != ''">
+			,ACCOUNT_HOLDER	= #{accntHolder}   	/*开户人*/
+			</if>
+			<if test=" bank != null and bank != ''">
+			,BANK = #{bank}
+			</if>
+			<if test=" applicantPhone != null and applicantPhone != ''">
+			,BANK_TEL = #{applicantPhone}
+			</if>
+			<if test=" type != null and type != ''">
+			,TYPE = #{type}
+			</if>
+			<if test=" sequence != null and sequence != ''">
+			,SEQUENCE = #{sequence}
+			</if>
+		
+		WHERE row_id = #{id}
+	</update>
+	
+	<!-- 银行账户picklist -->
+	<select id="queryAccountPickListPage" resultMap="account"
+		parameterType="com.hand.base.accountmanagement.model.Account">
+		select 
+		t1.row_id 				id 
+		,T1.CREATED           	created             /*创建时间*/
+		,T1.CREATED_BY      	createdBy           /*创建者ID*/
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       	lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           	corpid              /*公司账套*/
+		,t1.account_holder 		accntHolder
+		,t1.bank 				bank
+		,t1.card_number 		cardNum
+		,t1.type 				type
+		,t1.sequence 			sequence
+		,t1.BANK_TEL 			applicantPhone
+		,CONCAT(GET_LOV_NAME('101', 'TB_O2O_BANK',t1.bank),'-',t1.card_number) merchantAccount
+		from lnk_enterprise_account t1
+		where 1=1
+		and t1.corp_id=#{usercorpid}
+		<if test=" attr1 == 'queryById' ">
+		and t1.row_id = #{id}
+		</if>
+		order by t1.CREATED desc
+		
+	</select>
+	
+	<!-- 更新银行账户id -->
+	<update id="update" parameterType="com.hand.base.accountmanagement.model.Account">
+		UPDATE LNK_ENTERPRISE SET
+		 BANK_ACCOUNT_ID     = #{id}   /*商家名称*/
+		WHERE ROW_ID=#{enterpId}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.accountmanagement.model.Account">
+		DELETE FROM LNK_ENTERPRISE_ACCOUNT WHERE ROW_ID=#{id}
+	</delete>		
+		
+	<!-- 查询支付信息中可提现的订单信息 -->
+	<select id="queryCanCashOrderPage" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select
+		t1.row_id 				id 
+		,t1.created  			created  	 		/*创建时间*/
+		,t1.created_by  		createdBy 			/*创建人*/
+		,t1.last_upd   			lastUpdated 		/*最后更新时间*/
+		,t1.last_upd_by 		lastUpdatedBy
+		,t1.CORP_ID  			corpid 				/*套账id*/
+		,t1.amount   			arrivedAmount 		/*金额*/
+		,t1.order_number    	receiptCode 		/*订单编号*/
+		,t1.FUNDING_DIRECTION  	fundingDirection 	/*资金往来方向*/
+		,t1.MERCHANT_ACCOUNT  	merchantAccount	/*商户账户*/
+		,t1.is_select   		isSelect			/*是否选择*/
+		,t1.bill_id  			billId		/*对账单号*/
+		,t1.funds_status   		status				/*资金状态*/
+		,t3.qty_req 		  	number      			/*数量*/
+		,t4.o2o_display_name 	prodName 			/*商品名称*/
+		from cx_o_pay_info t1
+		left join (s_order t2 left join (s_order_item t3 left join s_prod_int_x t4 on t3.prod_id=t4.row_id)
+		on t2.row_id =t3.order_id) on t1.order_id=t2.row_id
+		where 1=1
+		and (t1.funds_status ='can_cash' OR t1. bill_id=#{billId})
+		AND T1.CORP_ID  = #{usercorpid}
+	</select>
+	
+	<!-- 管理员查看提现对账单的详细信息时查询其中的订单信息状态为cashing 对账单id为当前对账单id -->
+	<select id="queryCashingOrderPage" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select
+		t1.row_id 				id 
+		,t1.created  			created  	 		/*创建时间*/
+		,t1.created_by  		createdBy 			/*创建人*/
+		,t1.last_upd   			lastUpdated 		/*最后更新时间*/
+		,t1.last_upd_by 		lastUpdatedBy
+		,t1.CORP_ID  			corpid 				/*套账id*/
+		,t1.amount   			arrivedAmount 		/*金额*/
+		,t1.order_number    	receiptCode 		/*订单编号*/
+		,t1.FUNDING_DIRECTION  	fundingDirection 	/*资金往来方向*/
+		,t1.MERCHANT_ACCOUNT  	merchantAccount	/*商户账户*/
+		,t1.is_select   		isSelect			/*是否选择*/
+		,t1.bill_id  			billId		/*对账单号*/
+		,t1.funds_status   		status				/*资金状态*/
+		,t3.qty_req 		  	number      			/*数量*/
+		,t4.o2o_display_name 	prodName 			/*商品名称*/
+		from cx_o_pay_info t1
+		left join (s_order t2 left join (s_order_item t3 left join s_prod_int_x t4 on t3.prod_id=t4.row_id)
+		on t2.row_id =t3.order_id) on t1.order_id=t2.row_id
+		where 1=1
+		and t1.funds_status ='cashing'
+		and t1.bill_id=#{billId}
+	</select>
+	
+	<select id="brandQueryCashingOrderPage" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select
+		t1.row_id 				id 
+		,t1.created  			created  	 		/*创建时间*/
+		,t1.created_by  		createdBy 			/*创建人*/
+		,t1.last_upd   			lastUpdated 		/*最后更新时间*/
+		,t1.last_upd_by 		lastUpdatedBy
+		,t1.CORP_ID  			corpid 				/*套账id*/
+		,t1.amount   			arrivedAmount 		/*金额*/
+		,t1.order_number    	receiptCode 		/*订单编号*/
+		,t1.FUNDING_DIRECTION  	fundingDirection 	/*资金往来方向*/
+		,t1.MERCHANT_ACCOUNT  	merchantAccount	/*商户账户*/
+		,t1.is_select   		isSelect			/*是否选择*/
+		,t1.bill_id  			billId		/*对账单号*/
+		,t1.funds_status   		status				/*资金状态*/
+		,t3.qty_req 		  	number      			/*数量*/
+		,t4.o2o_display_name 	prodName 			/*商品名称*/
+		from cx_o_pay_info t1
+		left join (s_order_x t2 left join (s_order_item_x t3 left join s_prod_int_x t4 on t3.prod_id=t4.row_id)
+		on t2.row_id =t3.order_id) on t1.order_id=t2.row_id
+		where 1=1
+		and t1.funds_status ='cashing'
+		and t1.bill_id=#{billId}
+	</select>
+	
+	<!-- 点击查看订单信息时查看订单明细信息 -->
+	<select id="queryOrderInfoPage" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select 
+			t1.order_number         /*订单编号*/
+			,t3.`NAME`				/*消费者姓名*/
+			,t4.CONTACT				/*收货人姓名*/
+			,t4.CONTACT_PHONE		/*收货人电话*/
+			,CONCAT(t4.PROVICE,T4.CITY,T4.DISTRICT,T4.ADDRESS)  address /*收货地址*/
+			,t2.created				/*下单时间*/
+			,t1.amount				/*订单金额*/
+			,t1.type				/*支付类型*/
+			from cx_o_pay_info t1
+			left join (s_order t2 LEFT JOIN (lnk_accnt t3 LEFT JOIN CX_O_ADDRESS t4 on t4.customer_id=t3.row_id)
+			 on t3.row_id=t2.customer_id) on t1.order_id=t2.row_id
+	</select>
+	
+	<!-- 各类金额统计 -->
+	<select id="querySumMoney" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select SUM(beenWithdrawalsMoney)   		beenWithdrawalsMoney 	/*已提现金额*/
+			,SUM(applyMoney)					applyMoney				/*申请中金额*/
+			,SUM(noArrivalMoney)				noArrivalMoney  		/*未入账金额*/
+			,SUM(withdrawalsMoney)				withdrawalsMoney		/*可提现金额*/
+			,SUM(deposit)						deposit            	 	/*押金*/
+			,SUM(totalServiceMoney)				totalServiceMoney		/*手续费总计*/
+			,SUM(applyServCharge) 				applyServCharge			/*申请中手续费*/
+			from(
+				/*已到账金额合计*/
+				select sum(ARRIVED_AMOUNT) beenWithdrawalsMoney /*已到账*/,'0' applyMoney,'0' noArrivalMoney,'0' withdrawalsMoney,'0' deposit,'0' totalServiceMoney /*手续费*/,'0' applyServCharge
+				from LNK_BILL_INFO
+				WHERE 1=1
+				and CORP_ID  = #{corpid}
+				and STATUS ='transfer_success'
+			union 
+				/*申请中金额合计*/
+				SELECT '0' beenWithdrawnmoney,sum(ARRIVED_AMOUNT) applyMoney /*申请中*/,'0' noArrivalMoney,'0' withdrawalsMoney,'0' deposit,'0' totalServiceMoney /*手续费*/,'0' applyServCharge
+				from LNK_BILL_INFO
+				WHERE 1=1
+				and CORP_ID  = #{corpid}
+				and STATUS !='transfer_success'
+			union 
+				/*待入账金额合计*/
+				SELECT '0' beenWithdrawnmoney,'0' applyMoney,sum(amount) noArrivalMoney /*待入账*/,'0' withdrawalsMoney,'0' deposit,'0' totalServiceMoney /*手续费*/,'0' applyServCharge
+				from cx_o_pay_info 
+				where 1=1
+				AND CORP_ID  =#{corpid}
+				and funds_status ='wait_enter_account'
+			union 
+				/*可提现金额合计*/
+				SELECT '0' beenWithdrawnmoney,'0' applyMoney,'0' noArrivalMoney,sum(amount) withdrawalsMoney /*可提现*/,'0' deposit,'0' totalServiceMoney /*手续费*/,'0' applyServCharge
+				from cx_o_pay_info 
+				where 1=1
+				AND CORP_ID  =#{corpid}
+				and funds_status ='can_cash'
+			union 
+				/*押金合计*/
+				SELECT '0' beenWithdrawnmoney,'0' applyMoney,'0' noArrivalMoney,	'0' withdrawalsMoney,sum(amount) deposit /*押金*/,'0' totalServiceMoney /*手续费*/,'0' applyServCharge
+				from cx_o_pay_info 
+				where 1=1
+				AND CORP_ID  =#{corpid}
+				AND FUNDS_TYPE  ='deposit'
+			union 
+				/*已提现手续费合计*/
+				SELECT '0' beenWithdrawnmoney,'0' applyMoney /*申请中*/,'0' noArrivalMoney,'0' withdrawalsMoney,'0' deposit,sum(service_charge) totalServiceMoney /*手续费*/,'0' applyServCharge
+				from LNK_BILL_INFO
+				WHERE 1=1
+				and CORP_ID  = #{corpid}
+				and STATUS ='transfer_success'
+			union 
+				/*申请中手续费合计*/
+				SELECT '0' beenWithdrawnmoney,'0' applyMoney /*申请中*/,'0' noArrivalMoney,'0' withdrawalsMoney,'0' deposit,'0' totalServiceMoney /*手续费*/,sum(service_charge) applyServCharge
+				from LNK_BILL_INFO
+				WHERE 1=1
+				and CORP_ID  = #{corpid}
+				and STATUS !='transfer_success'
+		) T
+	</select>
+	<!-- 统计账单信息将其更新到企业表 -->
+	<select id="sumAndUpdateEnterprise" statementType="CALLABLE">
+         CALL RUN_UPDATE_FUND_INFO(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+		         					#{msgData,mode=OUT,jdbcType=VARCHAR},
+		         					#{param1,mode=IN,jdbcType=VARCHAR},
+		         					#{param2,mode=IN,jdbcType=VARCHAR},
+		         					#{param3,mode=IN,jdbcType=VARCHAR},
+		         					#{param4,mode=IN,jdbcType=VARCHAR},
+		         					#{param5,mode=IN,jdbcType=VARCHAR})
+	</select>
+	<!-- 可提现金额合计 -->
+	<select id="queryWithDrawalsMoney" resultMap="account" parameterType="com.hand.base.accountmanagement.model.Account">
+		select 
+		 	amount               withdrawalsMoney /*资金金额*/
+	       ,FUNDING_DIRECTION    fundingDirection /*资金往来方向*/
+		from cx_o_pay_info
+		where 1=1
+		and CORP_ID  = #{corpid}
+		and funds_status ='can_cash' 
+	</select>
+	
+	<select id="removalDuplicateBankCard" resultType="Integer" parameterType="com.hand.base.accountmanagement.model.Account">
+		select count(*)
+		from lnk_enterprise_account
+		where 1=1
+		and card_number = #{cardNum}
+		and corp_id = ${corpid}
+	</select>
+	
+</mapper>

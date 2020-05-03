@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.TransactionRecordMapper">
+	<resultMap type="com.hand.base.order.model.TransactionRecord" id="transactionRecord"></resultMap>
+	<select id="queryByExamplePage" resultMap="transactionRecord" parameterType="com.hand.base.order.model.TransactionRecord">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,/*交易时间*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.T_ATTR_01 tAttr01,/*交易类型*/
+			t1.STATUS status,/*状态*/
+			t1.PAYMENT_ACCT paymentAcct,/*支付账号*/
+			t1.RECEIVE_ACCT receiveAcct,/*收款账号*/
+			t1.AMOUNT amount,/*交易金额*/
+			t2.ORDER_NUM orderNum,/*订单编号*/
+			t4.CITY city,/*城市*/
+			date_format(t2.CREATED,'%Y-%m-%d %H:%i:%s') orderTime,/*下单时间*/
+			date_format(t3.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			t3.ATTRIB_48 attrib48,/*订单状态*/
+			t3.ATTRIB_07 attrib07,/*物流状态*/
+			t3.ATTRIB_39 name,/*商户名称*/
+			t5.OU_NUM ouNum,/*商户编码*/
+			t5.O2O_CONTACT o2oContact,/*联系人*/
+			t5.O2O_CONTACT_PHONE o2oContactPhone,/*联系人电话*/
+			t5.O2O_ALIPAY o2oAlipay,/*支付宝账号*/
+			t5.O2O_ACCONT_NAME o2oAccontName,/*开户人*/
+			t5.O2O_BANK o2oBank,/*发卡银行*/
+			t5.O2O_CREDIT_CARD o2oCreditCard,/*银行卡号*/
+			t1.PAYMENT_NUMBER paymentNumber,/*支付流水号*/
+			t1.TYPE type, /*支付方式*/
+			t6.T_ATTR_05 orgId
+		FROM
+			CX_O_PAY_INFO t1
+		LEFT JOIN S_ORDER t2 ON t2.ROW_ID = t1.ORDER_ID
+		LEFT JOIN S_ORDER_X t3 ON t3.ROW_ID = t1.ORDER_ID
+		LEFT JOIN CX_O_ADDRESS t4 ON t4.ROW_ID = t3.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t5 ON t5.ROW_ID = t3.ATTRIB_41
+		LEFT JOIN cx_o_area t6 on t3.X_ATTRIB_68 = t6.row_id
+		WHERE 1 = 1
+		and t2.row_id is not NULL
+		<if test="attr1 != null and attr1 != ''">
+		and t1.CREATED &gt;= #{attr1}
+		</if>
+		<if test="attr2 != null and attr2 != ''">
+		and t1.CREATED &lt;= #{attr2}
+		</if>
+		<if test="attr3 != null and attr3 != ''">
+		and t1.AMOUNT = #{attr3}
+		</if>
+		<if test="attr4 != null and attr4 != ''">
+		and t1.PAYMENT_NUMBER = #{attr4}
+		</if>
+		<if test="tAttr01 != null and tAttr01 != ''">
+		and t1.T_ATTR_01 = #{tAttr01}
+		</if>
+		<if test="attr5 != null and attr5 != ''">
+		and (t1.STATUS = #{attr5} or t1.STATUS = GET_LOV_NAME(#{usercorpid},'TB_O2O_PAYMENT_STATUS',#{attr5}))
+		</if>
+		<if test="type != null and type != ''">
+		and t1.TYPE = #{type}
+		</if>
+		<if test="orderNum != null and orderNum != ''">
+		and t2.ORDER_NUM LIKE CONCAT('%',#{orderNum},'%')
+		</if>
+		<if test="attrib48 != null and attrib48 != ''">
+		and t3.ATTRIB_48 = #{attrib48}
+		</if>
+		<if test="attrib07 != null and attrib07 != ''">
+		and t3.ATTRIB_07 = #{attrib07}
+		</if>
+		<if test="o2oContactPhone != null and o2oContactPhone != ''">
+		and t5.O2O_CONTACT_PHONE = #{o2oContactPhone}
+		</if>
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="transactionRecord" parameterType="com.hand.base.order.model.TransactionRecord">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,/*交易时间*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.T_ATTR_01 tAttr01,/*交易类型*/
+			t1.STATUS status,/*状态*/
+			t1.PAYMENT_ACCT paymentAcct,/*支付账号*/
+			t1.RECEIVE_ACCT receiveAcct,/*收款账号*/
+			t1.AMOUNT amount,/*交易金额*/
+			t3.ORDER_NUM orderNum,/*订单编号*/
+			t4.CITY city,/*城市*/
+			date_format(t3.CREATED,'%Y-%m-%d %H:%i:%s') orderTime,/*下单时间*/
+			date_format(t3.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			t3.ATTRIB_48 attrib48,/*订单状态*/
+			t3.ATTRIB_07 attrib07,/*物流状态*/
+			t3.ATTRIB_39 name,/*商户名称*/
+			t5.OU_NUM ouNum,/*商户编码*/
+			t5.O2O_CONTACT o2oContact,/*联系人*/
+			t5.O2O_CONTACT_PHONE o2oContactPhone,/*联系人电话*/
+			t5.O2O_ALIPAY o2oAlipay,/*支付宝账号*/
+			t5.O2O_ACCONT_NAME o2oAccontName,/*开户人*/
+			t5.O2O_BANK o2oBank,/*发卡银行*/
+			t5.O2O_CREDIT_CARD o2oCreditCard,/*银行卡号*/
+			t1.PAYMENT_NUMBER paymentNumber,/*支付流水号*/
+			t1.TYPE type, /*支付方式*/
+			t6.T_ATTR_05 orgId
+		FROM
+			CX_O_PAY_INFO t1
+		LEFT JOIN S_ORDER_X t3 ON t3.ROW_ID = t1.ORDER_ID
+		LEFT JOIN CX_O_ADDRESS t4 ON t4.ROW_ID = t3.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t5 ON t5.ROW_ID = t3.ATTRIB_41
+		LEFT JOIN cx_o_area t6 on t3.X_ATTRIB_68 = t6.row_id
+		where t3.order_type = 'brand'
+		<if test="attr1 != null and attr1 != ''">
+		and t1.CREATED &gt;= #{attr1}
+		</if>
+		<if test="attr2 != null and attr2 != ''">
+		and t1.CREATED &lt;= #{attr2}
+		</if>
+		<if test="attr3 != null and attr3 != ''">
+		and t1.AMOUNT = #{attr3}
+		</if>
+		<if test="attr4 != null and attr4 != ''">
+		and t1.PAYMENT_NUMBER = #{attr4}
+		</if>
+		<if test="tAttr01 != null and tAttr01 != ''">
+		and t1.T_ATTR_01 = #{tAttr01}
+		</if>
+		<if test="attr5 != null and attr5 != ''">
+		and (t1.STATUS = #{attr5} or t1.STATUS = GET_LOV_NAME(#{usercorpid},'TB_O2O_PAYMENT_STATUS',#{attr5}))
+		</if>
+		<if test="type != null and type != ''">
+		and t1.TYPE = #{type}
+		</if>
+		<if test="orderNum != null and orderNum != ''">
+		and t3.ORDER_NUM LIKE CONCAT('%',#{orderNum},'%')
+		</if>
+		<if test="attrib48 != null and attrib48 != ''">
+		and t3.ATTRIB_48 = #{attrib48}
+		</if>
+		<if test="attrib07 != null and attrib07 != ''">
+		and t3.ATTRIB_07 = #{attrib07}
+		</if>
+		<if test="o2oContactPhone != null and o2oContactPhone != ''">
+		and t5.O2O_CONTACT_PHONE = #{o2oContactPhone}
+		</if>
+		order by t1.CREATED desc
+	</select>
+</mapper>

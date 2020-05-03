@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.ProductDetailMapper">
+	<resultMap type="com.hand.base.goods.model.ProductDetail" id="productDetail"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+		T.ROW_ID as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY as lastUpdatedBy,
+		T.product_pic_id as productPicId,
+		T2.path as productPic,
+		T.product_pic_type as productPicType,
+		T.comments as comments,
+		T.product_id as productId
+	</sql>
+
+	<sql id="fromSql">
+	from lnk_product_detail T left join cx_o_img t2 on t.product_pic_id = t2.row_id
+  	</sql>
+
+  	<sql id="whereAllSql">
+  		where 1 = 1
+		<if test="productPicType != null and productPicType != '' ">
+			and T.product_pic_type = #{productPicType}
+		 </if>
+  	</sql>
+
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.ProductDetail" resultMap="productDetail">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+
+  	<select id="queryById" resultType="com.hand.base.goods.model.ProductDetail"
+		parameterType="com.hand.base.goods.model.ProductDetail">
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.goods.model.ProductDetail">
+		insert into lnk_product_detail
+		  (ROW_ID, product_pic_id, product_pic_type, comments,product_id)
+		values
+		  (#{id},#{productPicId},#{productPicType},#{comments},#{productId})
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.goods.model.ProductDetail">
+		update lnk_product_detail t
+		   set t.product_pic_id = #{productPicId}, t.product_pic_type = #{productPicType},t.comments=#{comments},t.product_id=#{productId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.ProductDetail">
+		DELETE FROM lnk_product_detail WHERE ROW_ID = #{id}
+	</delete>
+
+</mapper>

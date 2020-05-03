@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.postn.mapper.ApprovalPostnTypeMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.basic.model.ListOfValue" id="lov"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="lov" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT
+			t1.row_id ID,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1. NAME NAME,
+			t1. TYPE TYPE,
+			t1.val val,
+			t1.seq seq,
+			t1.lang_id langId,
+			t1.sap_val sapVal,
+			t1.parent_id parentId,
+			t1.corp_id corpid,
+			t1.active_flag activeFlag
+		FROM
+			LNK_LIST_OF_VAL t1
+		WHERE
+			t1.active_flag = 'Y'
+		AND t1.corp_id = #{usercorpid}
+		AND t1.type = 'POSTN_TYPE'
+		and not exists (select 1
+	          from LNK_INTER_APPROVAL_POSTNTYPE c2
+	         where t1.row_id = c2.POSTN_TYPE_ID
+	           and c2.approval_node_id = #{mvgParentId})
+		ORDER BY
+			t1.seq ASC
+  </select>
+  
+  <select id="queryRightListPage" resultMap="lov" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT
+			t1.row_id ID,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1. NAME NAME,
+			t1. TYPE TYPE,
+			t1.val val,
+			t1.seq seq,
+			t1.lang_id langId,
+			t1.sap_val sapVal,
+			t1.parent_id parentId,
+			t1.corp_id corpid,
+			t1.active_flag activeFlag,
+			 (case
+		         when T3.postn_type_id = t1.row_id then
+		          'Y'
+		         else
+		          'N'
+		       end) isDefault
+		FROM
+			LNK_LIST_OF_VAL t1,
+			LNK_INTER_APPROVAL_POSTNTYPE t2 left join
+			    	LNK_APPROVAL_FLOW_NODE t3
+			    on T2.approval_node_id = T3.ROW_ID
+		WHERE t1.row_id = t2.POSTN_TYPE_ID
+		and	t1.active_flag = 'Y'
+		AND t1.corp_id = #{usercorpid}
+		AND T2.approval_node_id = #{mvgParentId}
+		ORDER BY
+			t1.seq ASC
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_APPROVAL_POSTNTYPE
+		  (row_id,
+		   approval_node_id,
+		   postn_type_id)
+		values
+		  (#{id},
+		   #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_APPROVAL_POSTNTYPE
+		 WHERE postn_type_id = #{mvgSubsetId}
+		   and approval_node_id = #{mvgParentId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_APPROVAL_POSTNTYPE WHERE approval_node_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

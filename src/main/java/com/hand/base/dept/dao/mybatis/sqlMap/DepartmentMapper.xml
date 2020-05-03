@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.dept.dao.mybatis.mapper.DepartmentMapper">
+	<resultMap type="com.hand.base.dept.model.Department" id="department"></resultMap>
+
+	<sql id="queryAllSql">
+		select t1.row_id id,
+		       t1.created_by createdBy,
+		       t1.last_upd_by lastUpdatedBy,
+		       TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		       t1.created created,
+		       t1.CORP_ID corpid,
+		       t3.name corpName,
+		       t1.org_code deptCode,
+		       t1.org_name text,
+		       t1.is_org isOrg,
+		       t1.org_type deptType,
+		       t1.parent_org_id parentDeptId,
+		       t1.org_id orgId,
+		       (SELECT o.org_name FROM LNK_ORG_EXT o where o.row_id = t1.org_id) orgName,
+		       t1.is_effective isEffective,
+		       t1.integration_id integrationId,
+		       t1.source source,
+		       t2.org_name parentDeptName
+	</sql>
+
+	<sql id="fromTableSql">
+		  from LNK_ORG_EXT t1, LNK_ORG_EXT t2,lnk_enterprise t3 
+		 where 1 = 1
+		   and t1.corp_id = #{usercorpid}
+		   and t1.parent_org_id = t2.row_id(+)
+		   and t1.corp_id = t3.code(+)
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+		<if test="id != null and id != '' ">
+			and t1.row_id = #{id}
+		</if>
+		<if test="isOrg != null and isOrg != '' ">
+			and t1.is_org = #{isOrg}
+		</if>
+		<if test="text != null and text != '' ">
+			and t1.org_name = #{text}
+		</if>
+		<if test="deptCode != null and deptCode != '' ">
+			and t1.org_code = #{deptCode}
+		</if>
+		<if test="isEffective != null and isEffective != '' ">
+			and t2.is_effective = GET_LOV_VAL(#{usercorpid}, 'IS_EFFECTIVE',#{isEffective})
+		</if>
+		<if test="parentDeptId != null and parentDeptId != '' ">
+			and t1.parent_org_id = #{parentDeptId}
+		</if>
+		<if test="parentDeptName != null and parentDeptName != '' ">
+			and t2.org_name = #{parentDeptName}
+		</if>
+		<if test="integrationId != null and integrationId != '' ">
+			and t1.integration_Id = #{integrationId}
+		</if>
+  	</sql>
+  	
+	<select id="queryById" resultType="com.hand.base.dept.model.Department"
+		parameterType="com.hand.base.dept.model.Department">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.dept.model.Department">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录,不分页 -->
+	<select id="queryAll" resultMap="department"
+		parameterType="com.hand.base.dept.model.Department">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_org_id is not null
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="department"
+		parameterType="com.hand.base.dept.model.Department">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_org_id is not null
+	</select>
+  		
+	<delete id="deleteById" parameterType="com.hand.base.dept.model.Department">
+		DELETE FROM LNK_ORG_EXT WHERE ROW_ID = #{id}
+	</delete>
+  
+	<insert id="insert" parameterType="com.hand.base.dept.model.Department">
+		insert into LNK_ORG_EXT
+		  (ROW_ID,
+		   org_code,
+		   org_name,
+		   org_type,
+		   parent_org_id,
+		   org_id,
+		   is_org,
+		   is_effective,
+		   integration_id,
+		   source)
+		values
+		  (#{id},
+		   #{deptCode},
+		   #{text},
+		   #{deptType},
+		   #{parentDeptId},
+		   <!-- (SELECT n1.org_id FROM LNK_ORG_EXT n1 where n1.row_id = #{parentDeptId}), -->
+		   #{orgId},
+		   #{isOrg},
+		   GET_LOV_val(#{usercorpid},'IS_EFFECTIVE',#{isEffective}),
+		   #{integrationId},
+		   #{source}
+		   )
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.dept.model.Department">
+		UPDATE LNK_ORG_EXT
+		   SET org_code      = #{deptCode},
+		       org_name      = #{text},
+		       parent_org_id = #{parentDeptId},
+		       org_type      = #{deptType},
+		       org_id		 = #{orgId},
+			   <!-- org_id 		 = case
+				                  when is_org = 'Y' then
+				                   row_id
+				                  else
+				                   (SELECT n1.org_id
+				                      FROM LNK_ORG_EXT n1
+				                     where n1.row_id = #{parentDeptId})
+				                end, -->
+		       is_effective  = GET_LOV_val(#{usercorpid},  'IS_EFFECTIVE',#{isEffective})
+		 WHERE row_id = #{id}
+	</update>
+
+	<select id="queryRoot" resultType="com.hand.base.dept.model.Department" parameterType="com.hand.base.dept.model.Department">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	  	and t1.corp_id = #{usercorpid}
+	  	and t1.parent_org_id is null
+	</select>
+  
+	<!-- 查询非子职位 -->
+	<select id="queryDepartmentListRemoveIdAndChildrenPage" resultMap="department" parameterType="com.hand.base.dept.model.Department">
+		select t1.row_id id,
+		       t1.created created,
+		       t1.org_code deptCode,
+		       t1.org_name text,
+		       t1.is_org isOrg,
+		       t1.org_id orgId,
+		       (select org_name from LNK_ORG_EXT where row_id = t1.org_id) orgName,
+		       t1.org_type deptType
+		  from (select *
+		          from LNK_ORG_EXT s1
+		         where s1.is_effective = 'Y'
+		           and s1.corp_id = #{usercorpid}
+		           and s1.row_id not in
+		               (select n1.row_id
+		                  from LNK_ORG_EXT n1
+		                 start with n1.row_id = #{id}
+		                connect by n1.parent_org_id = prior n1.row_id)) t1
+		 where t1.row_id != #{id}
+		 <if test="isOrg != null and isOrg != '' ">
+			and t1.is_org = #{isOrg}
+		</if>
+	</select>
+</mapper>

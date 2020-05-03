@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.promotion.dao.mybatis.mapper.GroupTeamsMapper">
+  <resultMap type="com.hand.base.promotion.model.GroupTeams" id="groupTeams"></resultMap>
+	<sql id="querySchemaSql">
+		SELECT
+			t1.ROW_ID id,
+			date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') created,/*成团时间*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.city_id cityId,
+			t2.NAME activityName,/*促销活动名称*/
+			t2.CODE code,/*促销活动编码*/
+			t2.schema_id schemaId,/*活动方案ID*/
+			t5.O2O_DISPLAY_NAME buyMerchName,/*购买商品名称*/
+			t5.O2O_INT_CODE merchCode,/*商品编码*/
+			t4.groups_number groupsNumber,/*拼团人数*/
+			t1.team_num teamNum,/*已拼人数*/
+			(t4.groups_number - t1.team_num) lackNum,/*未拼人数*/
+			t2.type type,/*促销形式*/
+			t1.effective_duration effectiveDuration,/*成团有效时间*/
+			t1.STATUS status,/*拼团状态*/
+			t1.activity_id activityId,
+			t1.merchandise_id merchandiseId,
+			t6.row_id orgId
+	</sql>
+	
+	<sql id="fromSchemaSql">
+		FROM
+			lnk_group_list t1
+		LEFT JOIN (
+			cx_o_pmo_sp t2
+			LEFT JOIN (cx_o_area t3 LEFT JOIN lnk_org_ext t6 ON t6.ROW_ID = t3.T_ATTR_05) ON t2.city_id = t3.row_id
+			LEFT JOIN (
+				CX_O_PMO_SP_LN t4
+				LEFT JOIN S_PROD_INT_X t5 ON t4.MERCHANDISE_ID = t5.ROW_ID
+			) ON t4.head_id = t2.row_id
+		) ON t2.ROW_ID = t1.activity_id
+	</sql>
+	
+	<sql id="whereSchemaSql">
+		WHERE 1 = 1
+		AND t2.TYPE = 'FightGroup'
+		AND t4.merchandise_id = t1.merchandise_id
+		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+	</sql>
+
+	<select id="queryByExamplePage" resultMap="groupTeams" parameterType="com.hand.base.promotion.model.GroupTeams">
+		<include refid="querySchemaSql"/>
+		<include refid="fromSchemaSql"/>
+		<include refid="whereSchemaSql"/>
+		order by t1.CREATED desc
+	</select>
+	
+  	<insert id="insert" parameterType="com.hand.base.promotion.model.GroupTeams">
+  		insert into lnk_group_list(
+  				row_id,
+  				city_id,
+  				effective_duration,
+  				status,
+  				team_num,
+  				activity_id,
+  				merchandise_id
+  			)
+  			values(
+  				#{id},
+  				#{cityId},
+  				#{effectiveDuration},
+  				#{status},
+  				#{teamNum},
+  				#{activityId},
+  				#{merchandiseId}
+  			)
+	</insert>
+	
+	<insert id="update" parameterType="com.hand.base.promotion.model.GroupTeams">
+		update lnk_group_list 
+			set 
+			city_id=#{cityId},
+  			effective_duration=#{effectiveDuration},
+  			status=#{status},
+  			team_num=#{teamNum},
+  			activity_id=#{activityId},
+  			merchandise_id=#{merchandiseId}
+	</insert>
+	
+	<select id="queryById" resultMap="groupTeams" parameterType="com.hand.base.promotion.model.GroupTeams">
+		<include refid="querySchemaSql"/>
+		<include refid="fromSchemaSql"/>
+		<include refid="whereSchemaSql"/>
+		AND t1.ROW_ID=#{id}
+	</select>
+	
+	<delete id="deleteById" parameterType="com.hand.base.promotion.model.GroupTeams">
+		
+	</delete>
+</mapper>

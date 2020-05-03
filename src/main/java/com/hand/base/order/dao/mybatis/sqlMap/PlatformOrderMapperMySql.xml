@@ -1,0 +1,774 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.PlatformOrderMapper">
+	<resultMap type="com.hand.base.order.model.PlatformOrder" id="platformOrder"></resultMap>
+	<resultMap type="com.hand.base.order.model.InterfaceOrder" id="interfaceOrder"></resultMap>
+	<resultMap type="com.hand.base.order.model.InterfaceOrderLine" id="interfaceOrderLine"></resultMap>
+	<resultMap type="com.hand.base.basic.model.ListOfValue" id="listOfValue"></resultMap>
+	
+	 <resultMap type="com.hand.base.order.model.InterfaceOrder" id="interfaceOrderResult">
+  		<id column="id" property="id"/>
+  		<result property="corpid" column="corpid"/>
+		<result property="orderNum" column="orderNum"/>
+		<result property="customerName" column="customerName"/>
+		<result property="contact" column="contact"/>
+		<result property="province" column="province"/>
+		<result property="city" column="city"/>
+		<result property="district" column="district"/>
+		<result property="address" column="address"/>
+		<result property="contactPhone" column="contactPhone"/>
+		<result property="businessName" column="businessName"/>
+		<result property="orderStatus" column="orderStatus"/>
+		<result property="orderTime" column="orderTime"/>
+		<result property="orderAmount" column="orderAmount"/>
+		<result property="payType" column="payType"/>
+		<result property="payTime" column="payTime"/>
+		<result property="logisticsStatus" column="logisticsStatus"/>
+		<result property="logisticsCompany" column="logisticsCompany"/>
+		<result property="logisticsNum" column="logisticsNum"/>
+		<result property="shippingTime" column="shippingTime"/>
+		<result property="allDiscountAmount" column="allDiscountAmount"/>
+		<result property="customerComments" column="customerComments"/>
+		<result property="cancelTime" column="cancelTime"/>
+		<result property="gightGroups" column="gightGroups"/>
+		<result property="couponAmount" column="couponAmount"/>
+		<result property="orderComments" column="orderComments"/>
+		<result property="logisticsPayAmount" column="logisticsPayAmount"/>
+		 
+		 <collection property="interfaceOrderLineList" ofType="com.hand.base.order.model.InterfaceOrderLine">
+			<id property="lineId" column="lineId"/>
+			<result property="productName" column="productName"/>
+			<result property="productCode" column="productCode"/>
+			<result property="marketPrice" column="marketPrice"/>
+			<result property="qtyReq" column="qtyReq"/>
+			<result property="marketPriceAmount" column="marketPriceAmount"/>
+			<result property="dealPrice" column="dealPrice"/>
+			<result property="dealPriceAmount" column="dealPriceAmount"/>
+			<result property="giftFlag" column="giftFlag"/>
+			<result property="promotionName" column="promotionName"/>
+			<result property="itemDiscountAmount" column="itemDiscountAmount"/>
+			<result property="couponName" column="couponName"/>
+			<result property="couponDiscount" column="couponDiscount"/>
+			<result property="logisticsPay" column="logisticsPay"/>
+			<result property="orderId" column="orderId"/>
+		 </collection>
+		 
+    </resultMap>
+	
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,/*与子级相关字段*/
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.O2O_PAY_TYPE o2oPayType,/*支付方式*/
+			t2.ATTRIB_09 attrib09,/*是否O2O订单*/
+			t3.NAME merchantName,/*商户名称*/
+			t2.ATTRIB_48 attrib48,/*订单状态*/
+			t2.ATTRIB_07 attrib07,/*物流状态*/
+			date_format(t2.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			ROUND(t2.ATTRIB_22,2) attrib22,/*买赠优惠金额*/
+			date_format(t1.created,'%Y-%m-%d %H:%i:%s') created,/*下单时间*/
+			t1.ORDER_NUM orderNum,/*订单编号*/
+			t2.ATTRIB_54 attrib54,/*外部订单编号*/
+			t4.NAME customerName,/*消费者名称*/
+			t4.OU_NUM customerOuNum,/*消费者编码*/
+			t4.MAIN_PH_NUM mainPhNum,/*消费者电话*/
+			t2.ATTRIB_39 attrib39,/*店铺名称*/
+			
+			IF('send_rstrant' = t1.order_type, t2.ATTRIB_34, t5.CONTACT) contact,/*收货人*/
+			IF('send_rstrant' = t1.order_type, t2.ATTRIB_35, t5.CONTACT_PHONE) contactPhone,/*收货人电话*/
+			
+			t2.ATTRIB_36 attrib36,/*省/直辖市*/
+			t2.ATTRIB_37 attrib37,/*城市*/
+			t2.ATTRIB_38 attrib38,/*区/县*/
+			t2.ATTRIB_01 attrib01,/*详细地址*/
+			t5.GPS_LONGITUDE gpsLongitude,/*GPS经度*/
+			t5.GPS_LATITUDE gpsLatitude,/*GPS纬度*/
+			ROUND(t2.ATTRIB_14,2) attrib14,/*商品总价*/
+			ROUND(t2.O2O_TIP,2) o2oTip,/*小费*/
+			ROUND(t2.ATTRIB_21,2) attrib21,/*满减优惠金额*/
+			ROUND((
+				IFNULL (t2.ATTRIB_16, 0) + IFNULL (t2.ATTRIB_20, 0) + IFNULL (t2.ATTRIB_22, 0) + IFNULL (t2.ATTRIB_21, 0)
+			),2) offerSum,/*优惠总金额*/
+			ROUND(t2.ATTRIB_16,2) attrib16,/*特价优惠金额*/
+			ROUND(t2.ATTRIB_20,2) attrib20,/*优惠券金额*/
+			ROUND(t2.ATTRIB_17,2) attrib17,/*订单总金额*/
+			t2.ATTRIB_47 attrib47,/*买家留言*/
+			t2.ATTRIB_40 attrib40,/*配送方式*/
+			t3.OU_NUM merchantOuNum,/*商户编码*/
+			t3.O2O_CONTACT_PHONE o2oContactPhone,/*商户电话*/
+			t3.O2O_STORE_TYPE o2oStoreType,/*商户类型*/
+			CONCAT(t6.LAST_NAME, t6.FST_NAME) distributor,/*配送员*/
+			t7.ATTRIB_42 attrib42,/*配送员电话*/
+			t2.ATTRIB_44 attrib44,/*O2O订单分类*/
+			t2.O2O_FORCED_PICKUP o2oForcedPickup,/*是否兜底订单*/
+			t2.ATTRIB_55 attrib55,/*是否秒杀订单*/
+			t2.ATTRIB_50 attrib50,/*是否团购订单*/
+			t2.ATTRIB_43 attrib43,/*校验码*/
+			t2.ATTRIB_49 attrib49,/*校验状态*/
+			date_format(t2.ATTRIB_26,'%Y-%m-%d %H:%i:%s') attrib26,/*付款时间*/
+			date_format(t2.ATTRIB_57,'%Y-%m-%d %H:%i:%s') cancelTime,/*取消时间*/
+			t2.cancel_reason cancelReason,/*取消原因*/
+			date_format(t2.ATTRIB_27,'%Y-%m-%d %H:%i:%s') attrib27,/*接单时间*/
+			date_format(t2.ATTRIB_28,'%Y-%m-%d %H:%i:%s') attrib28,/*配送时间*/
+			t2.ATTRIB_46 attrib46,/*结算状态*/
+			t2.ATTRIB_53 attrib53,/*来源系统*/
+			t8.NAME typeName,/*类型*/
+			date_format(t2.ATTRIB_30,'%Y-%m-%d %H:%i:%s') attrib30,/*第一轮推送时间*/
+			date_format(t2.ATTRIB_31,'%Y-%m-%d %H:%i:%s') attrib31,/*第二轮推送时间*/
+			date_format(t2.ATTRIB_32,'%Y-%m-%d %H:%i:%s') attrib32,/*第三轮推送时间*/
+			t2.REFUSE_REFUND_REASON refuseRefundReason,/*拒绝退款、取消理由*/
+			date_format(t2.REFUSE_REFUND_DATE,'%Y-%m-%d %H:%i:%s') refuseRefundDate,/*拒绝、确认取消时间*/
+			ROUND(t2.ATTRIB_59,2) attrib59,/*特价费用商户分摊*/
+			ROUND(t2.ATTRIB_23,2) attrib23,/*优惠券费用商户分摊*/
+			ROUND(t2.ATTRIB_25,2) attrib25,/*买赠费用商户分摊*/
+			ROUND(t2.ATTRIB_24,2) attrib24,/*满减费用商户分摊*/
+			ROUND((
+				IFNULL (t2.ATTRIB_23, 0) + IFNULL (t2.ATTRIB_59, 0) + IFNULL (t2.ATTRIB_25, 0) + IFNULL (t2.ATTRIB_24, 0)
+			),2) merchantChargeSum,/*商户分摊费用总额*/
+			ROUND((
+				IFNULL (t2.ATTRIB_16, 0) + IFNULL (t2.ATTRIB_20, 0) + IFNULL (t2.ATTRIB_22, 0) + IFNULL (t2.ATTRIB_21, 0) + IFNULL (t2.ATTRIB_23, 0) + IFNULL (t2.ATTRIB_59, 0) + IFNULL (t2.ATTRIB_25, 0) + IFNULL (t2.ATTRIB_24, 0)
+			),2) chargeVerifivationSum, /*需核销费用总额*/
+			t1.ACCNT_ID accntId,
+			
+			IFNULL(GET_LOV_NAME(#{usercorpid},'LOGISTICS_COMPANY',t1.logistics_company),'') logisticsCompany, /*物流公司*/
+			IFNULL(t1.logistics_odd_number,'') logisticsOddNumber, /*物流单号*/
+			date_format(t1.shipping_time,'%Y-%m-%d %H:%i:%s') shippingTime, /*发运时间*/
+			t1.fight_groups_id fightGroupsId, /*拼团Id*/
+			t1.coupon_id couponId, /*优惠券Id*/
+			ROUND(t1.freight,2) freight /*运费*/
+			,t100.T_ATTR_05 orgId
+			,t2.order_process_msg orderProMsg /*订单推送消息备注*/
+		FROM S_ORDER t1
+		LEFT JOIN (S_ORDER_X t2 join cx_o_area t100 on t2.x_attrib_68 = t100.row_id) ON t1.ROW_ID = t2.PAR_ROW_ID
+		LEFT JOIN LNK_ACCNT t3 ON t3.ROW_ID = t2.ATTRIB_41
+		LEFT JOIN LNK_ACCNT t4 ON t4.ROW_ID = t1.ACCNT_ID
+		LEFT JOIN CX_O_ADDRESS t5 ON t5.ROW_ID = t2.O2O_RECIEVER_ID
+		LEFT JOIN S_CONTACT t6 ON t6.ROW_ID = t2.ATTRIB_42
+		LEFT JOIN S_CONTACT_X t7 ON t7.ROW_ID = t2.ATTRIB_42
+		LEFT JOIN S_ORDER_TYPE t8 ON t8.ROW_ID = t1.ORDER_TYPE_ID
+	</sql>
+	
+	<sql id="queryOrderPushRecordSql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.T_ATTR_01 tAttr01,/*推送类型*/
+			t2.ORDER_NUM orderNum,/*订单号*/
+			t3.NAME name, /*客户名称*/
+			t3.OU_NUM ouNum,/*客户编码*/
+			t3.O2O_STORE_TYPE o2oStoreType,/*商户类型*/
+			t3.O2O_ACCT_TYPE o2oAcctType,/*配送网点类型*/
+			ROUND(t1.T_ATTR_09,2) tAttr09, /*大约距离(米)*/
+			t1.IS_FORCED_PICKUP isForcedPickup, /*是否兜底商户*/
+			date_format(t1.T_ATTR_13,'%Y-%m-%d %H:%i:%s') tAttr13, /*开始时间*/
+			date_format(t1.T_ATTR_14,'%Y-%m-%d %H:%i:%s') tAttr14,/*过期时间*/
+			t1.PUSH_FLG pushFlg,/*是否已推送*/
+			t1.T_ATTR_12 tAttr12,/*兜底短信已发送次数*/
+			date_format(t1.T_ATTR_15,'%Y-%m-%d %H:%i:%s') tAttr15, /*兜底短信最后发送时间*/
+			t1.OBJECT_ID objectId,
+			t1.USER_ID userId
+		FROM
+			CX_O_PUSH_DTL t1
+		LEFT JOIN S_ORDER t2 ON t2.row_id = t1.OBJECT_ID
+		LEFT JOIN LNK_ACCNT t3 ON t3.row_id = t1.USER_ID
+		WHERE 1=1
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryTableSql" />
+		WHERE 1=1
+			<if test="attrib48 != null and attrib48 != ''">
+			and t2.ATTRIB_48 = #{attrib48}
+			</if>
+			<if test="attrib07 != null and attrib07 != ''">
+			and t2.ATTRIB_07 = #{attrib07}
+			</if>
+			<if test="o2oPayType != null and o2oPayType != ''">
+			and t2.O2O_PAY_TYPE = #{o2oPayType}
+			</if>
+			<if test="merchantName != null and merchantName != ''">
+			and t3.NAME like concat('%',#{merchantName},'%') 
+			</if>
+			<if test="tAttr13 != null and tAttr13 != ''">
+			and t1.created &gt;= #{tAttr13}
+			</if>
+			<if test="tAttr14 != null and tAttr14 != ''">
+			and t1.created &lt;= #{tAttr14}
+			</if>
+			<if test="attr1 != null and attr1 != ''">
+			and t2.ATTRIB_29 &gt;= #{attr1}
+			</if>
+			<if test="attr2 != null and attr2 != ''">
+			and t2.ATTRIB_29 &lt;= #{attr2}
+			</if>
+			<if test="attr3 != null and attr3 != ''">
+			and t2.ATTRIB_26 &gt;= #{attr3}
+			</if>
+			<if test="attr4 != null and attr4 != ''">
+			and t2.ATTRIB_26 &lt;= #{attr4}
+			</if>
+			<if test="orderNum != null and orderNum != ''">
+			and t1.ORDER_NUM like concat('%',#{orderNum},'%') 
+			</if>
+			<if test="contact != null and contact != ''">
+			and t5.CONTACT like concat('%',#{contact},'%') 
+			</if>
+			<if test="contactPhone != null and contactPhone != ''">
+			and t5.CONTACT_PHONE like concat('%',#{contactPhone},'%')
+			</if>
+			<if test="attrib37 != null and attrib37 != ''">
+			and t2.ATTRIB_37 like concat('%',#{attrib37},'%')
+			</if>
+			<if test="attrib46 != null and attrib46 != ''">
+			and t2.ATTRIB_46 = #{attrib46}
+			</if>
+			<if test="customerName != null and customerName != ''">
+			and t4.NAME like concat('%',#{customerName},'%')
+			</if>
+			<if test="mainPhNum != null and mainPhNum != ''">
+			and t4.MAIN_PH_NUM like concat('%',#{mainPhNum},'%')
+			</if>
+		order by t1.CREATED desc
+	</select>
+	
+	<!-- 品牌馆订单查询-->
+	<select id="queryBrandPage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryTableSql" />
+			where t1.source='brand'
+		<if test=" usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+	</select>
+	
+	<!-- 品牌馆订单发运查询-->
+	<select id="queryBfPage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryTableSql" />
+			where t1.source='brand'
+			and t2.ATTRIB_48 in ('To_Deliver', 'To_Receive')
+		<if test=" usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+	</select>
+
+	<select id="queryBrandById" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryTableSql" />
+		where t1.ROW_ID = #{id}
+	</select>
+		
+	<!-- 品牌馆订单发运筛选-->
+	<select id="orderStatusAll" resultMap="listOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT
+			t1.row_id id,
+			t1.created_by createdBy,
+			t1.created created,
+			t1.last_upd_by lastUpdatedBy,
+			date_format(
+				t1.last_upd,
+				'%Y-%m-%d %H:%i:%S'
+			) lastUpdated,
+			t1.corp_id corpid,
+			t3. NAME corpName,
+			t1. NAME NAME,
+			t1.type type,
+			t1.val val,
+			cast(t1.seq AS UNSIGNED INT) seq,
+			t1.lang_id langId,
+			t1.sap_val sapVal,
+			t1.parent_id parentId,
+			t2. NAME parentName,
+			t2.type parentType,
+			t2.val parentVal,
+			t1.active_flag activeFlag,
+			t1.COMMENTS comments
+		FROM
+			LNK_LIST_OF_VAL t1
+		LEFT JOIN LNK_LIST_OF_VAL t2 ON t1.parent_id = t2.row_id
+		LEFT JOIN lnk_enterprise t3 ON t1.corp_id = t3. CODE
+		WHERE
+			1 = 1
+		AND t1.active_flag ='Y'
+		AND t1.type ='BRAND_ORDER_STATUS'
+		and t1.NAME in ('待发货','待签收')
+		ORDER BY
+			t1.seq ASC
+	</select>
+	
+	<!-- 第一个行结构 -->
+	<select id="queryMerchantByPage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,/*与子级相关*/
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.ORDER_ID orderId,/*与父级相关字段*/
+			t2.O2O_DISPLAY_NAME o2oDisplayName,/*商品名称*/
+			t2.O2O_INT_CODE o2oIntCode,/*商品编码*/
+			ROUND(t1.BASE_UNIT_PRI,2) baseUnitPri,/*报价*/
+			t1.QTY_REQ qtyReq,/*数量*/
+			ROUND(t3.ATTRIB_17,2) attrib17,/*报价总金额*/
+			ROUND(t1.NET_PRI,2) netPri,/*成交价*/
+			ROUND(t3.ATTRIB_19,2) attrib19,/*成交金额*/
+			t3.O2O_GP_PROD o2oGpProd,/*是否团购商品*/
+			t3.ATTRIB_11 attrib11,/*是否赠品*/
+			ROUND(IF( t3.ATTRIB_11 = 'Y', 0, IFNULL(t3.ATTRIB_17, 0) - IFNULL(t3.ATTRIB_19, 0)),2) merchantOfferSum,/*商品优惠金额*/
+		 	ROUND(((IFNULL(t4.ATTRIB_20, 0) + IFNULL(t4.ATTRIB_22, 0) + IFNULL(t4.ATTRIB_21, 0)) * IFNULL(t3.ATTRIB_17, 0) / IFNULL(t4.ATTRIB_14, 0)),2) orderOfferSum, /*订单优惠金额分摊*/
+		 	
+		 	t5.CODE activityCode,/*促销活动编码*/
+			t5.NAME activityName,/*促销活动名称*/
+			t1.sales_promotion_id salesPromotionId,/*促销活动Id*/
+		 	ROUND(t1.discount_amount,2) discountAmount,/*优惠总金额*/
+			t1.coupon_id couponId,/*优惠券ID*/
+			ROUND(t1.freight,2) freight /*运费*/
+		FROM S_ORDER_ITEM t1
+		LEFT JOIN S_PROD_INT_X t2 ON t1.PROD_ID = t2.row_id
+		LEFT JOIN S_ORDER_ITEM_X t3 ON t3.par_row_id = t1.row_id
+		LEFT JOIN S_ORDER_X t4 ON t4.row_id = t1.ORDER_ID
+		LEFT JOIN CX_O_PMO_SP T5 ON T5.row_id=t1.sales_promotion_id
+		
+		<if test="attr6 == 'datail'">
+		where t1.ORDER_ID = #{attr5}
+		</if>
+	</select>
+	
+	<!-- 第二个行结构 -->
+	<select id="queryProductByPage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.ORDER_LINE_ID orderLineId,/*与父级相关*/
+			t2.O2O_DISPLAY_NAME o2oDisplayName,/*单品名称*/
+			t2.O2O_INT_CODE o2oIntCode,/*单品编码*/
+			t3.NAME name,/*单品产品名称*/
+			t3.PART_NUM partNum,/*单品产品编码*/
+			ROUND(t1.BASE_UNIT_PRI,2) baseUnitPri,/*报价*/
+			ROUND(t1.NET_PRICE,2) netPrice,/*成交价*/
+			t1.DEAL_NUMBER dealNumber,/*成交数量*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI,0) * IFNULL(t1.DEAL_NUMBER,0)),2) quotedPriceSum,/*报价总金额*/
+			ROUND((IFNULL(t1.NET_PRICE,0) * IFNULL(t1.DEAL_NUMBER,0)),2) dealSum,/*成交总金额*/
+			t4.O2O_DISPLAY_NAME o2oMerchantDisplayName,/*套装商品名称*/
+			t4.O2O_INT_CODE o2oMerchantIntCode,/*套装商品编码*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI,0) * IFNULL(t1.DEAL_NUMBER,0) / IFNULL(t1.X_ATTRIB_01,0) * ((IFNULL(t5.ATTRIB_20,0) + IFNULL(t5.ATTRIB_22,0) + IFNULL(t5.ATTRIB_21,0))* IFNULL(t7.ATTRIB_17,0) / IFNULL(t5.ATTRIB_14,0))),2) orderOfferSum,/*订单优惠金额分摊*/
+			ROUND((IFNULL(t1.BASE_UNIT_PRI,0) * IFNULL(t1.DEAL_NUMBER,0) / IFNULL(t1.X_ATTRIB_01,0) *IF (t7.ATTRIB_11 = 'Y',0,IFNULL(t7.ATTRIB_17, 0) - IFNULL(t7.ATTRIB_19, 0))),2) merchantOfferSum /*商品优惠金额分摊*/
+		FROM
+			CX_O_ORD_ITM_LN t1
+		LEFT JOIN S_PROD_INT_X t2 ON t2.ROW_ID = t1.PRODUCT_ID
+		LEFT JOIN S_PROD_INT t3 ON t3.ROW_ID = t2.O2O_PROD_ID
+		LEFT JOIN S_PROD_INT_X t4 ON t4.ROW_ID = t1.PARENT_PRODUCT_ID
+		LEFT JOIN S_ORDER_ITEM t6 ON t6.ROW_ID = t1.ORDER_LINE_ID
+		LEFT JOIN S_ORDER_X t5 ON t5.ROW_ID = t6.ORDER_ID
+		LEFT JOIN S_ORDER_ITEM_X t7 ON t7.ROW_ID = t1.ORDER_LINE_ID
+	</select>
+	
+	<select id="queryByOrderNum" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryTableSql" />
+		WHERE 1 = 1
+		AND t1.ORDER_NUM = #{orderNum}
+	</select>
+	
+	<select id="queryOrderPushRecord" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryOrderPushRecordSql" />
+		AND t2.ORDER_NUM = #{orderNum}
+		ORDER BY t1.CREATED desc
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.order.model.PlatformOrder">
+		INSERT INTO CX_O_PUSH_DTL(
+					ROW_ID,
+					modification_num,
+					conflict_id,
+					db_last_upd,
+					PUSH_FLG,
+					t_attr_09,
+					t_attr_12,
+					t_attr_13,
+					t_attr_14,
+					t_attr_15,
+					object_id,
+					t_attr_01,
+					user_id,
+					is_forced_pickup
+				)
+			VALUES(
+				#{id},
+				0,
+				'0',
+				now(),
+				#{pushFlg},
+				if(#{tAttr09} = '',null,#{tAttr09}),
+				if(#{tAttr12} = '',null,#{tAttr12}),
+				if(#{tAttr13} = '',null,#{tAttr13}),
+				if(#{tAttr14} = '',null,#{tAttr14}),
+				if(#{tAttr15} = '',null,#{tAttr15}),
+				#{objectId},
+				#{tAttr01},
+				#{userId},
+				#{isForcedPickup}
+			)
+	</insert>
+	
+	<update id="updateRecordById" parameterType="com.hand.base.order.model.PlatformOrder">
+		UPDATE cx_o_push_dtl t
+		SET t.push_flg = 'N',
+		 t.active_flag = 'Y',
+		 t.t_attr_13 = now(),
+		 t.t_attr_14 = DATE_ADD(now(), INTERVAL 10 DAY_MINUTE)
+		WHERE
+			row_id = #{id}
+	</update>
+	
+	<update id="update" parameterType="com.hand.base.order.model.PlatformOrder">
+		UPDATE CX_O_PUSH_DTL
+		SET
+			PUSH_FLG=#{pushFlg}
+			<if test=" tAttr09 != null and tAttr09 != '' ">
+			,t_attr_09=#{tAttr09}
+			</if>
+			<if test=" tAttr12 != null and tAttr12 != '' ">
+			,t_attr_12=#{tAttr12}			
+			</if>
+			<if test=" tAttr12 != null and tAttr12 != '' ">
+			,t_attr_13=#{tAttr13}
+			</if>
+			<if test=" tAttr12 != null and tAttr12 != '' ">
+			,t_attr_14=#{tAttr14}
+			</if>
+			<if test=" tAttr12 != null and tAttr12 != '' ">
+			,t_attr_15=#{tAttr15}
+			</if>
+			,object_id=#{objectId}
+			,t_attr_01=#{tAttr01}
+			,user_id=#{userId}
+			,is_forced_pickup=#{isForcedPickup}
+		WHERE ROW_ID = #{id}
+	</update>
+	
+	<select id="queryById" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		<include refid="queryOrderPushRecordSql" />
+		AND t1.ROW_ID = #{id}
+	</select>
+	
+	<select id="queryOrderEvaluation" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.TYPE type,/*类型*/
+			t1.T_ATTR_02 tAttr02,/*订单评级*/
+			t1.CONTEXT context,/*具体评价内容*/
+			t1.IS_POSITIVE isPositive /*是否正面评价*/
+		FROM
+			CX_O_ORD_MSG t1
+		WHERE 1=1 
+		AND (t1.TYPE = '订单评价' OR t1.TYPE = 'Service Evaluate')
+		AND t1.ORDER_ID = #{orderId}
+		
+	</select>
+	
+	<!-- 品牌馆订单状态更改-->	
+	<update id="brandUpdate" parameterType="com.hand.base.order.model.PlatformOrder">
+		UPDATE S_ORDER_X
+		SET
+			ATTRIB_48=#{attrib48}
+			<if test=" attrib07 != null and attrib07 != '' ">
+			,ATTRIB_07=#{attrib07}
+			</if>
+		WHERE PAR_ROW_ID = #{id}
+	</update>
+	
+	<!-- 品牌馆物流信息更改-->	
+	<update id="brandLogisticsUpdate" parameterType="com.hand.base.order.model.PlatformOrder">
+		UPDATE S_ORDER
+		SET
+			logistics_company=#{logisticsCompany},
+			logistics_odd_number=#{logisticsOddNumber},
+			shipping_time=#{shippingTime}
+		WHERE ROW_ID = #{id}
+	</update>
+	
+	<select id="queryOrderPromotions" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.NAME name,/*活动名称*/
+			t2.CODE code, /*活动编码*/
+			t1.ORDER_ID orderId
+		FROM
+			CX_O_ORD_PRM t1
+		LEFT JOIN CX_O_PMO_SP t2 ON t2.row_id = t1.PROMOTION_ID
+		WHERE t1.ORDER_ID = #{orderId}
+	</select>
+	
+	<delete id="deleteById" parameterType="com.hand.base.order.model.PlatformOrder">
+		DELETE FROM CX_O_PUSH_DTL WHERE ROW_ID = #{id}
+	</delete>
+	
+	<select id="queryCustomerNamePage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.NAME name,/*客户名称*/
+			t1.OU_NUM ouNum,/*客户编码*/
+			t1.O2O_STORE_TYPE o2oStoreType,/*商户类型*/
+			t1.O2O_STATUS o2oStatus,/*状态*/
+			t1.O2O_PROVINCE o2oProvince,/*省/直辖市*/
+			t1.O2O_CITY o2oCity,/*城市*/
+			t1.O2O_DISTRICT o2oDistrict,/*区/县*/
+			t1.O2O_CONTACT o2oContact,/*联系人*/
+			t1.O2O_CONTACT_PHONE o2oContactPhone,/*联系电话*/
+			t1.O2O_FORCED_STORE o2oForcedStore, /*是否兜底商户*/
+			t1.O2O_ACCT_TYPE o2oAcctType, /*配送网点类型*/
+			t1.ROW_ID accntId,
+			t2.T_ATTR_05 orgId
+		FROM
+			LNK_ACCNT t1
+		LEFT JOIN CX_O_AREA t2 ON T2.ROW_ID = T1.X_ATTRIB_165
+		WHERE 1=1
+		AND (t1.O2O_STORE_TYPE = 'Dealer' or t1.O2O_STORE_TYPE='End')
+		AND t1.O2O_STATUS = 'Active'
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="batchQueryInterfaceOrderCount" resultType="java.lang.String" parameterType="com.hand.base.order.model.InterfaceOrder">
+		SELECT
+			count(1) as count
+		FROM S_ORDER_X t1
+		where 1 = 1
+		and t1.CORP_ID = #{corpid}
+		and  t1.LAST_UPD <![CDATA[ >= ]]> #{startTime}
+		and  t1.LAST_UPD <![CDATA[ < ]]> #{endTime}
+		AND (t1.ATTRIB_48 = 'To Deliver' OR
+			 t1.ATTRIB_48 = 'To Receive' OR
+		     t1.ATTRIB_48 = 'Cancelling' OR
+			 t1.ATTRIB_48 = 'Refunding' OR
+			 t1.ATTRIB_48 = 'Tran_Closed' OR
+			 t1.ATTRIB_48 = 'Finished')
+	</select>
+	
+	<select id="batchQueryInterfaceOrder" parameterType="com.hand.base.order.model.InterfaceOrder" resultMap="interfaceOrderResult">
+		SELECT
+			t2.ROW_ID id,/*与子级相关字段*/
+			t2.CORP_ID corpid,
+			t2.ORDER_NUM orderNum,/*订单编号*/
+			t4.NAME customerName,/*消费者名称*/
+			t5.CONTACT contact,/*收货人*/
+			t2.ATTRIB_36 province,/*省/直辖市*/
+			t2.ATTRIB_37 city,/*城市*/
+			t2.ATTRIB_38 district,/*区/县*/
+			t2.ATTRIB_01 address,/*详细地址*/
+			t5.CONTACT_PHONE contactPhone,/*收货人电话*/
+			t3.NAME businessName,/*商户名称*/
+			GET_LOV_NAME('101','BRAND_ORDER_STATUS', t2.ATTRIB_48) orderStatus,/*订单状态*/
+			date_format(t2.created,'%Y-%m-%d %H:%i:%s') orderTime,/*下单时间*/
+			t2.ATTRIB_17 orderAmount,/*订单总金额*/
+			t2.O2O_PAY_TYPE payType,/*支付方式*/
+			date_format(t2.ATTRIB_26,'%Y-%m-%d %H:%i:%s') payTime,/*付款时间*/
+			IFNULL(t2.logistics_status, '') logisticsStatus, /*物流状态*/
+			IFNULL(t2.logistics_company, '') logisticsCompany, /*物流公司*/
+			IFNULL(t2.logistics_odd_number, '') logisticsNum, /*物流单号*/
+			t2.shipping_time shippingTime, /*发运时间*/
+			(
+				IFNULL (t2.ATTRIB_16, 0) + IFNULL (t2.ATTRIB_20, 0) + IFNULL (t2.ATTRIB_22, 0) + IFNULL (t2.ATTRIB_21, 0)
+			) allDiscountAmount,/*优惠总金额*/
+		
+			t2.ATTRIB_47 customerComments,/*买家留言*/
+			date_format(t2.REFUSE_REFUND_DATE,'%Y-%m-%d %H:%i:%s') cancelTime,/*拒绝、确认取消时间*/
+
+			t2.group_id gightGroups,# 拼团名称
+
+			t2.ATTRIB_20 couponAmount,/*优惠券金额*/
+			'' orderComments,# 订单备注
+			t2.freight logisticsPayAmount, /*运费*/
+			t11.ROW_ID lineId, #行号（主键）
+			t11.ORDER_ID orderId,/*与父级相关字段*/
+			t12.O2O_DISPLAY_NAME productName,/*商品名称*/
+			IFNULL(t12.bar_code, '') productCode, # 商品条码
+			t11.BASE_UNIT_PRI marketPrice,/*报价*/
+			t11.QTY_REQ qtyReq,/*数量*/
+			t11.ATTRIB_17 marketPriceAmount,/*报价总金额*/
+			t11.NET_PRI dealPrice,/*成交价*/
+			t11.ATTRIB_19 dealPriceAmount,/*成交金额*/
+			t11.ATTRIB_11 giftFlag,/*是否赠品*/
+			t15.NAME promotionName,/*促销活动名称*/
+			IF( T2.ATTRIB_11 = 'Y', 0, IFNULL(T2.ATTRIB_16, 0) + IFNULL(T2.ATTRIB_20, 0) + IFNULL(T2.ATTRIB_20, 0) + IFNULL(T2.ATTRIB_21, 0)) itemDiscountAmount,/*优惠总金额*/
+			T16.face_value couponDiscount,# 优惠券抵扣金额
+			t16.`name` couponName,# 优惠券名称
+			t11.freight logisticsPay /*运费*/
+		FROM S_ORDER_X t2
+		LEFT JOIN LNK_ACCNT t3 ON t3.ROW_ID = t2.ATTRIB_41
+		LEFT JOIN CX_O_ADDRESS t5 ON t5.ROW_ID = t2.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t4 ON t4.ROW_ID = t2.ACCNT_ID
+		LEFT JOIN (S_ORDER_ITEM_X t11 LEFT JOIN S_PROD_INT_X t12 ON t11.PROD_ID = t12.row_id
+								LEFT JOIN CX_O_PMO_SP T15 ON T15.row_id=t11.sales_promotion_id
+								LEFT JOIN CX_O_PMO_SP T16 ON T16.row_id = t11.coupon_id
+		) on t2.row_id = t11.ORDER_ID
+		where 1 = 1
+		AND t2.corp_id != '101'
+		AND (t2.ATTRIB_48 = 'To Deliver' OR
+			 t2.ATTRIB_48 = 'To Receive' OR
+		     t2.ATTRIB_48 = 'Cancelling' OR
+			 t2.ATTRIB_48 = 'Refunding' OR
+			 t2.ATTRIB_48 = 'Tran_Closed' OR
+			 t2.ATTRIB_48 = 'Finished')
+							
+		<if test="orderNum != null and orderNum != '' ">
+			and t2.ORDER_NUM = #{orderNum}		
+		</if>
+		<if test="orderNum == null or orderNum == '' ">
+			and  t2.LAST_UPD <![CDATA[ >= ]]> #{startTime}
+			and  t2.LAST_UPD <![CDATA[ < ]]> #{endTime}
+			order by t2.last_upd
+	    	limit #{startRow}, #{queryRow}		
+		</if>
+		
+		
+	
+	</select>
+	
+	
+	<select id="queryInterfaceOrderByOrderNum" resultMap="interfaceOrder" parameterType="com.hand.base.order.model.InterfaceOrder">
+    	SELECT
+			t2.ROW_ID id,/*与子级相关字段*/
+			t2.CORP_ID corpid,
+			t2.ORDER_NUM orderNum,/*订单编号*/
+			t4.NAME customerName,/*消费者名称*/
+			t5.CONTACT contact,/*收货人*/
+			t2.ATTRIB_36 province,/*省/直辖市*/
+			t2.ATTRIB_37 city,/*城市*/
+			t2.ATTRIB_38 district,/*区/县*/
+			t2.ATTRIB_01 address,/*详细地址*/
+			t5.CONTACT_PHONE contactPhone,/*收货人电话*/
+			t3.NAME businessName,/*商户名称*/
+			GET_LOV_NAME('101','BRAND_ORDER_STATUS', t2.ATTRIB_48) orderStatus,/*订单状态*/
+			date_format(t2.created,'%Y-%m-%d %H:%i:%s') orderTime,/*下单时间*/
+			t2.ATTRIB_17 orderAmount,/*订单总金额*/
+			t2.O2O_PAY_TYPE payType,/*支付方式*/
+			date_format(t2.ATTRIB_26,'%Y-%m-%d %H:%i:%s') payTime,/*付款时间*/
+			t2.logistics_status logisticsStatus, /*物流状态*/
+			t2.logistics_company logisticsCompany, /*物流公司*/
+			t2.logistics_odd_number logisticsNum, /*物流单号*/
+			t2.shipping_time shippingTime, /*发运时间*/
+			(
+				IFNULL (t2.ATTRIB_16, 0) + IFNULL (t2.ATTRIB_20, 0) + IFNULL (t2.ATTRIB_22, 0) + IFNULL (t2.ATTRIB_21, 0)
+			) allDiscountAmount,/*优惠总金额*/
+		
+			t2.ATTRIB_47 customerComments,/*买家留言*/
+			date_format(t2.REFUSE_REFUND_DATE,'%Y-%m-%d %H:%i:%s') cancelTime,/*拒绝、确认取消时间*/
+			'' gightGroups,# 拼团名称
+			t2.ATTRIB_20 couponAmount,/*优惠券金额*/
+			'' orderComments,# 订单备注
+			t2.freight logisticsPayAmount /*运费*/
+		FROM S_ORDER_X t2
+		LEFT JOIN LNK_ACCNT t3 ON t3.ROW_ID = t2.ATTRIB_41
+		LEFT JOIN CX_O_ADDRESS t5 ON t5.ROW_ID = t2.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t4 ON t4.ROW_ID = t2.ACCNT_ID
+		where 1 = 1
+		and t2.CORP_ID = #{corpid}
+		and t2.ORDER_NUM = #{orderNum}
+		AND (t2.ATTRIB_48 = 'To Deliver' OR
+			 t2.ATTRIB_48 = 'To Receive' OR
+		     t2.ATTRIB_48 = 'Cancelling' OR
+			 t2.ATTRIB_48 = 'Refunding' OR
+			 t2.ATTRIB_48 = 'Tran_Closed' OR
+			 t2.ATTRIB_48 = 'Finished')
+    </select>
+	
+	<select id="queryInterfaceOrderLineByOrderId" resultMap="interfaceOrderLine" parameterType="com.hand.base.order.model.InterfaceOrder">
+    	SELECT
+			t3.ROW_ID lineId, #行号（主键）
+			t3.ORDER_ID orderId,/*与父级相关字段*/
+			t2.O2O_DISPLAY_NAME productName,/*商品名称*/
+			t2.bar_code productCode, # 商品条码
+			t3.BASE_UNIT_PRI marketPrice,/*报价*/
+			t3.QTY_REQ qtyReq,/*数量*/
+			t3.ATTRIB_17 marketPriceAmount,/*报价总金额*/
+			t3.NET_PRI dealPrice,/*成交价*/
+			t3.ATTRIB_19 dealPriceAmount,/*成交金额*/
+			t3.ATTRIB_11 giftFlag,/*是否赠品*/
+			t5.NAME promotionName,/*促销活动名称*/
+			t3.discount_amount itemDiscountAmount,/*优惠总金额*/
+			T6.face_value couponDiscount,# 优惠券抵扣金额
+			t6.`name` couponName,# 优惠券名称
+			t3.freight logisticsPay /*运费*/
+		FROM S_ORDER_ITEM_X t3
+		LEFT JOIN S_PROD_INT_X t2 ON t3.PROD_ID = t2.row_id
+		LEFT JOIN S_ORDER_X t4 ON t4.row_id = t3.ORDER_ID
+		LEFT JOIN CX_O_PMO_SP T5 ON T5.row_id=t3.sales_promotion_id
+    	LEFT JOIN CX_O_PMO_SP T6 ON T6.row_id = t3.coupon_id
+    WHERE 1 = 1
+    AND t3.ORDER_ID = #{id}
+    </select>
+	
+	<select id="getQueryInterfaceOrderCount" statementType="CALLABLE">
+         CALL QUERY_INTERFACE_ORDER_P(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+         					#{msgData,mode=OUT,jdbcType=VARCHAR},
+         					#{param1,mode=IN,jdbcType=VARCHAR},
+         					#{param2,mode=IN,jdbcType=VARCHAR},
+         					#{param3,mode=IN,jdbcType=VARCHAR},
+         					#{param4,mode=IN,jdbcType=VARCHAR},
+         					#{param5,mode=IN,jdbcType=VARCHAR},
+         					#{param6,mode=IN,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="queryIdByOrderNum" parameterType="com.hand.base.order.model.PlatformOrder" resultType="com.hand.base.order.model.PlatformOrder">
+		select t.row_id id, t.attrib_07 attrib07, logistics_odd_number logisticsOddNumber, t.attrib_48 attrib48  from s_order_x t where t.order_num = #{orderNum}
+	</select>
+	
+	<update id="updateOrderLogisticsById" parameterType="com.hand.base.order.model.PlatformOrder">
+		update S_ORDER_X set LAST_UPD = now()
+							,LAST_UPD_BY = #{lastUpdatedBy}
+							,logistics_company = #{logisticsCompany}
+							,logistics_odd_number = #{logisticsOddNumber}
+							,shipping_time = now()
+							,attrib_07 = 'Shipping'
+							,attrib_48 = 'To Receive'		
+							<if test=" shippingAddress != null and shippingAddress != '' ">
+							,shipping_address = #{shippingAddress}			
+							</if>
+		where row_id = #{id}
+	</update>
+	
+	<!-- 品牌馆订单发运模板查询-->
+	<select id="queryTempPage" resultMap="platformOrder" parameterType="com.hand.base.order.model.PlatformOrder">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.order_number orderNumber,/*订单编号*/
+			t1.shipping_address shippingAddress,/*收货地址*/
+			t1.logistics_company logisticsCompany,/*物流公司*/
+			t1.logistics_odd_number logisticsOddNumber,/*物流单号*/
+			t1.shipping_time shippingTime,/*发运时间*/
+			t1.check_status checkStatus,/*校验状态*/
+			t1.error_message errorMessage /*校验结果*/
+		from s_order_temp t1
+	</select>
+	
+</mapper>

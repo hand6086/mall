@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.home.dao.mybatis.mapper.HomeMapper">
+    <select id="queryProductCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			ifnull(count(1),0) AS RESULT
+		FROM
+			S_PROD_INT_X t1
+		WHERE
+			t1.MARKET_TIME <![CDATA[ < ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) - 7 DAY)
+		AND t1.MARKET_TIME <![CDATA[ > ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) + 1 DAY)
+		AND t1.corp_id != '101'
+		<if test="usersystemRole != 'super_administrator' or usercorpid == '101' ">
+			AND t1.corp_id=#{usercorpid}
+		</if>
+    </select>
+    
+    <select id="queryOrderCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			ifnull(count(1),0) AS RESULT
+		FROM
+			S_ORDER_X t1
+		WHERE
+			t1.ORDER_DT <![CDATA[ < ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) - 7 DAY)<!-- TRUNC (SYSDATE(), 'd') + 8 -->
+		AND t1.ORDER_DT <![CDATA[ > ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) + 1 DAY)<!-- TRUNC (SYSDATE(), 'd') + 1  -->
+		AND t1.order_type = 'brand'
+		AND t1.corp_id != '101'
+		<if test="usersystemRole != 'super_administrator'  or usercorpid == '101' ">
+			AND t1.corp_id=#{usercorpid}
+		</if>
+    </select>
+    
+    <select id="querySaleCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			ifnull(ROUND(sum(t1.ATTRIB_17),2),0) AS RESULT
+		FROM
+			S_ORDER_X t1
+		WHERE
+			t1.ORDER_DT <![CDATA[ < ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) - 7 DAY)<!-- TRUNC (SYSDATE(), 'd') + 8 -->
+		AND t1.ORDER_DT <![CDATA[ > ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) + 1 DAY)<!-- TRUNC (SYSDATE(), 'd') + 1  -->
+		AND t1.order_type = 'brand'
+		AND t1.ATTRIB_48 in ('To Deliver','To Receive','To Appraise','Finished')
+		AND t1.corp_id != '101'
+		<if test="usersystemRole != 'super_administrator'  or usercorpid == '101' ">
+			AND t1.corp_id=#{usercorpid}
+		</if>
+    </select>
+    
+    <select id="queryProductSaleCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			ifnull(ROUND(sum(t1.QTY_REQ )),0) AS RESULT
+		FROM
+			S_ORDER_ITEM_X t1
+		LEFT JOIN S_ORDER_X t2 on t1.order_id = t2.row_id
+		WHERE
+			t2.ORDER_DT <![CDATA[ < ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) - 7 DAY)<!-- TRUNC (SYSDATE(), 'd') + 8 -->
+		AND t2.ORDER_DT <![CDATA[ > ]]> date_sub(curdate() ,INTERVAL WEEKDAY(curdate()) + 1 DAY)<!-- TRUNC (SYSDATE(), 'd') + 1  -->
+		AND t2.order_type = 'brand'
+		AND t2.ATTRIB_48 in ('To Deliver','To Receive','To Appraise','Finished')
+		AND T1.ATTRIB_11 = 'N'
+		AND t1.corp_id != '101'
+		<if test="usersystemRole != 'super_administrator'  or usercorpid == '101' ">
+			AND t1.corp_id=#{usercorpid}
+		</if>
+    </select>
+
+</mapper>

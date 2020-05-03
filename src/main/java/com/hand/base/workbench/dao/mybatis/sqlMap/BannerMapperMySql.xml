@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.workbench.dao.mybatis.mapper.BannerMapper">
+	<resultMap type="com.hand.base.workbench.model.Banner" id="banner"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T.ROW_ID            as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY        as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+		T.corp_id      as corpId,
+	    t.NAME name,
+		t.TARGET_ID targetId,
+		t.T_ATTR_01 tAttr01,
+		t1.NAME campaignName,
+		t1.CODE campaignCode,
+		t2.O2O_DISPLAY_NAME merchandiseName,
+		t2.O2O_INT_CODE merchandiseCode,
+		t.IS_DISPLAY isDisplay,
+		round(t.SEQUENCE) sequence,
+		date_format(t.START_TIME, '%Y-%m-%d %H:%i:%S') as startTime,
+		date_format(t.END_TIME, '%Y-%m-%d %H:%i:%S') as endTime,
+		t.URL url,
+		t.MERCHANDISE_ID merchandiseId,
+		t.IMAGE image,
+		t5.path imageUrl,
+		t.T_ATTR_02 cityId,
+		t3.name cityName,
+		t6.row_id orgId,
+		t.CAMPAIGN_ID campaignId,
+		t.classify_id classifyId,
+		t4.name classifyName,
+		t.button_id buttonId,
+		t7.BUTTON_NAME buttonName,
+		t.source source
+
+	</sql>
+
+	<sql id="fromSql">
+		FROM
+		CX_O_BANNER t
+		LEFT JOIN CX_O_CAMPAIGN t1 ON t1.ROW_ID = t.CAMPAIGN_ID
+		LEFT JOIN S_PROD_INT_X t2 ON t2.ROW_ID = t.MERCHANDISE_ID
+		left join (CX_O_AREA t3  LEFT JOIN lnk_org_ext T6 ON T6.ROW_ID = T3.T_ATTR_05) on t3.row_id = t.T_ATTR_02
+		left join lnk_brand_classify t4 on t4.row_id = t.classify_id
+		left join cx_o_img t5 on t5.row_id = t.IMAGE
+		left join CX_O_BUTTON_IMG t7 on t7.row_id = t.button_id
+
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.workbench.model.Banner" resultMap="banner">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		<if test=" source == null or source == '' ">
+			and t.source = 'fast shopping'
+		</if>
+		<if test=" source != null and source != '' ">
+			and t.source = #{source}
+		</if>
+		order by t.CREATED desc
+  	</select>
+  	
+  	<select id="brandQueryByExamplePage" parameterType="com.hand.base.workbench.model.Banner" resultMap="banner">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		and t.source = 'brand'
+		order by t.CREATED desc
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.workbench.model.Banner"
+		parameterType="com.hand.base.workbench.model.Banner">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultType="com.hand.base.workbench.model.Banner"
+		parameterType="com.hand.base.workbench.model.Banner">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.workbench.model.Banner">
+		insert into CX_O_BANNER
+		  (ROW_ID, NAME, TARGET_ID,T_ATTR_01,IS_DISPLAY,SEQUENCE,START_TIME
+		   , END_TIME, URL,MERCHANDISE_ID,CAMPAIGN_ID,T_ATTR_02,DB_LAST_UPD,button_id,source,IMAGE)
+		values
+		  (#{id},#{name},TB_O2O_ACCTIVITYCODE(),#{tAttr01},#{isDisplay},lnk_blank_str_to_null(#{sequence,jdbcType=FLOAT})
+		  ,lnk_blank_str_to_null(#{startTime,jdbcType=TIMESTAMP})
+		  ,lnk_blank_str_to_null(#{endTime,jdbcType=TIMESTAMP}),#{url},#{merchandiseId},#{campaignId},#{cityId},now(),#{buttonId},'fast shopping',#{image})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.workbench.model.Banner">
+		update CX_O_BANNER t
+		   set t.NAME = #{name}, t.TARGET_ID = #{targetId}, t.T_ATTR_01 = #{tAttr01}
+		   , t.IS_DISPLAY = #{isDisplay}, t.SEQUENCE = lnk_blank_str_to_null(#{sequence,jdbcType=FLOAT})
+		   , t.START_TIME = lnk_blank_str_to_null(#{startTime,jdbcType=TIMESTAMP})
+		   ,t.END_TIME = lnk_blank_str_to_null(#{endTime,jdbcType=TIMESTAMP}), t.URL = #{url}
+		   , t.MERCHANDISE_ID = #{merchandiseId},t.CAMPAIGN_ID = #{campaignId},t.db_last_upd=now(),button_id = #{buttonId},t.source = 'fast shopping'
+		 where t.row_id = #{id}
+	</update>
+	
+  	<insert id="brandInsert" parameterType="com.hand.base.workbench.model.Banner">
+		insert into CX_O_BANNER
+		  (ROW_ID, NAME, TARGET_ID,T_ATTR_01,IS_DISPLAY,SEQUENCE,START_TIME
+		   , END_TIME, URL,MERCHANDISE_ID,CAMPAIGN_ID,T_ATTR_02,DB_LAST_UPD,IMAGE,classify_id,button_id,source)
+		values
+		  (#{id},#{name},TB_O2O_ACCTIVITYCODE(),#{tAttr01},#{isDisplay},lnk_blank_str_to_null(#{sequence,jdbcType=FLOAT})
+		  ,lnk_blank_str_to_null(#{startTime,jdbcType=TIMESTAMP})
+		  ,lnk_blank_str_to_null(#{endTime,jdbcType=TIMESTAMP}),#{url},#{merchandiseId},#{campaignId},#{cityId},now()
+		  ,#{image},#{classifyId},#{buttonId},'brand')
+	</insert>
+  
+	<update id="brandUpdate" parameterType="com.hand.base.workbench.model.Banner">
+		update CX_O_BANNER t
+		   set t.NAME = #{name}, t.TARGET_ID = #{targetId}, t.T_ATTR_01 = #{tAttr01}
+		   , t.IS_DISPLAY = #{isDisplay}, t.SEQUENCE = lnk_blank_str_to_null(#{sequence,jdbcType=FLOAT})
+		   , t.START_TIME = lnk_blank_str_to_null(#{startTime,jdbcType=TIMESTAMP})
+		   , t.END_TIME = lnk_blank_str_to_null(#{endTime,jdbcType=TIMESTAMP}), t.URL = #{url}
+		   , t.MERCHANDISE_ID = #{merchandiseId},t.CAMPAIGN_ID = #{campaignId},t.db_last_upd=now()
+		   , t.IMAGE = #{image},t.classify_id = #{classifyId},button_id = #{buttonId}, t.source = 'brand'
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.workbench.model.Banner">
+		DELETE FROM CX_O_BANNER WHERE ROW_ID = #{id}
+	</delete>
+  	
+  	<update id="bannerImageUpdate" parameterType="com.hand.base.workbench.model.Banner">
+	 	UPDATE CX_O_BANNER t
+		   SET t.IMAGE = #{image}
+		 WHERE t.row_id = #{id}
+    </update>
+  
+</mapper>

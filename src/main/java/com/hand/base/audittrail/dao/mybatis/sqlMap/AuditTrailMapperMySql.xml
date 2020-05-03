@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.audittrail.dao.mybatis.mapper.AuditTrailMapper">
+  <resultMap type="com.hand.base.audittrail.model.AuditTrail" id="audittrail"></resultMap>
+  <sql id="queryAllSql">
+	SELECT 
+		T1.ROW_ID            as id                  /*记录编号*/
+	   ,t1.created           as created             /*创建时间*/
+	   ,T1.CREATED_BY        as createdBy          /*创建者ID*/
+	   ,date_format(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated/*最后更新时间*/
+	   ,T1.LAST_UPD_BY       as lastUpdatedBy         /*最后更新者ID*/
+	   ,T1.corp_id	      	  as corpid		/*公司账套ID*/
+	   ,T3.name corpName		/*公司账套*/			
+       ,T2.username userName
+	   ,T2.FST_NAME userFirstName                       /*员工姓名*/
+       ,T1.buscomp_name buscompName
+       ,T1.field
+       ,T1.action
+       ,T1.old_value oldValue
+       ,T1.new_value newValue
+       ,date_format(t1.date_time, '%Y-%m-%d %H:%i:%S') dateTime
+<!--        ,T1.service -->
+       ,T1.source_name sourceName
+       ,T1.base_table_name baseTable
+       ,T1.child_table_name childTable
+<!--        ,T1.child_value childValue
+       ,T1.row_name rowName
+       ,date_format(T1.syn_date, ''%Y-%m-%d %H:%i:%S'') synDate
+       ,T1.group_id groupId
+       ,T1.link_name linkName
+       ,T1.node -->
+       ,T1.table_name tableName
+       ,T1.line_flag lineFlag
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM LNK_AUDIT_TRAIL T1
+			 left join LNK_EMP_INFO T2 on T1.user_id = T2.row_id
+			 LEFT JOIN lnk_enterprise t3 on t1.corp_id = t3.code
+		WHERE 1=1
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid}
+		</if>
+		<if test="id != null and id != '' ">
+			and T1.row_id = #{id}
+		</if>
+	</sql>
+	
+	<select id="queryById" resultMap="audittrail"
+		parameterType="com.hand.base.audittrail.model.AuditTrail">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID = #{id}
+	</select>
+
+  
+  	<!-- 查询所有 -->
+	<select id="queryAll" resultMap="audittrail"
+		parameterType="com.hand.base.audittrail.model.AuditTrail">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="audittrail"
+		parameterType="com.hand.base.audittrail.model.AuditTrail">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+  
+  <delete id="deleteById" parameterType="com.hand.base.audittrail.model.AuditTrail">
+		DELETE FROM LNK_AUDIT_TRAIL WHERE ROW_ID = #{id}
+  </delete>
+  
+  
+  <insert id="insert" parameterType="com.hand.base.audittrail.model.AuditTrail">
+		insert into LNK_AUDIT_TRAIL
+		  (
+		   row_id,
+		   user_id,
+	       buscomp_name,
+	       field,
+	       action,
+	       old_value,
+	       new_value,
+	       date_time,
+<!-- 	       service, -->
+	       source_name,
+	       base_table_name,
+	       child_table_name,
+<!-- 	       child_value,
+	       row_name,
+	       syn_date,
+	       group_id,
+	       link_name,
+	       node, -->
+	       table_name,
+	       line_flag
+		   )
+		values
+		  (
+		   #{id},
+		   #{userId},
+		   #{buscompName},
+		   #{field},
+		   #{action},
+		   #{oldValue},
+		   #{newValue},
+		   date_format(#{dateTime}, '%Y-%m-%d %H:%i:%S'),
+<!-- 		   #{service}, -->
+		   #{sourceName},
+		   #{baseTable},
+		   #{childTable},
+<!-- 		   #{childValue},
+		   #{rowName},
+		   to_date(#{synDate}, ''%Y-%m-%d %H:%i:%S''),
+		   #{groupId},
+		   #{linkName},
+		   #{node}, -->
+		   #{tableName},
+		   #{lineFlag}
+		   )
+  </insert>
+
+  
+  <update id="update" parameterType="com.hand.base.audittrail.model.AuditTrail">
+ update LNK_AUDIT_TRAIL T1
+	set T1.user_id          = #{userId}
+	   ,T1.buscomp_name     = #{buscompName}
+       ,T1.field            = #{field}
+       ,T1.action           = #{action}
+       ,T1.old_value        = #{oldValue}
+       ,T1.new_value        = #{newValue}
+       ,T1.date_time        = date_format(#{dateTime}, '%Y-%m-%d %H:%i:%S')
+<!--        ,T1.service          = #{service} -->
+       ,T1.source_name      = #{sourceName}
+       ,T1.base_table_name  = #{baseTable}
+       ,T1.child_table_name = #{childTable}
+<!--        ,T1.child_value      = #{childValue}
+       ,T1.row_name         = #{rowName}
+       ,T1.syn_date         = date_format(#{synDate}, '%Y-%m-%d %H:%i:%S')
+       ,T1.group_id         = #{groupId}
+       ,T1.link_name        = #{linkName}
+       ,T1.node             = #{node} -->
+       ,T1.table_name       = #{tableName}
+       ,T1.line_flag        = #{lineFlag}   
+	 where T1.row_id = #{id}
+  </update>
+
+  
+  
+  
+</mapper>

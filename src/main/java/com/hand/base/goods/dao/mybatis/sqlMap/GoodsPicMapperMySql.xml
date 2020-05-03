@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsPicMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSuit" id="goodsSuit"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S')
+	as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.IS_DISPLAY isDisplay,/*是否显示 Y*/
+	round(t.DISPLAY_SEQ) displaySeq,/*显示顺序*/
+	t.t_attr_01 tAttr01, /*图片类型*/
+	t.PROD_ID prodId, /*link*/
+	t1.path linePath 
+	</sql>
+	
+	<sql id="brandQueryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S')
+	as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.IS_DISPLAY isDisplay,/*是否显示 Y*/
+	round(t.DISPLAY_SEQ) displaySeq,/*显示顺序*/
+	t.t_attr_01 tAttr01, /*图片类型*/
+	t.PROD_ID prodId, /*link*/
+	t1.path linePath 
+	</sql>
+
+	<sql id="fromSql">
+	from CX_O_PROD_PIC t left join cx_o_img t1 on t1.row_id = t.pic_id
+  	</sql>
+	
+	<sql id="brandFromSql">
+	from CX_O_PROD_PIC t left join cx_o_img t1 on t1.row_id = t.pic_id
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1 
+  		AND t.corp_id = #{usercorpid}
+  	</sql>
+	
+	<sql id="brandWhereAllSql">
+  		where 1 = 1 
+  		AND t.corp_id != '101'
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSuit" resultMap="goodsSuit">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		and t.PROD_ID=#{prodId}
+  	</select>
+	
+		<select id="brandQueryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSuit" resultMap="goodsSuit">
+  		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromSql"/>
+		<include refid="brandWhereAllSql"/>
+		and t.PROD_ID=#{prodId}
+  	</select>
+  	
+  	  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSuit"
+		parameterType="com.hand.base.goods.model.GoodsSuit">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id} 
+		AND t.corp_id = #{usercorpid}
+	</select>
+	
+	<select id="brandQueryById" resultType="com.hand.base.goods.model.GoodsSuit"
+		parameterType="com.hand.base.goods.model.GoodsSuit">		
+		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromSql"/>
+		where t.ROW_ID=#{id}
+		 AND t.corp_id = #{usercorpid}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into CX_O_PROD_PIC
+		  (ROW_ID, IS_DISPLAY, DISPLAY_SEQ,PROD_ID,t_attr_01)
+		values
+		  (#{id},#{isDisplay},lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT}),#{prodId},#{tAttr01})
+	</insert>
+	
+	<insert id="brandInsert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into CX_O_PROD_PIC
+		  (ROW_ID, IS_DISPLAY, DISPLAY_SEQ,PROD_ID,t_attr_01)
+		values
+		  (#{id},#{isDisplay},lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT}),#{prodId},#{tAttr01})
+	</insert>
+	
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSuit">
+		update CX_O_PROD_PIC t
+		   set t.IS_DISPLAY = #{isDisplay}, t.DISPLAY_SEQ = lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT})
+		   ,t.t_attr_01 = #{tAttr01}
+		 where t.row_id = #{id}
+	</update>
+	<update id="brandUpdate" parameterType="com.hand.base.goods.model.GoodsSuit">
+		update CX_O_PROD_PIC t
+		   set t.IS_DISPLAY = #{isDisplay}, t.DISPLAY_SEQ = lnk_blank_str_to_null(#{displaySeq,jdbcType=FLOAT})
+		   ,t.t_attr_01 = #{tAttr01}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSuit">
+		DELETE FROM CX_O_PROD_PIC WHERE ROW_ID = #{id}
+	</delete>
+	
+	<delete id="brandDeleteById" parameterType="com.hand.base.goods.model.GoodsSuit">
+		DELETE FROM CX_O_PROD_PIC WHERE ROW_ID = #{id}
+	</delete>
+	
+	
+</mapper>

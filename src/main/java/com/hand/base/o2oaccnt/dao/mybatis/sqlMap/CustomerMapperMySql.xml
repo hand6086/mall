@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaccnt.dao.mybatis.mapper.CustomerMapper">
+	<resultMap type="com.hand.base.o2oaccnt.model.Customer"
+		id="customer"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+			T1.ROW_ID id
+			,DATE_FORMAT(T1.CREATED, '%Y-%m-%d
+			%H:%i:%S')  created 
+			,T1.CREATED_BY as createdBy
+			,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d
+			%H:%i:%S') as lastUpdated
+			,T1.LAST_UPD_BY as lastUpdatedBy
+			,T1.OU_NUM   custmId/*消费者编码*/
+			,T1. NAME custmName/*姓名*/
+			,T1.MAIN_PH_NUM custmPhone/*手机号*/
+			,T1.IS_ACTIVE_USER  isActiveUser /*是否活跃用户*/
+			,T1.X_ATTRIB_157 inviteCode 	/*邀请码*/
+			,T1.O2O_ACCT_TYPE	custmType/*类型*/
+			,T1.CUSTOMER_SOURCE	custmSource/*消费者来源*/
+			,T1.IS_EMPLOYEE	isEmployee/*是否员工*/
+			,T1.IS_REGISTED	isRegisted/*是否在APP注册*/
+			,DATE_FORMAT(T1.register_time, '%Y-%m-%d
+			%H:%i:%S') createdTime /*注册时间*/
+			,T1.O2O_CITY	city/*注册城市*/
+			,T1.X_ATTRIB_159 attrIb159
+			,T2. NAME	inviteName/*邀请人*/
+			,T2.MAIN_PH_NUM		invitePhone/*邀请人手机号*/
+			,T2.ROW_ID			id2
+			,T2.X_ATTRIB_157	inviteCode2/*邀请人邀请码*/
+			,t4.row_id orgId
+	</sql>
+
+
+	<sql id="fromTableSql">
+		FROM lnk_accnt T1
+		LEFT JOIN lnk_accnt T2 ON T2.ROW_ID = T1.X_ATTRIB_159	
+		left join (CX_O_AREA t3  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T3.T_ATTR_05) on t3.row_id=T1.X_ATTRIB_165
+	</sql>
+
+	<sql id="whereAllSql">
+		WHERE 1 = 1
+		AND T1.O2O_ACCT_TYPE='Customer'
+		AND t1.accnt_flg='N'
+		<if test="city != null and city != ''">
+		and T1.O2O_CITY LIKE CONCAT('%',#{city},'%')
+		</if>
+		<if test="custmName != null and custmName != ''">
+		and T1. NAME LIKE CONCAT('%',#{custmName},'%')
+		</if>
+		<if test="custmPhone != null and custmPhone != ''">
+		and T1.MAIN_PH_NUM LIKE CONCAT('%',#{custmPhone},'%')
+		</if>
+		<if test="createdStart != null and createdStart != ''">
+		and t1.register_time &gt;= #{createdStart}
+		</if>
+		<if test="createdEnd != null and createdEnd != ''">
+		and t1.register_time &lt;= #{createdEnd}
+		</if>
+	</sql>
+
+	<select id="queryById" resultMap="customer" parameterType="com.hand.base.o2oaccnt.model.Customer">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		AND T1.ROW_ID =#{id}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="customer"
+		parameterType="com.hand.base.o2oaccnt.model.Customer">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		and T1.OU_NUM is not null
+	</select>
+	
+	<update id="update" 
+	 parameterType="com.hand.base.o2oaccnt.model.Customer">
+	UPDATE lnk_accnt
+	SET
+		OU_NUM 			=#{custmId}/*消费者编码*/
+		, NAME 				=#{custmName}/*姓名*/
+		,MAIN_PH_NUM 		=#{custmPhone}/*手机号*/
+		,IS_ACTIVE_USER     =#{isActiveUser} /*是否活跃用户*/
+		,X_ATTRIB_157 		=#{inviteCode} /*邀请码*/
+		,O2O_ACCT_TYPE 		=GET_LOV_val(#{usercorpid}, 'TB_O2O_ACCT_TYPE',#{custmType})/*类型*/
+		,CUSTOMER_SOURCE 	=GET_LOV_val(#{usercorpid}, 'TB_O2O_STORE_NAME',#{custmSource})/*消费者来源*/
+		,IS_EMPLOYEE 		=GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isEmployee})/*是否员工*/
+		,IS_REGISTED 		=GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isRegisted})/*是否在APP注册*/
+		,register_time 		=#{createdTime} /*注册时间*/
+		,O2O_CITY 			=#{city}/*注册城市*/
+		,X_ATTRIB_159 		=#{id2}
+	WHERE row_id =#{id};		
+	</update>
+	
+ 	 <insert id="insert" 
+	 	parameterType="com.hand.base.o2oaccnt.model.Customer">
+		insert into lnk_accnt (
+			row_id
+			,OU_NUM
+			, NAME
+			,MAIN_PH_NUM
+			,IS_ACTIVE_USER
+			,X_ATTRIB_157
+			,O2O_ACCT_TYPE
+			,CUSTOMER_SOURCE
+			,IS_EMPLOYEE
+			,IS_REGISTED
+			,register_time
+			,O2O_CITY
+			,X_ATTRIB_159
+			) VALUES (
+			#{id}
+			,s_sequence_pkg_get_next_rowid()
+			,#{custmName}/*姓名*/
+			,#{custmPhone}/*手机号*/
+			,#{isActiveUser} /*是否活跃用户*/
+			,#{inviteCode} /*邀请码*/
+			,GET_LOV_val(#{usercorpid}, 'TB_O2O_ACCT_TYPE',#{custmType})/*类型*/
+			,GET_LOV_val(#{usercorpid}, 'TB_O2O_STORE_NAME',#{custmSource})/*消费者来源*/
+			,GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isEmployee})/*是否员工*/
+			,GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{isRegisted})/*是否在APP注册*/
+			,#{createdTime} /*注册时间*/
+			,#{city}/*注册城市*/
+			,#{id2}
+			)
+	</insert>  
+
+	<delete id="deleteById" parameterType="com.hand.base.o2oaccnt.model.Customer">
+		DELETE FROM
+		LNK_ACCNT WHERE row_id = #{id}
+	</delete>
+	
+	
+	<select id="inviteeQueryPage" resultMap="customer"
+		parameterType="com.hand.base.o2oaccnt.model.Customer">
+		SELECT
+			DATE_FORMAT(T1.CREATED,'%Y-%m-%d %H:%i:%S') as     invitedTime/*邀请时间*/
+			,T1.INVITE_STATUS invitedStatus  /*邀请状态*/
+			,T1.INVITE_TYPE	 invitedType/*邀请方式*/
+			,T1.INVITEE_PHONE invitedPhone /*被邀请人电话*/
+			,t1.INVITER_ID inviterId /*邀请人id*/
+		FROM CX_O_INVT_RELAT T1
+	</select>
+	
+	<select id="registerCityPickListPage" resultMap="customer" parameterType="com.hand.base.o2oaccnt.model.Customer">
+		SELECT 
+		t1.NAME city /*省份名称*/
+		,t2.row_id orgId
+		FROM CX_O_AREA t1
+		LEFT JOIN lnk_org_ext T2 ON T2.ROW_ID = T1.T_ATTR_05
+		WHERE t1.TYPE ='City'
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryCustomerCount" resultType="java.lang.Integer" parameterType="com.hand.base.o2oaccnt.model.Customer">
+		select count(t1.ROW_ID)
+		FROM lnk_accnt T1
+		<include refid="whereAllSql"/>
+	</select>
+</mapper>

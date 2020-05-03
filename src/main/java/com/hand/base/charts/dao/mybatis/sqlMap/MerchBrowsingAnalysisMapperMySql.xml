@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.MerchBrowsingAnalysisMapper">
+	<resultMap type="com.hand.base.charts.model.ChartsBrowsingAnalysis" id="merchBrowsing"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT
+		t.row_id AS id,
+		t4.store_name AS merchName,
+		t4.NAME AS brandBusinessName,
+		t.city_name AS city,
+		t3. NAME AS province,
+		count(1) AS pV,
+		count(DISTINCT t.DEVICE_NO) AS uV
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM
+	 	LNK_PAGE_FLOW t
+		LEFT JOIN (
+		 cx_o_area t2
+		 LEFT JOIN cx_o_area t3 ON t2.parent_id = t3.row_id
+		) ON t.city_id = t2.row_id
+		LEFT JOIN lnk_enterprise t4 ON t. CODE = t4.row_id
+	WHERE  
+		t.PAGE_NAME ='店铺首页'
+		AND t. CODE IS NOT NULL
+		AND t. CODE != ''
+		AND t4.row_id IS NOT NULL
+		AND t4.row_id != ''
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="startTime != null and startTime != ''">
+			and t.created &gt;= #{startTime}
+		</if>
+		
+		<if test="endTime != null and endTime != ''">
+			and t.created &lt;= #{endTime}
+		</if>
+		<if test="city != null and city != ''">
+			and t.city_name LIKE CONCAT(CONCAT('%',#{city},'%'))
+			
+		</if>
+		<if test="province != null and province != ''">
+			and t3. NAME LIKE CONCAT(CONCAT('%',#{province},'%'))
+			
+		</if> 
+		<if test="merchName != null and merchName != ''">
+			and t4. store_name LIKE CONCAT(CONCAT('%',#{merchName},'%'))
+			
+		</if> 
+		 GROUP BY
+			 t4.store_name,
+			 t4. NAME,
+			 t.city_name,
+			 t3. NAME
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="merchBrowsing"
+		parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="queryById" resultMap="merchBrowsing"
+		parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<select id="brandQueryByExamplePage" resultMap="merchBrowsing"
+		parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="brandQueryById" resultMap="merchBrowsing"
+		parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="merchBrowsing"
+		parameterType="com.hand.base.charts.model.ChartsBrowsingAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

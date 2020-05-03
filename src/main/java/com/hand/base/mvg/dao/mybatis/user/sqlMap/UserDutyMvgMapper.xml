@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.user.mapper.UserDutyMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.duty.model.Duty" id="duty"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="duty" parameterType="com.hand.base.duty.model.Duty">
+		 select t1.row_id id,TO_CHAR (t1.created,'yyyy-MM-dd HH24:MI:ss') created, t1.name name, t1.comments comments
+		  from LNK_DUTY t1
+		 where not exists (select s1.row_id
+		          from LNK_INTER_DUTY_USER s1
+		         where s1.duty_id = t1.row_id
+		           and s1.user_id = #{mvgParentId})
+		   and t1.corp_id = #{usercorpid}       
+  </select>
+  
+  <select id="queryRightListPage" resultMap="duty" parameterType="com.hand.base.duty.model.Duty">
+		select t1.duty_id id, 
+   			   TO_CHAR (t1.created,'yyyy-MM-dd HH24:MI:ss') created,
+   			   t2.name name, 
+   			   t2.comments comments,
+   			   (case when t3.duty_id = t2.row_id then 'Y' else 'N' end) isDefault
+		  from LNK_INTER_DUTY_USER t1, LNK_DUTY t2, LNK_EMP_INFO t3
+		 where t1.duty_id = t2.row_id(+)
+		   and t1.user_id = t3.row_id(+)
+		   and t1.corp_id = #{usercorpid}
+		   and t1.user_id =#{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_DUTY_USER
+	      (row_id,
+	       user_id,
+	       duty_id)
+	    values
+	      (#{id},
+	       #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		delete from LNK_INTER_DUTY_USER
+		 where user_id = #{mvgParentId} 
+		   and duty_id = #{mvgSubsetId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_DUTY_USER WHERE user_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

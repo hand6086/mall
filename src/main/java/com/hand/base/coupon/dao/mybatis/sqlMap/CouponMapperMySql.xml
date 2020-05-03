@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.coupon.dao.mybatis.mapper.CouponMapper">
+	<resultMap type="com.hand.base.coupon.model.Coupon" id="Coupon"></resultMap>
+	<sql id="querycouponSql">
+	SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			t1.last_upd lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') created,
+			t1.CITY_ID cityId,
+			t2.name cityName,
+			t1.NAME couponName, /* 优惠券名称 */
+			t1.CODE couponCode, /* 编码*/
+			t1.FACE_VALUE faceValue, /* 面额（元）*/
+			date_format(t1.START_TIME, '%Y-%m-%d %H:%i:%S') startTime, /* 有效开始日期*/
+			date_format(t1.END_TIME, '%Y-%m-%d %H:%i:%S') endTime, /* 有效结束日期*/
+			t1.RESTRICTION restriction, /* 使用金额限制*/
+			t1.MIN_ORD_AMOUNT minOrdPrice, /* 定单满金额（元）*/
+			t1.T_ATTR_09 limitreceived, /* 已领取金额限制*/
+			date_format(t1.T_ATTR_13, '%Y-%m-%d %H:%i:%S') limitStarted, /* 限制开始时间*/
+			date_format(t1.T_ATTR_14, '%Y-%m-%d %H:%i:%S') limitFinish, /* 限制结束时间*/
+			t1.RELEASE_AMT releaseAmt, /* 发放数量*/
+			t1.AMT_PER_CONSUMER amtPerConsumer, /* 每人限领张数*/
+			t1.DRAW_TYPE drawType, /* 领取方式*/
+			t1.STATUS couponStatus, /* 状态*/
+			t1.TYPE type, /* 类型*/
+			t1.coupon_type couponType, /* 优惠券类型*/
+			t1.T_ATTR_02 goodsAvailable, /* 指定商品可用*/
+			t1.T_ATTR_10 receivedQuantity, /* 已领取数量*/
+			t1.COST_SHARE_PPT_D costProportionD, /* 经销商承担费用比例*/
+			t1.COST_SHARE_MAX_D costMaxProportionD, /* 经销商承担费用上限*/
+			t1.COST_SHARE_MIN_D costMinProportionD, /* 经销商承担费用下限*/
+			t1.COST_SHARE_PPT_W costProportionW, /* 二批商承担费用比例*/
+			t1.COST_SHARE_MAX_W costMaxProportionW, /* 二批商承担费用上限*/
+			t1.COST_SHARE_MIN_W costMinProportionW, /* 二批商承担费用下限*/
+			t1.COST_SHARE_PPT_R costProportionR, /* 终端承担费用比例*/
+			t1.COST_SHARE_MAX_R costMaxProportionR, /* 终端承担费用上限*/
+			t1.COST_SHARE_MIN_R costMinProportionR, /* 终端承担费用下限*/
+			t3.row_id orgId
+	</sql>
+	<sql id="couponFromSql">
+	FROM
+		CX_O_PMO_SP t1
+	left join (CX_O_AREA t2  LEFT JOIN lnk_org_ext T3 ON T3.ROW_ID = T2.T_ATTR_05) on t2.row_id = t1.CITY_ID
+	</sql>
+	<sql id="couponWhereSql" >
+	where 1=1
+		and t1.status='Active' 
+		and t1.type='Coupon'
+		and t1.delete_flg != 'Y'
+		and t1.SOURCE = 'fast shopping'
+		<if test="cityId != null and cityId != '' ">
+		  and t1.CITY_ID=#{cityId}
+		 </if>
+		<if test="cityName != null and cityName != '' ">
+		  and t2.NAME like CONCAT('%',#{cityName},'%')
+		 </if>
+		 <!-- 查询  优惠券名称 -->
+		 <if test="couponName != null and couponName != '' ">
+		   AND t1.NAME like CONCAT('%',#{couponName},'%')
+		 </if>
+		 <!-- 查询  编码 -->
+		 <if test="couponCode != null and couponCode != '' ">
+		   AND t1.CODE like CONCAT('%',#{couponCode},'%')
+		 </if>
+		 <!-- 查询  面额（元） -->
+		 <if test="faceValue != null and faceValue != '' ">
+		   AND t1.FACE_VALUE like CONCAT('%',#{faceValue},'%')
+		 </if>
+		 <!-- 查询  有效开始日期 -->
+		 <if test="startTime != null and startTime != '' ">
+		   AND t1.START_TIME LIKE CONCAT('%',#{startTime},'%')
+		 </if>
+		 <!-- 查询  有效结束日期 -->
+		 <if test="endTime != null and endTime != '' ">
+		   AND t1.END_TIME LIKE CONCAT('%',#{endTime},'%')
+		 </if>
+		 <!-- 查询  使用金额限制 -->
+		 <if test="restriction != null and restriction != '' ">
+		   AND t1.RESTRICTION LIKE CONCAT('%',#{restriction},'%')
+		 </if>
+		 <!-- 查询  定单满金额（元） -->
+		 <if test="minOrdPrice != null and minOrdPrice != '' ">
+		   AND t1.MIN_ORD_AMOUNT like CONCAT('%',#{minOrdPrice},'%')
+		 </if>
+		 <!-- 查询  已领取金额限制 -->
+		 <if test="limitreceived != null and limitreceived != '' ">
+		   AND t1.T_ATTR_09 like CONCAT('%',#{limitreceived},'%')
+		 </if>
+		 <!-- 查询  限制开始时间 -->
+		 <if test="limitStarted != null and limitStarted != '' ">
+		   AND t1.T_ATTR_13 LIKE CONCAT('%',#{limitStarted},'%')
+		 </if>
+		 <!-- 查询  限制结束时间 -->
+		 <if test="limitFinish != null and limitFinish != '' ">
+		    AND t1.T_ATTR_14 LIKE CONCAT('%',#{limitFinish},'%')
+		 </if>
+		 <!-- 查询  发放数量 -->
+		 <if test="releaseAmt != null and releaseAmt != '' ">
+		   AND t1.RELEASE_AMT like CONCAT('%',#{releaseAmt},'%')
+		 </if>
+		 <!-- 查询  每人限领张数 -->
+		 <if test="amtPerConsumer != null and amtPerConsumer != '' ">
+		   AND t1.AMT_PER_CONSUMER like CONCAT('%',#{amtPerConsumer},'%')
+		 </if>
+		 <!-- 查询  领取方式 -->
+		 <if test="drawType != null and drawType != '' ">
+		   AND t1.DRAW_TYPE=#{drawType}
+		 </if>
+		 <!-- 查询  状态 -->
+		 <if test="couponStatus != null and couponStatus != '' ">
+		   AND t1.STATUS=#{couponStatus}
+		 </if>
+		 <!-- 查询  类型 -->
+		 <if test="type != null and type != '' ">
+		   AND t1.TYPE=get_lov_val(#{usercorpid},'TB_O2O_CAMPAIGN_TYPE',#{type})
+		 </if>
+		 <!-- 查询  指定商品是否可用 -->
+		 <if test="goodsAvailable != null and goodsAvailable != '' ">
+		   AND t1.T_ATTR_02=#{goodsAvailable}
+		 </if>
+		 <!-- 查询  已领取数量 -->
+		 <if test="receivedQuantity != null and receivedQuantity != '' ">
+		   AND t1.T_ATTR_10 like CONCAT('%',#{receivedQuantity},'%')
+		 </if>
+	   
+	</sql>
+	
+	<select id="querycouponinformation" resultMap="Coupon" parameterType="com.hand.base.coupon.model.Coupon">
+		
+		<include refid="querycouponSql"/>
+		<include refid="couponFromSql"/>
+		<include refid="couponWhereSql"/>
+		<if test="id != null and id != ''">
+			AND t1.ROW_ID = #{id}
+		</if>
+		<if test=" oauth == 'MY_ORG' ">
+			AND (
+				t3.row_id = #{orgId}
+				OR EXISTS (
+					SELECT
+						1
+					FROM
+						LNK_PARTY_REL COMPA1
+					WHERE
+						t3.row_id = COMPA1.SUB_PARTY_ID
+					AND COMPA1.PARTY_ID = #{orgId}
+					AND COMPA1.DATA_TYPE = 'ORG'
+				)
+			)
+		</if>
+		  order by t1.CREATED desc
+		  limit #{startRows},#{rows}
+		
+	</select>
+	
+	<sql id="queryBrandAllSql">
+	SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.last_upd,'%Y-%m-%d %H:%i:%S') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') created,
+			t1.CITY_ID cityId,
+			t1.coupon_type couponType, 									/*优惠券类型*/
+			t1.NAME couponName, 										/*优惠券名称 */
+			t1.CODE couponCode, 										/*编码*/
+			date_format(t1.START_TIME, '%Y-%m-%d %H:%i:%S') startTime,  /* 有效开始日期*/
+			date_format(t1.END_TIME, '%Y-%m-%d %H:%i:%S') endTime, 		/* 有效结束日期*/
+			t1.FACE_VALUE faceValue,									/* 面额（元）*/
+			t1.MIN_ORD_AMOUNT minOrdPrice, 								/* 门槛（元）*/
+			t1.RELEASE_AMT releaseAmt, 									/* 发放数量*/
+			t1.AMT_PER_CONSUMER amtPerConsumer, 						/* 每人限领数量*/
+			t1.stock stock, 											/* 库存*/
+			(select count(*) FROM CX_O_PMO_CD_LN t2 where t2.head_id = t1.row_id) receivedQuantity, /* 已领取数量*/
+			(select count(*) FROM CX_O_PMO_CD_LN t2 where t2.is_used = 'Used' and t2.head_id = t1.row_id) usedAmt,	/*使用数量*/
+			t1.STATUS couponStatus, 									/* 状态*/
+			if(now() &gt; t1.END_TIME,'Time out',t1.brand_coupon_status) brandCouponStatus,	/*品牌馆优惠券状态*/
+			t1.TYPE type 												/* 活动类型*/
+	</sql>
+
+	<sql id="fromBrandTableSql">
+		FROM
+			CX_O_PMO_SP t1
+	</sql>
+	
+	<sql id="whereBrandAllSql">
+		where 1=1
+		AND T1.SOURCE = 'brand'
+		AND t1.delete_flg != 'Y'
+		AND t1.type='Coupon'
+		AND T1.corp_id = #{usercorpid}
+		<if test=" couponType != null and couponType != '' ">
+			AND t1.coupon_type = #{couponType}
+		</if>
+	</sql>
+	
+	<select id="brandQueryByExamplePage" resultMap="Coupon" parameterType="com.hand.base.coupon.model.Coupon">
+		<include refid="queryBrandAllSql" />
+		<include refid="fromBrandTableSql" />
+		<include refid="whereBrandAllSql" />
+	</select>
+	
+	<select id="brandQueryById" resultMap="Coupon" parameterType="com.hand.base.coupon.model.Coupon">
+		<include refid="queryBrandAllSql" />
+		<include refid="fromBrandTableSql" />
+		where 1=1
+		AND T1.SOURCE = 'brand'
+		AND T1.delete_flg != 'Y'
+		AND t1.type='Coupon'
+		AND t1.row_id = #{id}
+	</select>
+	
+	<insert id="brandInsert" parameterType="com.hand.base.coupon.model.Coupon">
+  		INSERT INTO cx_o_pmo_sp(
+		   ROW_ID, 
+           name,					/*优惠券名称 */
+           code,					/*编码*/
+		   start_time,				/* 有效开始日期*/
+		   end_time,				/* 有效开始日期*/
+		   type,					/* 活动类型*/
+		   coupon_type,				/*优惠券类型*/
+		   STATUS,					/* 状态*/
+		   FACE_VALUE,				/* 面额（元）*/
+		   MIN_ORD_AMOUNT,			/* 门槛（元）*/
+		   RELEASE_AMT,				/* 发放数量*/
+		   AMT_PER_CONSUMER,		/* 每人限领数量*/
+		   T_ATTR_10,				/* 已领取数量*/
+		   stock,					/*库存*/
+		   source,					/*频道类型*/
+		   brand_coupon_status,		/*品牌馆优惠券状态*/
+	 	   DRAW_TYPE, 				/*领取方式*/
+	 	   delete_flg,				/*删除标识*/
+		   <if test="couponType != 'all' ">
+		 	  store_id,		
+		   </if>					/*店铺Id*/
+		   T_ATTR_03				/*是否已使用优惠券*/
+		   )
+		VALUES(
+		   #{id},
+		   #{couponName},			/*优惠券名称 */
+		   TB_O2O_ACCTIVITYCODE(),	/*编码*/
+		   #{startTime},			/* 有效开始日期*/
+		   #{endTime},				/* 有效开始日期*/
+		   #{type},					/* 活动类型*/
+		   #{couponType},			/*优惠券类型*/
+		   #{couponStatus},			/* 状态*/
+		   #{faceValue},			/* 面额（元）*/
+		   #{minOrdPrice},			/* 门槛（元）*/
+		   #{releaseAmt},			/* 发放数量*/
+		   #{amtPerConsumer},		/* 每人限领数量*/
+		   '0',						/* 已领取数量*/
+		   #{releaseAmt},			/*库存*/
+		   'brand',					/*频道类型*/
+		   #{brandCouponStatus},	/*品牌馆优惠券状态*/
+		   #{drawType},				/*领取方式*/
+		   'N',						/*删除标识*/
+		   <if test="couponType != 'all' ">
+		   	(SELECT
+				row_id storeId
+			FROM
+				lnk_enterprise
+			WHERE
+			CODE = #{usercorpid}),	
+		   </if>					/*店铺Id*/
+		   'N'						/*是否已使用优惠券*/
+		   )
+	</insert>
+	
+    <update id="brandUpdate" parameterType="com.hand.base.coupon.model.Coupon">
+		UPDATE cx_o_pmo_sp 
+		SET
+			ROW_ID=#{id}
+		   <if test="brandCouponStatus != null and brandCouponStatus != '' ">
+         	  ,brand_coupon_status     =#{brandCouponStatus}      
+  		   </if>
+		   <if test="couponStatus != null and couponStatus != '' ">
+         	  ,status                  =#{couponStatus}      
+  		   </if>
+		   <if test="deleteFlg != null and deleteFlg != '' ">
+         	  ,delete_flg  		       =#{deleteFlg}        
+  		   </if>
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<select id="querycouponinformationCount" resultType="java.lang.Integer" parameterType="com.hand.base.coupon.model.Coupon">
+		
+		select count(t1.ROW_ID)
+		<include refid="couponFromSql"/>
+		<include refid="couponWhereSql"/>
+		<if test="id != null and id != ''">
+			AND t1.ROW_ID = #{id}
+		</if>
+		
+	</select>
+	
+	<select id="queryCouponById" resultMap="Coupon" parameterType="com.hand.base.coupon.model.Coupon">
+		<include refid="querycouponSql"/>
+		<include refid="couponFromSql"/>
+		<include refid="couponWhereSql"/>
+		and t1.row_id=#{id}
+	</select>
+	
+	<insert id="couponinformationInsert" parameterType="com.hand.base.coupon.model.Coupon">
+		insert into CX_O_PMO_SP(
+		ROW_ID ,
+		 CITY_ID , 
+		 NAME ,CODE ,
+		FACE_VALUE, 
+		START_TIME ,
+		 END_TIME,
+		RESTRICTION ,
+		MIN_ORD_AMOUNT ,
+		T_ATTR_09 ,
+		T_ATTR_13 ,T_ATTR_14 ,RELEASE_AMT,
+		AMT_PER_CONSUMER ,
+		DRAW_TYPE ,STATUS ,TYPE,coupon_type,
+		T_ATTR_02 ,T_ATTR_10 ,COST_SHARE_PPT_D,
+		COST_SHARE_MAX_D ,COST_SHARE_MIN_D ,
+		COST_SHARE_PPT_W ,COST_SHARE_MAX_W
+		,
+		COST_SHARE_MIN_W ,COST_SHARE_PPT_R ,
+		COST_SHARE_MAX_R
+		,COST_SHARE_MIN_R
+		,source
+		,delete_flg
+		)
+		values
+		(#{id},#{cityId},#{couponName},TB_O2O_ACCTIVITYCODE(),if(#{faceValue}='',null,#{faceValue}),#{startTime},#{endTime},
+		get_lov_val(#{usercorpid},'TB_O2O_COUPON_DRAW_TYPE',if(#{restriction}='',null,#{restriction})),
+		if(#{minOrdPrice} ='',0,#{minOrdPrice}),
+		if(#{limitreceived}='',999,#{limitreceived}), if(#{limitStarted}='',null,#{limitStarted}) ,if(#{limitFinish}='',null,#{limitFinish}) ,if(#{releaseAmt}='',0,#{releaseAmt}),
+		if(#{amtPerConsumer}='',null,#{amtPerConsumer}),
+		get_lov_val(#{usercorpid},'TB_O2O_COUPON_DRAW_TYPE',#{drawType}),
+		get_lov_val(#{usercorpid},'TB_O2O_STATUS',#{couponStatus}),
+		get_lov_val(#{usercorpid},'TB_O2O_CAMPAIGN_TYPE',#{type}),
+		get_lov_val(#{usercorpid},'CAMPAIGN_TYPE',#{couponType}),
+		#{goodsAvailable},#{receivedQuantity},#{costProportionD},#{costMaxProportionD},
+		#{costMinProportionD},#{costProportionW},#{costMaxProportionW},#{costMinProportionW},#{costProportionR},
+		#{costMaxProportionR},#{costMinProportionR},'fast shopping','N'
+		)
+	</insert>
+		<select id="CouponUpdate" resultMap="Coupon"
+		parameterType="com.hand.base.coupon.model.Coupon">
+		update CX_O_PMO_SP set
+		ROW_ID= #{id},
+		city_id = #{cityId},
+		NAME =#{couponName},
+		#优惠券名称
+		CODE=#{couponCode} ,
+		#编码
+		FACE_VALUE=if(#{faceValue}='',null,#{faceValue}),
+		#面额
+		START_TIME=#{startTime},
+		#有效开始日期
+		END_TIME=#{endTime} ,
+		#有效结束日期
+		RESTRICTION=get_lov_val(#{usercorpid},'TB_O2O_COUPON_DRAW_TYPE',if(#{restriction}='',null,#{restriction})),
+		#使用金额限制
+		MIN_ORD_AMOUNT=if(#{minOrdPrice} ='',0,#{minOrdPrice}),
+		#定单满金额
+		T_ATTR_09=if(#{limitreceived}='',999,#{limitreceived}) ,
+		#已领取金额限制
+		T_ATTR_13= if(#{limitStarted}='',null,#{limitStarted}),
+		#限制开始时间
+		T_ATTR_14= if(#{limitFinish}='',null,#{limitFinish}),
+		#限制结束时间
+		RELEASE_AMT=if(#{releaseAmt}='',0,#{releaseAmt}) ,
+		#发放数量
+		AMT_PER_CONSUMER=if(#{amtPerConsumer}='',null,#{amtPerConsumer}) ,
+		#每人限领张数
+		DRAW_TYPE= get_lov_val(#{usercorpid},'TB_O2O_COUPON_DRAW_TYPE',#{drawType}) ,
+		#领取方式
+		STATUS=get_lov_val(#{usercorpid},'TB_O2O_STATUS',#{couponStatus}) ,
+		#状态
+		TYPE=get_lov_val(#{usercorpid},'TB_O2O_CAMPAIGN_TYPE',#{type}) ,
+		coupon_type=get_lov_val(#{usercorpid},'CAMPAIGN_TYPE',#{couponType}) ,
+		#类型
+		T_ATTR_02 =#{goodsAvailable},
+		#指定商品可用
+		T_ATTR_10 =#{receivedQuantity},
+		#已领取数量
+		COST_SHARE_PPT_D=#{costProportionD} ,
+		##经销商承担费用比例
+		COST_SHARE_MAX_D=#{costMaxProportionD} ,
+		##经销商承担费用上限
+		COST_SHARE_MIN_D=#{costMinProportionD} ,
+		##经销商承担费用下限
+		COST_SHARE_PPT_W=#{costProportionW} ,
+		##二批商承担费用比例
+		COST_SHARE_MAX_W=#{costMaxProportionW} ,
+		##二批商承担费用上限
+		COST_SHARE_MIN_W=#{costMinProportionW} ,
+		##二批商承担费用下限
+		COST_SHARE_PPT_R=#{costProportionR} ,
+		##终端承担费用比例
+		COST_SHARE_MAX_R=#{costMaxProportionR} ,
+		##终端承担费用上限
+		COST_SHARE_MIN_R=#{costMinProportionR}
+		##终端承担费用下限
+		where row_id=#{id}
+
+	</select>
+		<sql id="queryConsumerSql">
+	select 
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t2.NAME customerName,
+		t2.OU_NUM customerCode,
+		t1.T_ATTR_02 actualCity,
+		t3.name couponCity,
+		t1.STATUS status,
+		date_format(t1.created, '%Y-%m-%d %H:%i:%S') created,
+		t1.IS_USED isUsed,
+		t1.HEAD_ID headId,
+		t1.CUSTOMER_ID customerId
+	
+	</sql>
+	<sql id="ConsumerFromSql">
+	FROM
+		CX_O_PMO_CD_LN t1
+	LEFT JOIN lnk_accnt t2 ON t1.CUSTOMER_ID = t2.row_id
+	LEFT JOIN (
+		CX_O_PMO_SP t4
+		LEFT JOIN CX_O_AREA t3 ON t4.City_Id = t3.row_id
+	) ON t1.Head_Id = t4.row_id
+	</sql>
+	<sql id="ConsumerWhereSql">
+	where 1=1 
+	</sql>
+<select id="queryConsumerInformationPage" resultMap="Coupon"
+		parameterType="com.hand.base.coupon.model.Coupon">
+		<include refid="queryConsumerSql"/>
+		<include refid="ConsumerFromSql"/>
+		<include refid="ConsumerWhereSql"/>
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryconsumerById"  resultMap="Coupon" parameterType="com.hand.base.coupon.model.Coupon">
+		<include refid="queryConsumerSql"/>
+		<include refid="ConsumerFromSql"/>
+		<include refid="ConsumerWhereSql"/>
+		 and t1.row_id=#{id}
+	</select>
+
+	<insert id="customerInsert" parameterType="com.hand.base.coupon.model.Coupon">
+		insert into
+		CX_O_PMO_CD_LN(row_id,T_ATTR_02,STATUS,IS_USED,CUSTOMER_ID,Head_Id)
+		values(#{id},#{actualCity},#{status},#{isUsed},
+		#{customerId},
+		#{headId})
+
+	</insert>
+	<update id='customerUpdate' parameterType="com.hand.base.coupon.model.Coupon">
+		update CX_O_PMO_CD_LN set T_ATTR_02=#{actualCity},STATUS=#{status},
+		IS_USED=#{isUsed},CUSTOMER_ID=#{customerId}
+		where row_id=#{id}
+	</update>
+
+	
+	<!-- <select id="querygoodsinformationPage" resultMap="Coupon"
+		parameterType="com.hand.base.coupon.model.Coupon">
+		SELECT
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.PROMOTION_CODE_ID promotionCodeId,
+		t2.O2O_DISPLAY_NAME merchName,
+		t2.O2O_INT_CODE merchCode
+		from CX_O_PMO_CD_PRO t1 left join S_PROD_INT_X t2
+		on t1.PRODUCT_ID=t2.row_id
+		where 1=1
+	</select> -->
+	
+<!-- <select id="querygoodsinformationById" resultMap="Coupon"
+		parameterType="com.hand.base.coupon.model.Coupon">
+		SELECT
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.PROMOTION_CODE_ID promotionCodeId,
+		t2.O2O_DISPLAY_NAME merchName,
+		t2.O2O_INT_CODE merchCode
+		from CX_O_PMO_CD_PRO t1 left join S_PROD_INT_X t2
+		on t1.PRODUCT_ID=t2.row_id
+		where 1=1
+		and t1.row_id=#{id}
+	</select> -->
+	
+	<!-- <insert id="goodsInsert" parameterType="com.hand.base.coupon.model.Coupon">
+		insert into CX_O_PMO_CD_PRO(row_id,PRODUCT_ID,PROMOTION_CODE_ID)
+		values(#{id}, #{merchId},#{promotionCodeId})
+
+	</insert>
+	<update id='goodsUpdate' parameterType="com.hand.base.coupon.model.Coupon">
+		update CX_O_PMO_CD_PRO set PRODUCT_ID=#{merchId}
+		where row_id=#{id}
+	</update> -->
+
+
+
+	<delete id="deleteById" parameterType="com.hand.base.coupon.model.Coupon">
+		DELETE FROM CX_O_PMO_SP
+		WHERE ROW_ID = #{id}
+	</delete>
+	<select id="customerPlistPage" resultMap="Coupon"
+		parameterType="com.hand.base.coupon.model.Coupon">
+		select t1.row_id id,
+			   t1.row_id customerId,
+			   t1.ou_num customerCode,
+			   t1.name  customerName,
+			   t1.main_ph_num phone
+		from lnk_accnt t1
+		where t1.o2o_acct_type = 'Customer'
+		order by t1.ou_num
+	</select>
+	
+	<update id='count' parameterType="com.hand.base.coupon.model.Coupon">
+		UPDATE CX_O_PMO_SP t
+			SET t.T_ATTR_10 = (
+				SELECT
+					COUNT(1)
+				FROM
+					CX_O_PMO_CD_LN t1
+				WHERE
+					t1.HEAD_ID = t.row_id
+			)
+			WHERE t.row_id = #{id}
+	</update>
+
+</mapper>

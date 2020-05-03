@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.hand.base.brandpromotion.dao.mybatis.mapper.BrandPromotionGoodsMapper">
+
+	<resultMap type="com.hand.base.brandpromotion.model.BrandPromotionGoods" id="brandPromotionGoods"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.HEAD_ID headId,
+		t1.MERCHANDISE_ID buyMerchId,
+		t1.FREE_MERCH_ID freeMerchId,
+		round(t1.T_ATTR_12,2) successRate, /*秒杀成功率*/
+		t1.T_ATTR_01 payMode, /*支付方式*/
+		t2.O2O_DISPLAY_NAME buyMerchName,/*购买商品名称*/
+		t2.O2O_INT_CODE merchCode,/*商品编码*/
+		t1.PMO_PRICE promotionPrice, /*活动价*/
+		t1.T_ATTR_09 totalQty,/*限购总量*/
+		t1.LMT_AMT lmtAmt,/*单人限赠数量*/
+		t1.STATUS status,/*状态*/
+		date_format(t1.T_ATTR_13,'%Y-%m-%d %H:%i:%s') merchStartTime,
+		date_format(t1.T_ATTR_14,'%Y-%m-%d %H:%i:%s') merchEndTime,
+		t6.row_id orgId
+	</sql>
+
+	<sql id="fromTableSql">
+		from CX_O_PMO_SP_LN t1 
+		left join S_PROD_INT_X t2 on t1.MERCHANDISE_ID = t2.ROW_ID
+		LEFT JOIN cx_o_pmo_sp t4 on t4.row_id = t1.head_id
+		left join (
+			CX_O_AREA t5 LEFT JOIN lnk_org_ext t6 ON t6.ROW_ID = t5.T_ATTR_05
+			) on t4.CITY_ID= t5.ROW_ID
+	</sql>
+
+	<sql id="whereAllSql">
+		where 1=1
+	<if test="usersystemRole != 'super_administrator' ">
+		and t1.corp_id = #{usercorpid}
+	</if>
+	</sql>
+
+
+	<select id="queryByExamplePage" resultMap="brandPromotionGoods" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		<if test="attr1 == 'submit'">
+			and t1.head_id = #{headId}
+		</if>
+		<if test="headId != '' and headId != null ">
+			and t1.head_id = #{headId}
+		</if>
+		order by t1.CREATED desc
+	</select>
+
+
+
+	<select id="queryById" resultMap="brandPromotionGoods" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		where T1.ROW_ID=#{id}
+	</select>
+
+
+
+	<select id="queryAll" resultMap="brandPromotionGoods" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+
+
+	<insert id="insert" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		insert into CX_O_PMO_SP_LN
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+				ROW_ID,
+			</if>
+			<if test="headId != null and headId != '' ">
+				HEAD_ID,
+			</if>
+			<if test="buyAmt != null and buyAmt != ''">
+				BUY_AMT,
+			</if>
+			<if test="freeAmt != null and freeAmt != ''">
+				FREE_AMT,
+			</if>
+			<if test="lmtAmt != null and lmtAmt != ''">
+				LMT_AMT,
+			</if>
+			<if test="status!=null and status != ''">
+				STATUS,
+			</if>
+			<if test="costProportionD!=null and costProportionD != ''">
+				COST_SHARE_PPT_D,</if>
+
+			<if test="costMaxProportionD!=null and costMaxProportionD != ''">
+				COST_SHARE_MAX_D,</if>
+
+			<if test="costMinProportionD!=null and costMinProportionD != ''">
+				COST_SHARE_MIN_D,</if>
+
+			<if test="costProportionW!=null and costProportionW != ''">
+				COST_SHARE_PPT_W,</if>
+
+			<if test="costMaxProportionW!=null and costMaxProportionW != ''">
+				COST_SHARE_MAX_W,</if>
+
+			<if test="costMinProportionW!=null and costMinProportionW != ''">
+				COST_SHARE_MIN_W,</if>
+			<if test="costProportionR!=null and costProportionR != ''">
+				COST_SHARE_PPT_R,</if>
+
+			<if test="costMaxProportionR!=null and costMaxProportionR != ''">
+				COST_SHARE_MAX_R,</if>
+
+			<if test="costMinProportionR!=null and costMinProportionR != ''">
+				COST_SHARE_MIN_R,</if>
+
+			<if test="buyMerchId!=null and buyMerchId != ''">
+				MERCHANDISE_ID,</if>
+
+			<if test="freeMerchId!=null and freeMerchId != ''">
+				FREE_MERCH_ID,</if>
+			<if test="promotionPrice!=null and promotionPrice!=''">
+				PMO_PRICE,
+			</if>
+			<if test="purchasedQty!=null and purchasedQty!=''">
+				T_ATTR_10,
+			</if>
+			<if test="totalQty!=null and totalQty!=''">
+				T_ATTR_09,</if>
+			<if test="successRate!=null and successRate!=''">
+				T_ATTR_12,
+			</if>
+			<if test="successRate!=null and successRate!=''">
+				T_ATTR_01,
+			</if>
+			<if test="merchStartTime != null and merchStartTime != '' ">
+				T_ATTR_13,
+			</if>
+			<if test="merchEndTime != null and merchEndTime != '' ">
+				T_ATTR_14,
+			</if>
+			<if test="groupsNumber != null and groupsNumber != '' ">
+				groups_number,
+			</if>
+
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null and id != ''">
+				#{id},
+			</if>
+			<if test="headId != null and headId != '' ">
+				#{headId},
+			</if>
+			<if test="buyAmt != null and buyAmt != ''">
+				#{buyAmt},
+			</if>
+			<if test="freeAmt != null and freeAmt != ''">
+				#{freeAmt},
+			</if>
+			<if test="lmtAmt != null and lmtAmt != ''">
+				#{lmtAmt},
+			</if>
+			<if test="status!=null and status != ''">
+				GET_LOV_VAL(#{usercorpid}, 'TB_O2O_STATUS',#{status}),
+			</if>
+			<if test="costProportionD!=null and costProportionD != ''">
+				#{costProportionD},</if>
+
+			<if test="costMaxProportionD!=null and costMaxProportionD != ''">
+				#{costMaxProportionD},</if>
+
+			<if test="costMinProportionD!=null and costMinProportionD != ''">
+				#{costMinProportionD},</if>
+
+			<if test="costProportionW!=null and costProportionW != ''">
+				#{costProportionW},</if>
+
+			<if test="costMaxProportionW!=null and costMaxProportionW != ''">
+				#{costMaxProportionW},</if>
+
+			<if test="costMinProportionW!=null and costMinProportionW != ''">
+				#{costMinProportionW},</if>
+			<if test="costProportionR!=null and costProportionR != ''">
+				#{costProportionR},</if>
+
+			<if test="costMaxProportionR!=null and costMaxProportionR != ''">
+				#{costMaxProportionR},</if>
+
+			<if test="costMinProportionR!=null and costMinProportionR != ''">
+				#{costMinProportionR},</if>
+
+			<if test="buyMerchId!=null and buyMerchId != ''">
+				#{buyMerchId},</if>
+
+			<if test="freeMerchId!=null and freeMerchId != ''">
+				#{freeMerchId},</if>
+			<if test="promotionPrice!=null and promotionPrice!=''">
+				#{promotionPrice},
+			</if>
+			<if test="purchasedQty!=null and purchasedQty!=''">
+				#{purchasedQty},</if>
+			<if test="totalQty!=null and totalQty!=''">
+				#{totalQty},</if>
+			<if test="successRate!=null and successRate!=''">
+				#{successRate},</if>
+			<if test="payMode!=null and payMode!=''">
+				#{payMode},</if>
+			<if test="merchStartTime != null and merchStartTime != '' ">
+				#{merchStartTime},</if>
+			<if test="merchEndTime != null and merchEndTime != '' ">
+				#{merchEndTime},</if>
+			<if test="groupsNumber != null and groupsNumber != '' ">
+				#{groupsNumber},</if>
+
+		</trim>
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		update CX_O_PMO_SP_LN
+		<set>
+			<if test="buyAmt != null and buyAmt != ''">
+				BUY_AMT=#{buyAmt},
+			</if>
+			<if test="freeAmt != null and freeAmt != ''">
+				FREE_AMT=#{freeAmt},
+			</if>
+			<if test="lmtAmt != null and lmtAmt != ''">
+				LMT_AMT=#{lmtAmt},
+			</if>
+			<if test="status!=null and status != ''">
+				STATUS=GET_LOV_VAL(#{usercorpid}, 'TB_O2O_STATUS',#{status}),
+			</if>
+			<if test="costProportionD!=null and costProportionD != ''">
+				COST_SHARE_PPT_D=#{costProportionD},</if>
+
+			<if test="costMaxProportionD!=null and costMaxProportionD != ''">
+				COST_SHARE_MAX_D=#{costMaxProportionD},</if>
+
+			<if test="costMinProportionD!=null and costMinProportionD != ''">
+				COST_SHARE_MIN_D=#{costMinProportionD},</if>
+
+			<if test="costProportionW!=null and costProportionW != ''">
+				COST_SHARE_PPT_W=#{costProportionW},</if>
+
+			<if test="costMaxProportionW!=null and costMaxProportionW != ''">
+				COST_SHARE_MAX_W=#{costMaxProportionW},</if>
+
+			<if test="costMinProportionW!=null and costMinProportionW != ''">
+				COST_SHARE_MIN_W=#{costMinProportionW},</if>
+			<if test="costProportionR!=null and costProportionR != ''">
+				COST_SHARE_PPT_R=#{costProportionR},</if>
+
+			<if test="costMaxProportionR!=null and costMaxProportionR != ''">
+				COST_SHARE_MAX_R=#{costMaxProportionR},</if>
+
+			<if test="costMinProportionR!=null and costMinProportionR != ''">
+				COST_SHARE_MIN_R=#{costMinProportionR},</if>
+
+			<if test="buyMerchId!=null and buyMerchId != ''">
+				MERCHANDISE_ID=#{buyMerchId},</if>
+
+			<if test="freeMerchId!=null and freeMerchId != ''">
+				FREE_MERCH_ID=#{freeMerchId},</if>
+			<if test="promotionPrice!=null and promotionPrice!=''">
+				PMO_PRICE=#{promotionPrice},
+			</if>
+			<if test="purchasedQty!=null and purchasedQty!=''">
+				T_ATTR_10=#{purchasedQty},</if>
+			<if test="totalQty!=null and totalQty!=''">
+				T_ATTR_09=#{totalQty},</if>
+			<if test="successRate!=null and successRate!=''">
+				T_ATTR_12=#{successRate},</if>
+			<if test="payMode!=null and payMode!=''">
+				T_ATTR_01=#{payMode},</if>
+			<if test="merchStartTime!=null and merchStartTime!=''">
+				T_ATTR_13=#{merchStartTime},</if>
+			<if test="merchEndTime!=null and merchEndTime!=''">
+				T_ATTR_14=#{merchEndTime},</if>
+			<if test="groupsNumber!=null and groupsNumber!=''">
+				groups_number=#{groupsNumber},</if>
+
+		</set>
+
+		where row_id=#{id}
+	</update>
+
+	<delete id="deleteById" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		DELETE FROM CX_O_PMO_SP_LN
+		WHERE ROW_ID=#{id}
+	</delete>
+
+	<!-- 秒杀活动参与者查询 -->
+	<select id="querySeckillManPage" resultMap="brandPromotionGoods" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+		select
+		t1.row_id id
+		,t1.CREATED created
+		,t1.CAM_LINE_ID
+		campaignLineId /*活动行id*/
+		,t2.NAME customerName
+		,t2.OU_NUM customerCode
+		,t2.MAIN_PH_NUM customerPhone
+		from CX_O_CAM_PART t1 left join lnk_accnt
+		t2 on t1.CUSTOMER_ID=t2.row_id
+		where t2.name is not null
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryByMerchCode" resultType="java.lang.Integer" parameterType="com.hand.base.brandpromotion.model.BrandPromotionGoods">
+	    SELECT
+			count(t2.row_id) id
+		FROM
+			CX_O_PMO_SP  t1
+		JOIN CX_O_PMO_SP_ln t2 ON t1.row_id = t2.head_id
+		WHERE
+			(
+				t1.type ='Second Kill'
+				OR t1.type ='Limited Purchase'
+				OR t1.type ='Free Buy'
+				
+				OR t1.type ='FightGroup'
+				OR t1.type ='Combination'
+				
+			)
+		
+		AND t2.merchandise_id = #{buyMerchId}
+		AND t1.CITY_ID=#{cityId}
+		AND t1.STATUS ='Active'
+		AND T2.STATUS='Active'
+		and t2.row_id != #{id}
+	AND (#{startTime} BETWEEN t1.start_time AND t1.end_time
+			OR #{endTime} BETWEEN t1.start_time AND t1.end_time
+			or (#{startTime} <![CDATA[<]]> t1.start_time and #{endTime}>t1.end_time))
+	
+	</select>
+
+</mapper>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsSuitMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSuit" id="goodsSuit"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.O2O_DISPLAY_NAME o2oDisplayName,
+	t1.O2O_INT_CODE o2oIntCode,
+	(select LINE_PATH from CX_O2O_PRODUCT_PICTURE_V where row_id = t.row_id limit 1) linePath,
+	t2.NAME o2oProdSeries,
+	t1.O2O_FP_DISPLAY o2oFroPageDisp,
+	t1.O2O_STORAGE_METHOD o2oStorMeth,
+	t1.O2O_SHELF_LIFE o2oShelfLife,
+	t1.O2O_PRODUCT_INGREDIENT o2oProdIng,
+	t1.O2O_PROD_DESC o2oProdDesp,
+	t.PROD_TYPE_CD prodDefTypeCode,
+	t1.O2O_SHARE_TYPE o2oShareType,
+	t1.O2O_SHARE_THEME o2oShareTheme,
+	t1.O2O_SHARE_NOTES o2oShareNotes,
+	t1.O2O_SHARE_URL o2oShareUrl,
+	t.CFG_MODEL_ID cfgModelId,
+	t3.LOCKED_FLG vodLockedFlag,
+	t3.LOCKED_BY vodLockedBy,
+	date_format(t3.LOCKED_DT, '%Y-%m-%d %H:%i:%S') as vodLockedDate,
+	t2.status status,
+	t1.O2O_SHARE_PIC_ID picId,
+	t1.O2O_PROD_CATEGORY o2oProdCategory
+
+
+	</sql>
+
+	<sql id="fromSql">
+	FROM
+	S_PROD_INT t
+	LEFT JOIN S_PROD_INT_X t1 on t.ROW_ID =t1.PAR_ROW_ID
+	LEFT JOIN CX_PROD_SERIES t2 on t2.ROW_ID=t1.O2O_PROD_CATEGORY
+	LEFT JOIN S_VOD t3 on t3.OBJECT_NUM = t.CFG_MODEL_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and t.SALES_SRVC_FLG = 'Y' AND t1.ATTRIB_09 = 'Y'
+  		AND t2. NAME='产品组合'
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSuit" resultMap="goodsSuit">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSuit"
+		parameterType="com.hand.base.goods.model.GoodsSuit">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into S_PROD_INT
+		  (ROW_ID, PROD_TYPE_CD, CFG_MODEL_ID,name,SALES_SRVC_FLG )
+		values
+		  (#{id},#{prodDefTypeCode},#{id},'Bundle Product','Y')
+	</insert>
+	
+	<insert id="prodIntXInsert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into S_PROD_INT_X
+		  (ROW_ID,PAR_ROW_ID,O2O_DISPLAY_NAME, O2O_INT_CODE, O2O_FP_DISPLAY, O2O_STORAGE_METHOD, O2O_SHELF_LIFE,
+		  O2O_PRODUCT_INGREDIENT, O2O_PROD_DESC, O2O_SHARE_TYPE, O2O_SHARE_THEME, O2O_SHARE_NOTES,
+		  O2O_SHARE_URL,O2O_PROD_CATEGORY,ATTRIB_09)
+		values
+		  (#{id},#{id},#{o2oDisplayName},#{o2oIntCode},#{o2oFroPageDisp},#{o2oStorMeth},
+		  #{o2oShelfLife},#{o2oProdIng},#{o2oProdDesp},
+		  #{o2oShareType},#{o2oShareTheme},#{o2oShareNotes},#{o2oShareUrl},#{o2oProdCategory},'Y')
+	</insert>
+	
+	<insert id="vodInsert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into S_VOD
+		  (ROW_ID,OBJECT_NUM,vod_name,vod_type_cd,LOCKED_FLG,LOCKED_BY,LOCKED_DT)
+		values
+		  (S_SEQUENCE_PKG_GET_NEXT_ROWID(),#{id},#{o2oDisplayName},'ISS_PROD_DEF',#{vodLockedFlag},#{vodLockedBy},#{vodLockedDate})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSuit">
+		update S_PROD_INT t
+		   set t.PROD_TYPE_CD = #{prodDefTypeCode}, t.CFG_MODEL_ID = #{cfgModelId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="prodIntXUpdate" parameterType="com.hand.base.goods.model.GoodsSuit">
+		update S_PROD_INT_X t
+		   <set>
+			   	<if test="o2oDisplayName != null and o2oDisplayName != '' ">
+			   		t.O2O_DISPLAY_NAME = #{o2oDisplayName},
+			   	</if>
+			   	<if test="o2oIntCode != null and o2oIntCode != '' ">
+			   		t.O2O_INT_CODE = #{o2oIntCode},
+			   	</if>
+			   	<if test="o2oFroPageDisp != null and o2oFroPageDisp != '' ">
+			   		t.O2O_FP_DISPLAY = #{o2oFroPageDisp},
+			   	</if>
+			   	<if test="o2oStorMeth != null and o2oStorMeth != '' ">
+			   		t.O2O_STORAGE_METHOD = #{o2oStorMeth},
+			   	</if>
+			   	<if test="o2oShelfLife != null and o2oShelfLife != '' ">
+			   		t.O2O_SHELF_LIFE = #{o2oShelfLife},
+			   	</if>
+			   	<if test="o2oProdIng != null and o2oProdIng != '' ">
+			   		t.O2O_PRODUCT_INGREDIENT = #{o2oProdIng},
+			   	</if>
+			   	<if test="o2oProdDesp != null and o2oProdDesp != '' ">
+			   		t.O2O_PROD_DESC = #{o2oProdDesp},
+			   	</if>
+			    <if test="o2oShareType != null and o2oShareType != '' ">
+			   		t.O2O_SHARE_TYPE = #{o2oShareType},
+			   	</if>
+			    <if test="o2oShareTheme != null and o2oShareTheme != '' ">
+			   		t.O2O_SHARE_THEME = #{o2oShareTheme},
+			   	</if>
+			    <if test="o2oShareNotes != null and o2oShareNotes != '' ">
+			   		t.O2O_SHARE_NOTES = #{o2oShareNotes},
+			   	</if>
+			    <if test="o2oShareUrl != null and o2oShareUrl != '' ">
+			   		t.O2O_SHARE_URL = #{o2oShareUrl},
+			   	</if>
+			    <if test="o2oProdCategory != null and o2oProdCategory != '' ">
+			   		O2O_PROD_CATEGORY=#{o2oProdCategory},
+			   	</if>
+			    <if test="attrib09 != null and attrib09 != '' ">
+			   		ATTRIB_09=#{attrib09},
+			   	</if>
+		   </set>
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSuit">
+		DELETE FROM S_PROD_INT WHERE ROW_ID = #{id}
+	</delete>
+  	
+  
+    <select id="queryOrderPkAll" parameterType="com.hand.base.goods.model.GoodsSuit"
+	resultMap="goodsSuit">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d
+	%H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD,
+	'%Y-%m-%d
+	%H:%i:%S')
+	as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.ORDER_NUM orderNumber #订单号
+	from S_ORDER t
+	ORDER BY
+      T.ORDER_NUM
+  	</select>
+  	
+  	<select id="queryCustomerPkAll" parameterType="com.hand.base.goods.model.GoodsSuit"
+	resultMap="goodsSuit">
+		select
+			T.ROW_ID as id,
+			date_format(T.CREATED,'%Y-%m-%d
+			%H:%i:%S') as
+			created,
+			T.CREATED_BY as createdBy,
+			date_format(T.LAST_UPD,
+			'%Y-%m-%d
+			%H:%i:%S')
+			as lastUpdated,
+			T.LAST_UPD_BY as lastUpdatedBy,
+			t.OU_NUM customerCode, #消费者编号 
+			t.NAME customerName #消费者名称
+		from lnk_accnt t
+		where ACCNT_FLG = 'N'
+		AND OU_NUM != ''
+  	</select>
+  
+</mapper>

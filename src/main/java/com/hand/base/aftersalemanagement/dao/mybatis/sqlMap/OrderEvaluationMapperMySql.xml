@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.aftersalemanagement.dao.mybatis.mapper.OrderEvaluationMapper">
+  <resultMap type="com.hand.base.aftersalemanagement.model.OrderEvaluation" id="orderevaluation"></resultMap>
+  
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="orderevaluation"
+		parameterType="com.hand.base.aftersalemanagement.model.OrderEvaluation">
+		select 
+			T1.ROW_ID as id,
+			date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+			T1.CREATED_BY as createdBy,
+			date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+			T1.LAST_UPD_BY as lastUpdatedBy,
+			t1.T_ATTR_02 		orderRate,
+			t1.CONTEXT			 context,
+			t1.IS_POSITIVE 		  isPositive,
+			date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S')  orderCreated,
+			t1.TYPE               type,
+			t2.ORDER_NUM          orderNumber,
+			t7.O2O_DISPLAY_NAME	productName	,/*商品名称*/
+			t7.O2O_INT_CODE	productCode,/*商品编码*/
+			t1.T_ATTR_01	merchRate,/*商品评级*/
+			t3. NAME             customerName,
+			t3.ou_num            customerCode,
+			t3.main_ph_num       customerPhoneNumber,
+			t4.CONTACT           receiverName,
+			t4.CONTACT_PHONE     receiverPhone,
+			t4.PROVICE           receiverProvince,
+			t4.CITY              receiverCity,
+			t4.DISTRICT          receiverDistrict,
+			t4.ADDRESS           receiverAddress,
+			t6.NAME              dSRName ,
+			t6.ou_num             dSRCode ,
+			t6.O2O_CONTACT_PHONE  storeCellphone,
+			date_format(t2.CREATED, '%Y-%m-%d %H:%i:%S')   orderDate,
+			date_format(t5.ATTRIB_26, '%Y-%m-%d %H:%i:%S')  payBillTime,
+			date_format(t5.ATTRIB_27, '%Y-%m-%d %H:%i:%S') orderPickedTime,
+			date_format(t5.ATTRIB_28, '%Y-%m-%d %H:%i:%S') startDeliveryTime,
+			date_format(t5.ATTRIB_29, '%Y-%m-%d %H:%i:%S') receivedTime
+		FROM
+			CX_O_ORD_MSG t1 
+		    left join S_ORDER T2 on T1.ORDER_ID = T2.ROW_ID
+		    left join lnk_accnt T3 on T1.CUSTOMER_ID = T3.ROW_ID
+		    left join S_PROD_INT_X T7 on T1.MERCH_ID = T7.ROW_ID
+		    left join (
+			    S_ORDER_X T5 
+			    left join CX_O_ADDRESS T4 on T5.O2O_RECIEVER_ID = T4.ROW_ID
+			    left join lnk_accnt T6 on T5.ATTRIB_41 = T6.ROW_ID
+			    )on T1.ORDER_ID = T5.ROW_ID
+		  where 1=1
+		    and  T1.TYPE = #{type}
+			and  T2.row_id is not NULL
+		  ORDER BY t1.created desc
+	</select>
+	<!-- 根据条件查询记录 -->
+	<select id="brandQueryByExamplePage" resultMap="orderevaluation"
+		parameterType="com.hand.base.aftersalemanagement.model.OrderEvaluation">
+		SELECT
+			T1.ROW_ID AS id,
+			date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') AS created,
+			T1.CREATED_BY AS createdBy,
+			date_format(T1.LAST_UPD,'%Y-%m-%d %H:%i:%S') AS lastUpdated,
+			T1.LAST_UPD_BY AS lastUpdatedBy,
+			t1.T_ATTR_02 orderRate,
+			t1.CONTEXT context,
+			t1.IS_POSITIVE isPositive,
+			date_format(t1.CREATED,'%Y-%m-%d %H:%i:%S') orderCreated,
+			t1.TYPE type,
+			t2.ORDER_NUM orderNumber,
+			t3. NAME customerName,
+			t3.ou_num customerCode,
+			t3.main_ph_num customerPhoneNumber,
+			t4.CONTACT receiverName,
+			t4.CONTACT_PHONE receiverPhone,
+			t4.PROVICE receiverProvince,
+			t4.CITY receiverCity,
+			t4.DISTRICT receiverDistrict,
+			t4.ADDRESS receiverAddress,
+			t5. NAME dSRName,
+			t5.ou_num dSRCode,
+			t5.O2O_CONTACT_PHONE storeCellphone,
+			date_format(t2.CREATED,'%Y-%m-%d %H:%i:%S') orderDate,
+			date_format(t2.ATTRIB_26,'%Y-%m-%d %H:%i:%S') payBillTime,
+			date_format(t2.ATTRIB_27,'%Y-%m-%d %H:%i:%S') orderPickedTime,
+			date_format(t2.ATTRIB_28,'%Y-%m-%d %H:%i:%S') startDeliveryTime,
+			date_format(t2.ATTRIB_29,'%Y-%m-%d %H:%i:%S') receivedTime
+		FROM
+			CX_O_ORD_MSG t1
+		LEFT JOIN (
+			S_ORDER_X T2
+			LEFT JOIN CX_O_ADDRESS T4 ON T2.O2O_RECIEVER_ID = T4.ROW_ID
+			LEFT JOIN lnk_accnt T5 ON T2.ATTRIB_41 = T5.ROW_ID
+			) ON T1.ORDER_ID = T2.ROW_ID
+		LEFT JOIN lnk_accnt T3 ON T1.CUSTOMER_ID = T3.ROW_ID
+		WHERE
+			1 = 1
+		AND T1.TYPE = #{type}
+		AND T2.order_type = 'brand'
+		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		 </if>
+		 <if test="usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101'
+		 </if>
+	</select>
+	
+ <select id="queryevaluationPage" resultMap="orderevaluation"
+		parameterType="com.hand.base.aftersalemanagement.model.OrderEvaluation">
+	select 
+ 	T1.ROW_ID as id,
+	date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T1.CREATED_BY as createdBy,
+	date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T1.LAST_UPD_BY as lastUpdatedBy,
+	t2.LABEL_NAME evaLabelName,
+	t1.EVALUATE_ID  evaluateId
+	from CX_O_P_EVLU_LBL t1 
+	left join CX_O_EVALU_LBL t2 on  t1.EVALUATE_LABEL_ID=t2.row_id
+	where 1=1
+	</select> 
+	
+	<select id="queryorderevaluationCount" resultType="java.lang.Integer" parameterType="com.hand.base.aftersalemanagement.model.OrderEvaluation">
+		
+		select count(T1.ROW_ID)
+		FROM
+			CX_O_ORD_MSG t1
+		left join S_ORDER T2 on T1.ORDER_ID = T2.ROW_ID
+		where 1=1
+		and  T1.TYPE = #{type}
+		and  T2.row_id is not NULL
+	</select>
+	
+	<select id="brandQueryorderevaluationCount" resultType="java.lang.Integer" parameterType="com.hand.base.aftersalemanagement.model.OrderEvaluation">
+		
+		select count(T1.ROW_ID)
+		FROM
+			CX_O_ORD_MSG t1
+		left join S_ORDER_X T2 on T1.ORDER_ID = T2.ROW_ID
+		where 1=1
+		AND T1.TYPE = #{type}
+		AND T2.order_type = 'brand'
+	</select>
+</mapper>

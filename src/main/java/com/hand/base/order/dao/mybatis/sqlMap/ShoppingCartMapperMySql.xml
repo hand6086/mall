@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.ShoppingCartMapper">
+	<resultMap type="com.hand.base.order.model.ShoppingCart" id="shoppingCart"></resultMap>
+	<resultMap type="com.hand.base.basic.model.ListOfValue" id="listOfValue"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.T_ATTR_01 name,/*城市*/
+			t3.NAME customerName,/*消费者名称*/
+			t3.OU_NUM ouNum,/*消费者编码*/
+			t3.MAIN_PH_NUM mainPhNum,/*消费者电话*/
+			t4.O2O_DISPLAY_NAME o2oDisplayName,/*商品名称*/
+			t4.O2O_INT_CODE o2oIntCode,/*商品编码*/
+			t1.QTY qty,/*数量*/
+			t1.CREATED created,/*日期*/
+			t1.STATUS status, /*状态*/
+			t1.city_id cityId,
+			t1.CUSTOMER_ID customerId,
+			t1.MERCH_ID merchId,
+			t1.channel_type channelType,/*频道*/
+			t1.scenes_type scenesType,/*场景*/
+			t1.promotion_type promotionType,/*促销*/
+			t5.row_id orgId
+		FROM
+			CX_O_SHP_CART t1
+		LEFT JOIN (CX_O_AREA t2  LEFT JOIN lnk_org_ext T5 ON T5.ROW_ID = T2.T_ATTR_05) ON t2.ROW_ID = t1.city_id
+		LEFT JOIN LNK_ACCNT t3 ON t3.ROW_ID = t1.CUSTOMER_ID
+		LEFT JOIN S_PROD_INT_X t4 ON t4.ROW_ID = t1.MERCH_ID
+		
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="shoppingCart" parameterType="com.hand.base.order.model.ShoppingCart">
+		<include refid="queryTableSql" />
+		ORDER BY t1.CREATED DESC
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="shoppingCart" parameterType="com.hand.base.order.model.ShoppingCart">
+		<include refid="queryTableSql" />
+		ORDER BY t1.CREATED DESC
+	</select>
+	
+	<select id="queryById" resultMap="shoppingCart" parameterType="com.hand.base.order.model.ShoppingCart">
+		<include refid="queryTableSql" />
+		WHERE 1=1
+		AND T1.ROW_ID = #{id}
+	</select>
+	<insert id="insert">
+		INSERT INTO CX_O_SHP_CART(
+			ROW_ID,
+			MODIFICATION_NUM, 
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			QTY,
+			STATUS,	
+			CUSTOMER_ID,
+			MERCH_ID,
+			T_ATTR_01,
+			channel_type,
+			scenes_type,
+			promotion_type,
+			city_id
+		)
+		VALUES(
+			#{id},
+			0,
+			'0',
+			now(),
+			#{qty},
+			#{status},
+			#{customerId},
+			#{merchId},
+			#{name},
+			#{channelType},
+			#{scenesType},
+			#{promotionType},
+			#{cityId}
+		)
+	</insert>
+	
+	<update id="update">
+		UPDATE CX_O_SHP_CART
+		SET
+			QTY = #{qty},
+			STATUS = #{status},	
+			CUSTOMER_ID = #{customerId},
+			MERCH_ID = #{merchId},
+			T_ATTR_01 = #{name},
+			channel_type = #{channelType},
+			scenes_type = #{scenesType},
+			promotion_type = #{promotionType},
+			city_id = #{cityId}
+		WHERE ROW_ID = #{id}
+	</update>
+	
+	<select id="queryCustomerPage" resultMap="shoppingCart" parameterType="com.hand.base.order.model.ShoppingCart">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.ROW_ID customerId,
+			t1.OU_NUM ouNum,/*消费者编码*/
+			t1.NAME customerName,/*姓名*/
+			t1.MAIN_PH_NUM mainPhNum /*手机号*/
+		FROM LNK_ACCNT t1
+		where t1.O2O_ACCT_TYPE = 'Customer'
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryMerchantPage" resultMap="shoppingCart" parameterType="com.hand.base.order.model.ShoppingCart">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.ROW_ID merchId,
+			t2.O2O_DISPLAY_NAME o2oDisplayName,/*商品名称*/
+			t2.O2O_INT_CODE o2oIntCode /*商品编码*/
+		FROM
+			S_PROD_INT t1
+		LEFT JOIN S_PROD_INT_X t2 ON t2.PAR_ROW_ID = t1.ROW_ID
+		WHERE 1 = 1
+		AND	t1.SALES_SRVC_FLG = 'Y'
+		order by t1.CREATED desc
+	</select>
+	
+
+	<select id="campaignType" resultMap="listOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+		SELECT
+			t1.row_id id,
+			t1.created_by createdBy,
+			t1.created created,
+			t1.last_upd_by lastUpdatedBy,
+			date_format(
+				t1.last_upd,
+				'%Y-%m-%d %H:%i:%S'
+			) lastUpdated,
+			t1.corp_id corpid,
+			t1. NAME NAME,
+			t1.type type,
+			t1.val val,
+			cast(t1.seq AS UNSIGNED INT) seq,
+			t1.lang_id langId,
+			t1.sap_val sapVal,
+			t1.active_flag activeFlag,
+			t1.COMMENTS comments
+		FROM
+			LNK_LIST_OF_VAL t1
+		WHERE
+			1 = 1
+		AND t1.active_flag ='Y'
+		AND t1.type ='TB_O2O_CAMPAIGN_TYPE'
+		and t1.NAME in ('秒杀','组合','拼团')
+		ORDER BY
+			t1.seq ASC
+	</select>
+</mapper>

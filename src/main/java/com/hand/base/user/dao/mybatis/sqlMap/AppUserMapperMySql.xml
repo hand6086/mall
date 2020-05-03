@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.user.dao.mybatis.mapper.AppUserMapper">
+	<resultMap type="com.hand.base.user.model.AppUser" id="appuser"></resultMap>
+	
+	<sql id="querySql">
+		SELECT
+			t1.row_id id,
+			t1.NAME name,
+			t1.USER_ID userId,
+			t1.T_ATTR_01 customerId,
+			t1.USER_TYPE userType,
+			t1.PHONE_NUMBER phoneNumber,
+			t1.T_ATTR_02 status
+		FROM
+			cx_o2o_user_v t1
+		WHERE
+			1 = 1
+		<if test=" attr1 == 'storeInfo' ">
+			AND t1.T_ATTR_01 = #{attr2}
+		</if>
+	</sql>
+	
+	<select id="queryById" parameterType="com.hand.base.user.model.AppUser"
+		resultMap="appuser">
+		<include refid="querySql"></include>
+   		and t1.row_id=#{id}
+   </select>
+   
+   <update id="updateAccnt" parameterType="com.hand.base.user.model.AppUser">
+ 		update LNK_ACCNT set  NAME=#{name}
+ 		<if test="userType == 'Customer'">
+ 			,MAIN_PH_NUM = #{phoneNumber}
+ 		</if> 
+ 		where ROW_ID=#{id}
+  </update>
+  
+  <update id="updateUserName" parameterType="com.hand.base.user.model.AppUser">
+  		update S_CONTACT set last_name=SUBSTR(#{name},1,1),fst_name=SUBSTR(#{name},2) where ROW_ID=#{id}
+  </update>
+  
+  <update id="updateContactX" parameterType="com.hand.base.user.model.AppUser">
+  		update S_CONTACT_X set ROW_ID=#{id}
+  		<if test="password != null and password != ''">
+  		,ATTRIB_02=#{password}
+  		</if>
+  		<if test="phoneNumber != null and phoneNumber != ''">
+  		,ATTRIB_42=#{phoneNumber} 
+  		</if>
+  		<if test="userType != null and userType != ''">
+  		,ATTRIB_41=#{userType}
+  		</if>
+  		where ROW_ID=#{id}
+  </update>
+	
+	<select id="queryByExamplePage" parameterType="com.hand.base.user.model.AppUser"
+		resultMap="appuser">
+		  <include refid="querySql"></include>
+   </select>
+   
+	<select id="queryByPhone" parameterType="com.hand.base.user.model.AppUser"
+		resultMap="appuser">
+		  <include refid="querySql"></include>
+		  and t1.PHONE_NUMBER = #{phoneNumber}
+		  and t1.USER_TYPE = #{userType}
+		  <if test="id != null and id != ''">
+		  and t1.row_id != #{id}
+		  </if>
+   </select>
+   
+   <delete id="deleteFromBaseUser" parameterType="com.hand.base.user.model.AppUser">
+      delete from S_USER where row_id = #{id}
+   </delete>
+   <delete id="deleteFromBaseContact" parameterType="com.hand.base.user.model.AppUser">
+      delete from S_CONTACT where row_id = #{id}
+   </delete>
+   
+    <delete id="deleteFromContactX" parameterType="com.hand.base.user.model.AppUser">
+      delete from S_CONTACT_X where row_id = #{id}
+   </delete>
+    <delete id="deleteFromAccnt" parameterType="com.hand.base.user.model.AppUser">
+      delete from lnk_accnt where row_id = #{id}
+   </delete>
+
+   
+   <insert id="insert" statementType="CALLABLE">
+		CALL TB_O2O_CUSTOMER_PKG_NEW_CUSTOMER(#{returnStatus,mode=OUT,jdbcType=VARCHAR}
+								,#{msgData,mode=OUT,jdbcType=VARCHAR},#{param1,mode=IN,jdbcType=VARCHAR}
+								,#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR}
+								,#{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR}
+								,#{param5,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR}
+								,#{param5,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+	</insert>
+	
+	<insert id="storeEmployeeInsert" statementType="CALLABLE">
+		CALL TB_O2O_CUSTOMER_PKG_NEW_ACCOUNT_USER(#{returnStatus,mode=OUT,jdbcType=VARCHAR}
+								,#{msgData,mode=OUT,jdbcType=VARCHAR},#{param1,mode=IN,jdbcType=VARCHAR}
+								,#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR}
+								,#{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR}
+								,#{param5,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR}
+								,#{param5,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+	</insert>
+	
+	<select id="queryAppUserCount" resultType="java.lang.Integer" parameterType="com.hand.base.user.model.AppUser">
+		
+		select count(ROW_ID)
+		FROM
+			cx_o2o_user_v t1
+		where 1=1
+	</select>
+	
+</mapper>

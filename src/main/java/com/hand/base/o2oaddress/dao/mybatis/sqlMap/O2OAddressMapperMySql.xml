@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaddress.dao.mybatis.mapper.O2OAddressMapper">
+	<resultMap type="com.hand.base.o2oaddress.model.O2OAddress" id="o2oaddress"></resultMap>
+ 	<sql id="queryAllSql">
+		select 
+ 			T1.ROW_ID            as id
+			,t1.created created
+			,T1.CREATED_BY        as createdBy
+			,date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated
+			,T1.LAST_UPD_BY       as lastUpdatedBy
+			,T1.CORP_ID corpid
+			,T1.`NAME` areaName /*区域名称*/
+			,T1.TYPE	areaType /*区域类型*/
+			,T1.CODE	areaCode /*区域编码*/
+			,T1.PARENT_ID parentId /*父区域id*/
+			,t2.name	parentAreaName
+			,t3.name    parentAreaName2
+	</sql>
+	
+	<sql id="fromTableSql">
+		from CX_O_AREA t1
+		left join CX_O_AREA t2 on t1.PARENT_ID = t2.row_id
+		left join CX_O_AREA t3 on t2.PARENT_ID = t3.row_id
+		where 1 = 1
+	</sql>
+	
+	<sql id="whereAllSql">
+	
+		<if test="areaName != null and areaName != '' ">
+			and t1.name = #{areaName}
+		</if>
+		<if test="areaType != null and areaType != '' ">
+			and t1.TYPE = #{areaType}
+		</if>
+		<if test="areaCode != null and areaCode != '' ">
+			and t1.CODE = #{areaCode}
+		</if>
+		<if test="parentId != null and parentId != '' ">
+			and t1.PARENT_ID = #{parentId}
+		</if>
+		<if test="parentAreaName != null and parentAreaName != '' ">
+			and t2.name = #{parentAreaName}
+		</if>
+		<if test="parentAreaName2 != null and parentAreaName2 != '' ">
+			and t3.name = #{parentAreaName2}
+		</if>
+		<if test="ids != null">
+			and T1.ROW_ID in 
+			<foreach collection="ids" item="id" open="(" separator=", " close=")">#{id}</foreach>
+		</if>
+	</sql>
+	<!-- 这里不能用Page结尾，不然会报limit -1的语法错误，page默认分页会从-1开始 -->
+	<select id="queryByExample" resultMap="o2oaddress" parameterType="com.hand.base.o2oaddress.model.O2OAddress">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+ 	</select> 
+ 
+	</mapper>

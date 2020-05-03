@@ -1,0 +1,3930 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.MyChartMapper">
+	<resultMap type="com.hand.base.common.model.MyChart" id="myChart"></resultMap>
+	<resultMap type="com.hand.base.common.model.PanelDetailReport"
+		id="monitoringPanelDetailReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.SalesJournalReport"
+		id="salesJournalReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.DailySalesSingleReport"
+		id="dailySalesSingleReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.MerchSettleBatchQueryReport"
+		id="merchSettleBatchQueryReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.UsersPurchaseCountReport"
+		id="usersPurchaseCountReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.OrderDeliveryTimeReport"
+		id="orderDeliveryTimeReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.PanelCountReport"
+		id="panelCountReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.SalesExpressReport"
+		id="salesExpressReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.UserVisitCountReport"
+		id="userVisitCountReport"></resultMap>
+	<!-- <resultMap type="com.hand.base.common.model.RePurchaseReport"
+		id="rePurchaseReport"></resultMap> -->
+	<resultMap type="com.hand.base.common.model.UserGrowthReport"
+		id="userGrowthReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.CancelOrderReport"
+		id="cancelOrderReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.DeliveryDaysReport"
+		id="deliveryDaysReport"></resultMap>
+	<resultMap type="com.hand.base.common.model.RePurchaseReport"
+		id="rePurchaseReport"></resultMap>
+	<select id="queryMonitoringPanelDetailReport" resultMap="monitoringPanelDetailReport"
+		parameterType="com.hand.base.common.model.PanelDetailReportParam">
+			SELECT
+			T1.ORDER_NUM,
+			/*订单编号*/
+			 GET_LOV_NAME(#{usercorpid},'TB_O2O_ORDER_STATUS',T2.ATTRIB_48) as ATTRIB_48 ,
+			/*订单状态*/
+			 GET_LOV_NAME(#{usercorpid},'TB_O2O_LOGISTICS_STATUS',T2.ATTRIB_07) as ATTRIB_07,
+			/*物流状态*/
+			T1.Created AS XD_PERIOD,
+			/*下单时间*/
+			T2.ATTRIB_27,
+			/*接单时间*/
+			T2.ATTRIB_28,
+			/*配送时间*/
+			T2.ATTRIB_29,
+			/*收货时间*/
+			T3.OU_NUM AS
+			SH_CODE,
+			/*商户编码 */
+			T3. NAME AS SH_NAME,
+			/*商户名称*/
+			T3.O2O_CONTACT_PHONE,
+			/*商户电话*/
+			T5.OU_NUM AS XFZ_CODE,
+			/*消费者编码*/
+			T5. NAME AS XFZ_NAME,
+			/*消费者名称*/
+			T5.MAIN_PH_NUM AS XFZ_PHO,
+			/*消费者电话*/
+			T6.CONTACT AS SH_MAN,
+			/*收货人*/
+			T6.CONTACT_PHONE AS SHR_PHO,
+			/*收货人电话*/
+			T2.ATTRIB_36,
+			/*省*/
+			T2.ATTRIB_37,
+			/*城市*/
+			T2.ATTRIB_38,
+			/*区*/
+			T2.ATTRIB_01 /*详细地址*/
+			FROM
+			S_ORDER T1
+			LEFT JOIN (
+			S_ORDER_X T2
+			LEFT JOIN lnk_accnt T3 ON T2.ATTRIB_41 = T3.ROW_ID
+			LEFT
+			JOIN CX_O_ADDRESS T6 ON T2.O2O_RECIEVER_ID = T6.ROW_ID
+			) ON T1.ROW_ID
+			=
+			T2.ROW_ID
+			LEFT JOIN lnk_accnt t5 ON T1.ACCNT_ID = T5.ROW_ID
+	
+			WHERE 1 = 1
+			AND T1.created >= #{DATE_FROM}
+			AND T1.created <![CDATA[<]]>
+			DATE_ADD(#{DATE_TO} ,INTERVAL 1 DAY)
+			AND T2.ATTRIB_09 = 'Y'
+			AND
+			T2.ATTRIB_44 ='Platform Order'
+			and t2.ATTRIB_37 =
+			if(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>1,t2.ATTRIB_37,#{O2O_CITY})
+			AND T2.ATTRIB_48 = IF( GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A', 'To Pick Up',if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) =
+			'B','To Receive', if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'C', 'To Receive', 'Refunding')))
+			AND (T2.ATTRIB_07 = IF(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A',
+			T2.ATTRIB_07,if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) =
+			'B','Have Order', if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'C',
+			'In The Distribution', 'Order Picked'))) OR
+			T2.ATTRIB_07 =
+			IF(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A', T2.ATTRIB_07,if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'B','Order Picked',
+			if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'C', 'In The Distribution', 'In The Distribution'))) OR
+			T2.ATTRIB_07 = IF(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A',
+			T2.ATTRIB_07,if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'B','Order Picked',
+			if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) ='C', 'In The Distribution', 'Received'))) OR
+			T2.ATTRIB_07 =
+			IF(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A', T2.ATTRIB_07,if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'B','Order Picked',
+			if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'C', 'In The Distribution', 'Returning')))
+			OR
+			T2.ATTRIB_07 = IF(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'A', T2.ATTRIB_07,if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) =
+			'B','Order Picked',
+			if(GET_LOV_VAL(#{usercorpid},'TB_REPORD_ORDERSTATUS',#{STATUS_ZB}) = 'C', 'In The Distribution','Returned'))) )
+
+	</select>
+
+	<select id="querySalesJournalReport" resultMap="salesJournalReport"
+		parameterType="com.hand.base.common.model.SalesJournalReportParam">
+		SELECT T.O2O_CITY,
+		SUM(NOT_TAKE_ORDER_CNT) AS NOT_TAKE_ORDER_CNT,
+		SUM(TO_BE_DISTRIBUT_CNT) AS TO_BE_DISTRIBUT_CNT,
+		SUM(TO_BE_SIGN_CNT) AS
+		TO_BE_SIGN_CNT,
+		SUM(COMPLETE_CNT) AS COMPLETE_CNT,
+		SUM(ACTIVE_ORDER_CNT) AS ACTIVE_ORDER_CNT,
+		SUM(PRO_ORI_AMOUNT_OF_SALES) AS PRO_ORI_AMOUNT_OF_SALES,
+		SUM(AMOUNT_OF_PAID) AS AMOUNT_OF_PAID,
+		SUM(CARTON_CNT) AS CARTON_CNT,
+		round(SUM(KILOLITER_CNT),6) AS KILOLITER_CNT,
+		SUM(ACTIVE_GROUP_ORDER_CNT) AS
+		ACTIVE_GROUP_ORDER_CNT,
+		SUM(GROUP_ORI_AMOUNT_OF_SALES) AS
+		GROUP_ORI_AMOUNT_OF_SALES,
+		SUM(AMOUNT_OF_GROUP_PAID) AS
+		AMOUNT_OF_GROUP_PAID,
+		SUM(GROUP_CARTON_CNT) AS GROUP_CARTON_CNT,
+		round(SUM(GROUP_KILOLITER_CNT),6) AS GROUP_KILOLITER_CNT
+		FROM (SELECT
+		T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		COUNT(*) AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT,
+		/*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT,
+		/*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS
+		AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS
+		GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 ='To Pick Up'
+		GROUP
+		BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS
+		NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		COUNT(*) AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT,
+		/*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES,
+		/*产品原价销售额（有效订单商品总价求和） */
+		0 AS AMOUNT_OF_PAID,
+		/*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT, /*箱数*/
+		0 AS
+		KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS
+		GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID,
+		/*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT
+		/*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 = 'To Receive'
+		AND
+		T.ATTRIB_07 = 'Order Picked'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT,/*-待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		COUNT(*)
+		AS TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT,
+		/*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES,
+		/*产品原价销售额（有效订单商品总价求和） */
+		0 AS AMOUNT_OF_PAID,
+		/*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT, /*箱数*/
+		0 AS
+		KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS
+		GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID,
+		/*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT
+		/*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 = 'To Receive'
+		AND
+		T.ATTRIB_07 = 'Shipping'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		COUNT(*) AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额（有效订单商品总价求和）
+		*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT,
+		/*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT,
+		/*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS
+		AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS
+		GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Appraise','Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS
+		O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		COUNT(*) AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额（有效订单商品总价求和） */
+		0 AS AMOUNT_OF_PAID,
+		/*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT, /*箱数*/
+		0 AS
+		KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS
+		GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID,
+		/*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT
+		/*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION
+		ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		SUM(ATTRIB_14) AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM
+		S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION
+		ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		SUM(ATTRIB_17) AS AMOUNT_OF_PAID,
+		/*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS CARTON_CNT, /*箱数*/
+		0 AS
+		KILOLITER_CNT, /*千升数 */
+		0 AS ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS
+		GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID,
+		/*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT
+		/*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION
+		ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和：商品总价）*/
+		0 AS AMOUNT_OF_PAID,
+		/*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		SUM(T1.QTY_REQ) AS CARTON_CNT,
+		/*箱数（订单商品行商品数量sum）*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM
+		S_ORDER t4 join S_ORDER_X t on T4.ROW_ID = T.PAR_ROW_ID
+		JOIN
+		S_ORDER_ITEM T1 ON T4.ROW_ID = T1.ORDER_ID
+		WHERE T.ATTRIB_09 = 'Y'
+		AND
+		T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION
+		ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		round(SUM(T2.ATTRIB_19 * if(T1.QTY_REQ='',0,T1.QTY_REQ)),6)
+		AS KILOLITER_CNT, /*千升数(商品千升数*箱数)
+		*/
+		0 AS ACTIVE_GROUP_ORDER_CNT,
+		/*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS
+		AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS
+		GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM S_ORDER T4
+		JOIN (
+		S_ORDER_ITEM T1
+		JOIN
+		S_PROD_INT_X T2 ON T1.PROD_ID = T2.ROW_ID
+		) ON T4.ROW_ID = T1.ORDER_ID
+		JOIN S_ORDER_X T ON T4.ROW_ID = T.PAR_ROW_ID
+		WHERE T.ATTRIB_09 = 'Y'
+		AND
+		T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION
+		ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0 AS NOT_TAKE_ORDER_CNT,
+		/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		COUNT(*) AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM
+		S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		AND T.ATTRIB_50 = 'Y'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0
+		AS NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		SUM(ATTRIB_14) AS
+		GROUP_ORI_AMOUNT_OF_SALES, /*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID,
+		/*团购实收金额*/
+		0 AS GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT
+		/*团购千升数*/
+		FROM S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		AND T.ATTRIB_50 = 'Y'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0
+		AS NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		SUM(ATTRIB_17) AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM
+		S_ORDER_X T
+		WHERE T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		AND T.ATTRIB_50 = 'Y'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0
+		AS NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		SUM(T1.QTY_REQ) AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		0 AS GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM
+		S_ORDER t4 join S_ORDER_X t on T4.ROW_ID = T.PAR_ROW_ID
+		JOIN
+		S_ORDER_ITEM T1 ON T4.ROW_ID = T1.ORDER_ID
+		WHERE T.ATTRIB_09 = 'Y'
+		AND
+		T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		AND T.ATTRIB_50 = 'Y'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		0
+		AS NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS PRO_ORI_AMOUNT_OF_SALES, /*产品原价销售额
+		（有效订单商品总价求和）*/
+		0 AS AMOUNT_OF_PAID, /*实收金额（实收金额=订单总金额=商品总价-优惠总金额）*/
+		0 AS
+		CARTON_CNT, /*箱数*/
+		0 AS KILOLITER_CNT, /*千升数 */
+		0 AS
+		ACTIVE_GROUP_ORDER_CNT, /*有效团购订单数量 */
+		0 AS GROUP_ORI_AMOUNT_OF_SALES,
+		/*团购产品原价销售额*/
+		0 AS AMOUNT_OF_GROUP_PAID, /*团购实收金额*/
+		0 AS
+		GROUP_CARTON_CNT, /*团购箱数*/
+		round(SUM(T2.ATTRIB_19*T1.QTY_REQ),6)  AS
+		GROUP_KILOLITER_CNT /*团购千升数*/
+		FROM S_ORDER T4
+		JOIN (
+		S_ORDER_ITEM T1
+		JOIN
+		S_PROD_INT_X T2 ON T1.PROD_ID = T2.ROW_ID
+		) ON T4.ROW_ID = T1.ORDER_ID
+		JOIN S_ORDER_X T ON T4.ROW_ID = T.PAR_ROW_ID
+		WHERE T.ATTRIB_09 = 'Y'
+		AND
+		T.ATTRIB_37 =IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		T.ATTRIB_37 ,#{O2O_CITY}
+		)
+		AND T.CREATED >= concat(#{DATE_FROM} ,' ',':00:00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		concat(#{DATE_TO} ,' ',':23:59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up','To Receive', 'To Appraise', 'Finished')
+		AND T.ATTRIB_50 = 'Y'
+		GROUP BY T.ATTRIB_37) T
+		GROUP BY T.O2O_CITY
+
+
+
+
+	</select>
+	<select id="queryDailySalesReport" resultMap="dailySalesSingleReport"
+		parameterType="com.hand.base.common.model.DailySalesSingleReportParam">
+		SELECT T.O2O_CITY,
+		T.O2O_DISPLAY_NAME,
+		SUM(ORDER_CNT) AS ORDER_CNT,
+		round(SUM(PRO_SUM),6) AS PRO_SUM,
+		round(SUM(REAL_SUM),6) AS REAL_SUM,
+		SUM(ORDER_CTNS_SUM)
+		AS ORDER_CTNS_SUM,
+		round(SUM(KL_NUM),6) AS KL_NUM
+		FROM (
+		SELECT
+		t.O2O_CITY,
+		t.O2O_DISPLAY_NAME,
+		count(*) AS ORDER_CNT,
+		/*订单量*/
+		0 AS PRO_SUM,
+		/*产品原价销售额（元）*/
+		0 AS REAL_SUM,
+		/*实收金额（元）*/
+		0 AS ORDER_CTNS_SUM,
+		/*箱数 */
+		0 AS
+		KL_NUM /*千升数*/
+		FROM
+		(
+		SELECT DISTINCT
+		o.row_id,
+		ooil.PRODUCT_ID,
+		ox.attrib_37 AS O2O_CITY,
+		/*城市*/
+		ix.o2o_display_name AS O2O_DISPLAY_NAME
+		/*商品*/
+		FROM
+		S_ORDER o
+		JOIN S_ORDER_X ox ON o.row_id = ox.par_row_id
+		RIGHT
+		JOIN
+		S_ORDER_ITEM oi ON
+		o.row_id = oi.order_id
+		JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN S_PROD_INT_X ix ON ooil.PRODUCT_ID =
+		ix.row_id
+		) ON
+		ooil.ORDER_LINE_ID = oi.row_id
+		WHERE
+		ox.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY}))  <![CDATA[ < ]]>
+		1,
+		ox.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		AND o.CREATED >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND o.CREATED <![CDATA[ <= ]]>
+		concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND ox.ATTRIB_09 = 'Y'
+		AND
+		ox.ATTRIB_48 IN (
+		'To Pick Up',
+		'To Receive',
+		'To Appraise',
+		'Finished'
+		)
+		)
+		t
+		GROUP BY
+		t.O2O_CITY,
+		t.O2O_DISPLAY_NAME
+
+		union
+		SELECT
+	ox.attrib_37 AS CITY,
+	/*城市*/
+	ix.o2o_display_name AS O2O_DISPLAY_NAME,
+	/*商品*/
+	0 AS ORDER_CNT,
+	/*订单量*/
+	SUM(
+		ooil.BASE_UNIT_PRI * ooil.DEAL_NUMBER
+	) AS PRO_SUM,
+	/*产品原价销售额（元）*/
+	0 AS REAL_SUM,
+	/*实收金额（元）*/
+	0 AS ORDER_CTNS_SUM,
+	/*箱数  */
+	0 AS KL_NUM /*千升数*/
+FROM
+	S_ORDER o
+JOIN S_ORDER_X ox ON o.row_id = ox.par_row_id
+RIGHT JOIN (
+	S_ORDER_ITEM oi
+	JOIN S_ORDER_ITEM_X oix ON oi.row_id = oix.par_row_id
+	JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN S_PROD_INT_X ix ON ooil.PRODUCT_ID = ix.row_id
+	) ON ooil.ORDER_LINE_ID = oi.row_id
+) ON o.row_id = oi.order_id
+WHERE
+	ox.ATTRIB_37 =
+IF (
+	LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+	ox.ATTRIB_37,
+	#{O2O_CITY}
+)
+AND o.CREATED >= #{DATE_FROM}
+AND o.CREATED <![CDATA[ <= ]]> #{DATE_TO}
+AND ox.ATTRIB_09 = 'Y'
+AND ox.ATTRIB_48 IN (
+	'To Pick Up',
+	'To Receive',
+	'To Appraise',
+	'Finished'
+)
+GROUP BY
+	ox.attrib_37,
+	ix.o2o_display_name
+		union
+
+		SELECT
+		ox.attrib_37 AS
+		O2O_CITY ,/*城市*/
+		ix.o2o_display_name AS O2O_DISPLAY_NAME,
+		/*商品*/
+		0 AS
+		ORDER_CNT,
+		/*订单量*/
+		0 AS PRO_SUM,
+		/*产品原价销售额（元）*/
+		SUM(
+		ooil.NET_PRICE *
+		ooil.DEAL_NUMBER
+		) AS REAL_SUM,
+		/*实收金额（元）*/
+		0 AS ORDER_CTNS_SUM,
+		/*箱数 */
+		0
+		AS KL_NUM /*千升数*/
+		FROM
+		S_ORDER o
+		JOIN S_ORDER_X ox ON o.row_id =
+		ox.par_row_id
+		RIGHT JOIN (
+		S_ORDER_ITEM oi
+		JOIN S_ORDER_ITEM_X oix
+		ON
+		oi.row_id = oix.par_row_id
+		JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN
+		S_PROD_INT_X ix ON
+		ooil.PRODUCT_ID =
+		ix.row_id
+		) ON ooil.ORDER_LINE_ID =
+		oi.row_id
+		) ON o.row_id = oi.order_id
+		where ox.ATTRIB_37=IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		ox.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		AND o.CREATED >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND o.CREATED <![CDATA[ <= ]]>
+		concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND ox.ATTRIB_09 = 'Y'
+		AND
+		ox.ATTRIB_48 IN (
+		'To Pick Up',
+		'To Receive',
+		'To Appraise',
+		'Finished'
+		)
+		group by ox.attrib_37, ix.o2o_display_name
+
+		union
+
+		SELECT ox.attrib_37
+		AS O2O_CITY, /*城市*/
+		ix.o2o_display_name AS O2O_DISPLAY_NAME, /*商品*/
+		0 AS
+		ORDER_CNT, /*订单量*/
+		0 AS PRO_SUM, /*产品原价销售额（元）*/
+		SUM(ooil.NET_PRICE *
+		ooil.DEAL_NUMBER) AS REAL_SUM, /*实收金额（元）*/
+		0 AS ORDER_CTNS_SUM, /*箱数 */
+		0 AS KL_NUM /*千升数*/
+		FROM S_ORDER o
+		JOIN S_ORDER_X ox ON o.row_id =
+		ox.par_row_id
+		RIGHT JOIN (
+		S_ORDER_ITEM oi
+		JOIN S_ORDER_ITEM_X oix
+		ON
+		oi.row_id = oix.par_row_id
+		JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN
+		S_PROD_INT_X ix ON
+		ooil.PRODUCT_ID =
+		ix.row_id
+		) ON ooil.ORDER_LINE_ID =
+		oi.row_id
+		) ON o.row_id = oi.order_id
+		where ox.ATTRIB_37=IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		ox.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		AND o.CREATED >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND o.CREATED <![CDATA[ <= ]]>
+		concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND ox.ATTRIB_09 = 'Y'
+		AND
+		ox.ATTRIB_48 IN (
+		'To Pick Up',
+		'To Receive',
+		'To Appraise',
+		'Finished'
+		)
+		group by ox.attrib_37, ix.o2o_display_name
+
+		union
+
+		SELECT
+		ox.attrib_37
+		AS O2O_CITY,
+		/*城市*/
+		ix.o2o_display_name AS O2O_DISPLAY_NAME,
+		/*商品*/
+		0 AS
+		ORDER_CNT,
+		/*订单量*/
+		0 AS PRO_SUM,
+		/*产品原价销售额（元）*/
+		0 AS REAL_SUM,
+		/*实收金额（元）*/
+		SUM(ooil.DEAL_NUMBER) AS ORDER_CTNS_SUM,
+		/*箱数*/
+		0 AS KL_NUM /*千升数 */
+		FROM
+		S_ORDER o
+		JOIN S_ORDER_X ox ON o.row_id = ox.par_row_id
+		RIGHT
+		JOIN
+		S_ORDER_ITEM oi ON
+		o.row_id = oi.order_id
+		JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN S_PROD_INT_X ix ON ooil.PRODUCT_ID =
+		ix.row_id
+		) ON
+		ooil.ORDER_LINE_ID = oi.row_id
+		WHERE
+		ox.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>1,
+		ox.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		AND o.CREATED >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND o.CREATED <![CDATA[ <= ]]>concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND ox.ATTRIB_09 = 'Y'
+		AND ox.ATTRIB_48 IN (
+		'To Pick Up',
+		'To Receive',
+		'To Appraise',
+		'Finished'
+		)
+		GROUP BY
+		ox.attrib_37,
+		ix.o2o_display_name
+
+		union
+
+		SELECT
+		ox.attrib_37 AS
+		O2O_CITY,
+		/*城市*/
+		ix.o2o_display_name AS O2O_DISPLAY_NAME,
+		/*商品*/
+		0 AS
+		ORDER_CNT,
+		/*订单量*/
+		0 AS PRO_SUM,
+		/*产品原价销售额（元）*/
+		0 AS REAL_SUM,
+		/*实收金额（元）*/
+		0 AS ORDER_CTNS_SUM,
+		/*箱数 */
+		SUM(
+		if(ix.attrib_19=''||ix.attrib_19 is
+		null, 0,ix.attrib_19) *
+		if(ooil.DEAL_NUMBER=''||ooil.DEAL_NUMBER is
+		null, 0,ooil.DEAL_NUMBER)
+		) AS KL_NUM /*千升数 */
+		FROM
+		S_ORDER o
+		JOIN
+		S_ORDER_X ox ON o.row_id = ox.par_row_id
+		RIGHT JOIN
+		S_ORDER_ITEM oi
+		ON
+		o.row_id = oi.order_id
+		JOIN (
+		CX_O_ORD_ITM_LN ooil
+		LEFT JOIN
+		S_PROD_INT_X
+		ix ON ooil.PRODUCT_ID =
+		ix.row_id
+		) ON
+		ooil.ORDER_LINE_ID =
+		oi.row_id
+		WHERE
+		ox.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		ox.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		AND o.CREATED >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND o.CREATED <![CDATA[ <= ]]>concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND ox.ATTRIB_09 = 'Y'
+		AND ox.ATTRIB_48 IN (
+		'To Pick Up',
+		'To Receive',
+		'To Appraise',
+		'Finished'
+		)
+		GROUP BY
+		ox.attrib_37,
+		ix.o2o_display_name) T
+		GROUP BY T.O2O_CITY,
+		T.O2O_DISPLAY_NAME
+	</select>
+
+	<select id='queryMerchSettleBatchQueryReport'
+		parameterType="com.hand.base.common.model.MerchSettleBatchQueryReportParam"
+		resultMap="merchSettleBatchQueryReport">
+		SELECT
+		C5.START_DATE AS START_DATE,
+		/*开始时间*/
+		C5.END_DATE AS END_DATE,
+		/*结束时间*/
+		C2. NAME AS O2O_CITY,
+		/*城市*/
+		C3.OU_NUM AS STORE_NUM,
+		/*商户编码*/
+		C3.
+		NAME AS STORE_NAME,
+		/*商户名称*/
+		C3.O2O_CONTACT_PHONE AS STORE_PHONE,
+		/*商户电话*/
+		C3.O2O_ALIPAY AS STORE_ALIPAY,
+		/*支付宝账号*/
+		C3.O2O_BANK AS BANK,
+		/*开户银行*/
+		C3.O2O_ACCONT_NAME AS ACC_NAME,
+		/*开户人*/
+		C3.O2O_CREDIT_CARD AS
+		CARD,
+		/*银行卡号*/
+		C1.T_ATTR_04 AS TOTAL_AMOUNT,
+		/*结算总金额*/
+		C1.SETTLE_TIME AS
+		SETTLE_TIME,
+		/*结算时间*/
+		C1. STATUS AS SETTLE_STATUS,
+		/*结算状态*/
+		C1.T_ATTR_14
+		AS NO_SETTLE_REASON /*未结算原因*/
+		FROM
+		CX_O_CO_SE_LINE C1
+		LEFT JOIN (
+		lnk_accnt c3
+		JOIN (
+		CX_O_AREA C2
+		RIGHT JOIN CX_O_COLECT_SET C5 ON
+		C5.CITY_ID =
+		C2.ROW_ID
+		)
+		ON C2.ROW_ID = C3.X_ATTRIB_165
+		) ON C1.STORE_ID =
+		C3.ROW_ID
+		where 1=1
+		and
+		C2.NAME =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		C2.NAME,
+		#{O2O_CITY}
+		)
+		AND C5.START_DATE >= concat(
+		#{DATE_FROM},
+		' ',
+		':00:00:00'
+		)
+		AND C5.END_DATE <![CDATA[ <= ]]>concat(
+		#{DATE_TO},
+		' ',
+		':23:59:59'
+		)
+		AND C1.STATUS= if(#{SETTLE_STATUS}='', 'No Settled',#{SETTLE_STATUS})
+
+	</select>
+	<select id="queryUsersPurchaseCountReport"
+		parameterType="com.hand.base.common.model.UsersPurchaseCountReportParam"
+		resultMap="usersPurchaseCountReport">
+		SELECT
+		O2O_city AS O2O_city,
+		/* 城市 */
+		sum(num2) AS NUM2,
+		/* 购买总人数 */
+		sum(num1) AS NUM1,
+		/* 新注册人数 */
+		sum(num3) AS NUM3,
+		/* 新用户购买人数 */
+		(sum(num1) - sum(num3)) AS NUM4,
+		/* 新用户未购买人数 */
+		IF (
+		sum(num1) = 0,
+		0,
+		round(sum(num3) / sum(num1), 4) * 100
+		) AS ROTE1,
+		/* 新注册并购买人数占比 */
+		(sum(num2) - sum(num3)) AS NUM5,
+		/* 老用户购买人数 */
+		IF (
+		sum(num2) = 0,
+		0,
+		round(
+		(sum(num2) - sum(num3)) / sum(num2),
+		4
+		) * 100
+		) AS ROTE2 /*
+		老用户购买占比 */
+		FROM
+		(
+		SELECT
+		if(count(*)='', 0,count(*)) AS num1,
+		0 AS num2,
+		0
+		AS num3,
+		t.O2O_city AS O2O_city
+		FROM
+		(
+		SELECT DISTINCT
+		t1.OU_NUM,
+		t1.O2O_CITY AS O2O_city
+		FROM
+		lnk_accnt t1
+		WHERE
+		t1.created >= #{DATE_FROM}
+		AND t1.created <![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND t1.O2O_CITY= IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,
+		t1.O2O_CITY,
+		#{O2O_CITY}
+		)
+		) t
+		GROUP BY
+		t.O2O_city
+		UNION
+		SELECT
+		0 AS num1,
+		if(count(*)='', 0,count(*)) AS num2,
+		0 AS num3,
+		t.O2O_CITY AS O2O_CITY
+		FROM
+		(
+		SELECT DISTINCT
+		oe.ou_num,
+		ox.attrib_37 AS O2O_CITY
+		FROM
+		S_ORDER o
+		JOIN S_ORDER_X ox ON o.row_id = ox.par_row_id
+		LEFT JOIN lnk_accnt oe ON
+		o.accnt_id = oe.row_id
+		WHERE
+		o.created >=#{DATE_FROM}
+		AND o.created <![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND ox.attrib_37 = if(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1, ox.attrib_37,#{O2O_CITY})
+		AND (
+		ox.attrib_48 = 'To Pick Up'
+		OR
+		ox.attrib_48 = 'To Receive'
+		OR ox.attrib_48 = 'To Appraise'
+		OR
+		ox.attrib_48 = 'Finished'
+		)
+		) t
+		GROUP BY
+		t.O2O_CITY
+		UNION
+		SELECT
+		0 AS num1,
+		0
+		AS num2,
+		if(count(*)='', 0,count(*)) AS num3,
+		t.O2O_CITY AS O2O_CITY
+		FROM
+		(
+		SELECT
+		t5.ou_num,
+		t5.O2O_CITY AS O2O_CITY
+		FROM
+		(
+		SELECT DISTINCT
+		oe.ou_num AS ou_num,
+		ox.attrib_37 AS O2O_CITY
+		FROM
+		S_ORDER o
+		JOIN
+		S_ORDER_X ox ON o.row_id = ox.par_row_id
+		LEFT JOIN lnk_accnt oe ON
+		o.accnt_id = oe.row_id
+		WHERE
+		o.created >=#{DATE_FROM}
+		AND o.created<![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND ox.attrib_37 = if(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,ox.attrib_37,#{O2O_CITY})
+		AND (
+		ox.attrib_48 = 'To Pick Up'
+		OR
+		ox.attrib_48 = 'To Receive'
+		OR ox.attrib_48 = 'To Appraise'
+		OR
+		ox.attrib_48 = 'Finished'
+		)
+		) t4
+		JOIN (
+		SELECT DISTINCT
+		oex.ou_num AS
+		ou_num,
+		oex.O2O_CITY AS O2O_CITY
+		FROM
+		lnk_accnt oex
+		WHERE
+		oex.created >=
+		#{DATE_FROM}
+		AND oex.created <![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND oex.O2O_CITY = if(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1, oex.O2O_CITY,#{O2O_CITY})
+		) t5 ON t4.O2O_CITY = t5.O2O_CITY
+		AND
+		t4.ou_num = t5.ou_num
+		) t
+		GROUP BY
+		t.O2O_CITY
+		) mm
+		GROUP BY
+		O2O_CITY
+
+	</select>
+	<select id="queryOrderDeliveryTimeReport"
+		parameterType="com.hand.base.common.model.OrderDeliveryTimeReportParam"
+		resultMap="orderDeliveryTimeReport">
+		SELECT O2O_CITY AS O2O_CITY, /*城市*/
+		SUM(NUM1) AS NUM1, /*有效订单总数*/
+		SUM(NUM2) AS NUM2, /*送达≤1小时*/
+		SUM(NUM3) AS NUM3, /*1小时＜送达＜3小时*/
+		SUM(NUM4) AS NUM4, /*3小时≤送达≤当日0点*/
+		SUM(NUM5) AS NUM5, /*次日达，送达≥3*/
+		SUM(NUM6) AS NUM6 /*2天以上送达*/
+		FROM (select if(count(*)='', 0,count(*))
+		as NUM1,
+		0 AS NUM2,
+		0 AS NUM3,
+		0 AS NUM4,
+		0 AS NUM5,
+		0 AS NUM6,
+		ox.attrib_37 as O2O_CITY
+		from S_ORDER o join S_ORDER_X ox on o.row_id =
+		ox.par_row_id
+		where 1=1
+		and o.created >= #{DATE_FROM}
+		and o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		group by ox.attrib_37
+
+		UNION
+
+		select 0 AS NUM1,
+		if(count(*)='', 0,count(*)) as NUM2,
+		0 AS NUM3,
+		0 AS NUM4,
+		0 AS NUM5,
+		0 AS
+		NUM6,
+		ox.attrib_37 as O2O_CITY
+		from S_ORDER o join S_ORDER_X ox on
+		o.row_id = ox.par_row_id
+		where 1=1
+		and o.created >= #{DATE_FROM}
+		and
+		o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		and ox.attrib_29 is not null
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60<![CDATA[ <= ]]>
+		1
+		group by ox.attrib_37
+		UNION
+
+		select 0 AS NUM1,
+		0 AS NUM2,
+		if(count(*)='',
+		0,count(*)) as NUM3,
+		0 AS NUM4,
+		0 AS NUM5,
+		0 AS NUM6,
+		ox.attrib_37 as
+		O2O_CITY
+		from S_ORDER o join S_ORDER_X ox on o.row_id = ox.par_row_id
+		where 1=1
+		and o.created >= #{DATE_FROM}
+		and o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		and ox.attrib_29 is not null
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60> 1
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 <![CDATA[ < ]]>
+		3
+		group by ox.attrib_37
+
+		UNION
+
+		select 0 AS NUM1,
+		0 AS NUM2,
+		0 as NUM3,
+		if(count(*)='', 0,count(*)) as num4,
+		0 AS NUM5,
+		0 AS NUM6,
+		ox.attrib_37
+		as O2O_CITY
+		from S_ORDER o join S_ORDER_X ox on o.row_id =
+		ox.par_row_id
+		where 1=1
+		and o.created >= #{DATE_FROM}
+		and o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		and ox.attrib_29 is not null
+		and TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 >= 3
+		and TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 <![CDATA[ <= ]]>
+		round(TIMESTAMPDIFF(SECOND,o.created,CONCAT(DATE_FORMAT(TIMESTAMPADD(day,1,o.created),'%y-%m-%d'),' ','00:00:00'))/60/60,2)
+		group by
+		ox.attrib_37
+
+		UNION
+
+		select 0 AS NUM1,
+		0 AS NUM2,
+		0 as NUM3,
+		0 as num4,
+		if
+		(count(*)='', 0,count(*)) as num5,
+		0 AS NUM6,
+		ox.attrib_37 as O2O_CITY
+		from S_ORDER o join S_ORDER_X ox on o.row_id = ox.par_row_id
+		where 1=1
+		and o.created >= #{DATE_FROM}
+		and o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		and ox.attrib_29 is not null
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 >= 3
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 >
+		round(TIMESTAMPDIFF(SECOND,o.created,CONCAT(DATE_FORMAT(TIMESTAMPADD(day,
+		1,o.created),
+		'%y-%m-%d'),' ','00:00:00'))/60/60,2)
+		and TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 <![CDATA[ < ]]>
+		round(TIMESTAMPDIFF(SECOND,o.created,CONCAT(DATE_FORMAT(TIMESTAMPADD(day,
+		2,o.created),
+		'%y-%m-%d'),' ','00:00:00'))/60/60,2)
+		group by
+		ox.attrib_37
+
+		UNION
+
+		select 0 AS NUM1,
+		0 AS NUM2,
+		0 as NUM3,
+		0 as num4,
+		0 as
+		num5,
+		if(count(*)='', 0,count(*)) as num6,
+		ox.attrib_37 as O2O_CITY
+		from
+		S_ORDER o join S_ORDER_X ox on o.row_id = ox.par_row_id
+		where 1=1
+		and
+		o.created >= #{DATE_FROM}
+		and o.created <![CDATA[ <= ]]>
+		date_add(#{DATE_TO}, interval 1 day)
+		and ox.attrib_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,ox.ATTRIB_37,#{O2O_CITY})
+		and (ox.attrib_48 = 'To Pick Up' or
+		ox.attrib_48 = 'To Receive' or
+		ox.attrib_48 = 'To Appraise' or
+		ox.attrib_48 = 'Finished')
+		and ox.attrib_29!=0
+		and
+		TIMESTAMPDIFF(MINUTE,o.created,ox.attrib_29)/60 >=
+		round(TIMESTAMPDIFF(SECOND,o.created,CONCAT(DATE_FORMAT(TIMESTAMPADD(day,
+		2,o.created),
+		'%y-%m-%d'),' ','00:00:00'))/60/60,2)
+		group by
+		ox.attrib_37)t
+		GROUP BY t.O2O_CITY
+
+
+	</select>
+	<select id="querySalesExpressReport" parameterType="com.hand.base.common.model.SalesExpressReportParam"
+		resultMap="salesExpressReport">
+		SELECT T.O2O_CITY,
+		SUM(ACTIVE_ORDER_CNT) AS ACTIVE_ORDER_CNT,
+		SUM(NOT_TAKE_ORDER_CNT) AS NOT_TAKE_ORDER_CNT,
+		SUM(TAKE_ORDER_CNT) AS
+		TAKE_ORDER_CNT,
+		SUM(COOP_TAKE_ORDER_CNT) AS COOP_TAKE_ORDER_CNT,
+		SUM(COOP_TAKE_ORDER_AVG_TIME) AS COOP_TAKE_ORDER_AVG_TIME,
+		SUM(POCKET_TAKE_ORDER_CNT) AS POCKET_TAKE_ORDER_CNT,
+		SUM(POCKET_TAKE_ORDER_AVG_TIME) AS POCKET_TAKE_ORDER_AVG_TIME,
+		SUM(POCKET_ORDER_CNT) AS POCKET_ORDER_CNT,
+		SUM(POCKET_ORDER_AVG_TIME)
+		AS POCKET_ORDER_AVG_TIME,
+		SUM(TO_BE_DISTRIBUT_CNT) AS
+		TO_BE_DISTRIBUT_CNT,
+		SUM(TO_BE_SIGN_CNT) AS TO_BE_SIGN_CNT,
+		SUM(COMPLETE_CNT) AS COMPLETE_CNT,
+		SUM(ORI_PRICE_ORDER_CNT) AS
+		ORI_PRICE_ORDER_CNT,
+		SUM(COUPON_ORDER_CNT) AS COUPON_ORDER_CNT,
+		SUM(SECKILL_ORDER_CNT) AS SECKILL_ORDER_CNT,
+		SUM(BUY_GIFT_ORDER_CNT) AS
+		BUY_GIFT_ORDER_CNT
+		FROM (SELECT T.ATTRIB_37 AS O2O_CITY, /*城市*/
+		COUNT(*) AS ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT, /*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT, /*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND 
+		T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},'
+		',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up', 'To Receive', 'To Appraise',
+		'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS
+		O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		COUNT(*) AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},'
+		',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 = 'To Pick Up'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		COUNT(*) AS TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS
+		COOP_TAKE_ORDER_CNT, /*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS
+		COOP_TAKE_ORDER_AVG_TIME, /*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT,
+		/*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0 AS POCKET_TAKE_ORDER_AVG_TIME,
+		/*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT, /*兜底订单数量，是否兜底为“Y”*/
+		0 AS
+		POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		GROUP BY
+		T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		COUNT(*) AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商,待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T JOIN lnk_accnt T1
+		on T.ATTRIB_41 = T1.ROW_ID
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		(O2O_FORCED_PICKUP='' OR O2O_FORCED_PICKUP = 'N') /*非兜底订单*/
+		AND
+		(T1.O2O_FORCED_STORE = 'N' OR T1.O2O_FORCED_STORE='') /*非兜底商*/
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商,待签收+待评价+已完成*/
+		round(sum((TIMESTAMPDIFF(SECOND,T.Created,T.Attrib_27)/60)/60)/COUNT(*),2)
+		AS COOP_TAKE_ORDER_AVG_TIME, /*合作商抢单-平均接单时长*/
+		0 AS
+		POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0 AS
+		POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T join lnk_accnt T1
+		on T.ATTRIB_41 = T1.ROW_ID
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		(O2O_FORCED_PICKUP='' OR O2O_FORCED_PICKUP = 'N') /*非兜底订单*/
+		AND
+		(T1.O2O_FORCED_STORE = 'N' OR T1.O2O_FORCED_STORE='') /*非兜底商*/
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		COUNT(*) AS POCKET_TAKE_ORDER_CNT,
+		/*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0 AS POCKET_TAKE_ORDER_AVG_TIME,
+		/*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT, /*兜底订单数量，是否兜底为“Y”*/
+		0 AS
+		POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T join lnk_accnt T1
+		on T.ATTRIB_41 = T1.ROW_ID
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		(O2O_FORCED_PICKUP='' OR O2O_FORCED_PICKUP = 'N') /*非兜底订单*/
+		AND
+		T1.O2O_FORCED_STORE = 'Y' /*兜底商*/
+		GROUP BY T.ATTRIB_37
+
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		round(sum((TIMESTAMPDIFF(SECOND,T.Created,T.Attrib_27)/60)/60)/COUNT(*),2)
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T join lnk_accnt T1
+		on T.ATTRIB_41 = T1.ROW_ID
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 = 'Y'
+		AND T.ATTRIB_37 = IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		(O2O_FORCED_PICKUP='' OR O2O_FORCED_PICKUP = 'N') /*非兜底订单*/
+		AND
+		T1.O2O_FORCED_STORE = 'Y' /*兜底商*/
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		COUNT(*) AS
+		POCKET_ORDER_CNT, /*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME,
+		/*兜底订单-平均接单时长*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		O2O_FORCED_PICKUP = 'Y' /*兜底订单*/
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		round(sum((TIMESTAMPDIFF(SECOND,T.Created,T.Attrib_27)/60)/60)/COUNT(*),2)
+		AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Receive', 'To Appraise', 'Finished')
+		AND
+		O2O_FORCED_PICKUP = 'Y' /*兜底订单*/
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		COUNT(*) AS TO_BE_DISTRIBUT_CNT,
+		/*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS TO_BE_SIGN_CNT,
+		/*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS COMPLETE_CNT,
+		/*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 = 'To Receive'
+		AND ATTRIB_07 = 'Have Order'
+		GROUP BY
+		T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		COUNT(*)
+		AS TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND ATTRIB_07 = 'In The Distribution'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		COUNT(*) AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Appraise', 'Finished')
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT,
+		/*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		COUNT(*) AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0 状态呢？*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND  T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up', 'To Receive', 'To Appraise',
+		'Finished')
+		/*优惠券金额,特价优惠金额,买赠优惠金额,满减优惠金额*/
+		AND
+		if(T.ATTRIB_20='',0,T.ATTRIB_20) + if(T.ATTRIB_16='',0,T.ATTRIB_16) +
+		if(T.ATTRIB_22='',0,T.ATTRIB_22) + if(T.ATTRIB_21='',0,T.ATTRIB_21)= 0
+		GROUP BY T.ATTRIB_37
+
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS
+		ACTIVE_ORDER_CNT, /*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		COUNT(*) AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up', 'To Receive', 'To Appraise',
+		'Finished')
+		AND if(T.ATTRIB_20='', 0,T.ATTRIB_20)>0
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT,
+		/*有效订单数量 待抢单+待签收+待评价+已完成*/
+		0 AS
+		NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS TAKE_ORDER_CNT,
+		/*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		COUNT(*) AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		0 AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up', 'To Receive', 'To Appraise',
+		'Finished')
+		AND T.ATTRIB_55 = 'Y'
+		GROUP BY T.ATTRIB_37
+
+		UNION ALL
+
+		SELECT
+		T.ATTRIB_37 AS O2O_CITY,/*城市*/
+		0 AS ACTIVE_ORDER_CNT, /*有效订单数量
+		待抢单+待签收+待评价+已完成*/
+		0 AS NOT_TAKE_ORDER_CNT,/*未接订单数量，订单状态是“待抢单”*/
+		0 AS
+		TAKE_ORDER_CNT, /*已接订单数量，待签收+待评价+已完成*/
+		0 AS COOP_TAKE_ORDER_CNT,
+		/*合作商抢单，是否兜底不为Y，商户非兜底商*/
+		0 AS COOP_TAKE_ORDER_AVG_TIME,
+		/*合作商抢单-平均接单时长*/
+		0 AS POCKET_TAKE_ORDER_CNT, /*兜底商抢单，是否兜底不为Y，商户是兜底商*/
+		0
+		AS POCKET_TAKE_ORDER_AVG_TIME, /*兜底商抢单-平均接单时长*/
+		0 AS POCKET_ORDER_CNT,
+		/*兜底订单数量，是否兜底为“Y”*/
+		0 AS POCKET_ORDER_AVG_TIME, /*兜底订单-平均接单时长*/
+		0 AS
+		TO_BE_DISTRIBUT_CNT, /*待配送数量（未点击开始配送），订单状态是“待签收”+物流状态是“已接单”*/
+		0 AS
+		TO_BE_SIGN_CNT, /*待签收数量（未录入码），订单状态是“待签收”+物流状态是“配送中”*/
+		0 AS
+		COMPLETE_CNT, /*已配送完成数量（已录入码），订单状态是“待评价”或“已完成”*/
+		0 AS
+		ORI_PRICE_ORDER_CNT,/*原价订单，四种费用都为0*/
+		0 AS COUPON_ORDER_CNT,
+		/*优惠券订单，优惠券金额不为0*/
+		0 AS SECKILL_ORDER_CNT, /*秒杀订单,是否秒杀订单为Y*/
+		COUNT(*) AS
+		BUY_GIFT_ORDER_CNT /*买赠订单,买赠金额不为0*/
+		FROM S_ORDER_X T
+		WHERE T.corp_id = '101' AND T.ATTRIB_09 =
+		'Y'
+		AND T.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,T.ATTRIB_37,#{O2O_CITY})
+		AND T.CREATED >=CONCAT(#{DATE_FROM},' ',if(#{START_HOUR}='','00',#{START_HOUR}),':00:00')
+		AND T.CREATED<![CDATA[ <= ]]>
+		CONCAT(#{DATE_TO},' ',if(#{END_HOUR}='','23',#{END_HOUR}),':59:59')
+		AND T.ATTRIB_48 IN ('To Pick Up', 'To Receive', 'To Appraise',
+		'Finished')
+		AND if(T.ATTRIB_22='',0,T.ATTRIB_22) > 0
+		GROUP BY
+		T.ATTRIB_37 ) T
+		GROUP BY T.O2O_CITY
+	</select>
+	<select id="queryPanelCountReport" parameterType="com.hand.base.common.model.PanelCountReportParam"
+		resultMap="panelCountReport">
+
+		SELECT
+		ATTRIB_37,/*未接单数量-今日*/
+		COUNT_OUM,/*未接单数量-截止昨日*/
+		(sum(COUNT_OUM_ALL)-
+		sum(COUNT_OUM)) AS WJDSL_JZZR,/*未配送数量-今日*/
+		COUNT_OUM_WPS,/*未配送数量-截止昨日*/
+		(
+		sum(COUNT_OUM_WPS1) - sum(COUNT_OUM_WPS)
+		) AS WPSSL_JZZR,/*未录码数量-今日*/
+		COUNT_OUM_WLM,/*未录码数量-截止昨日*/
+		(sum(COUNT_OUM_WLM1) - sum(COUNT_OUM_WLM))AS
+		WLMSL_JZZR,/*待确认退款数量-今日*/
+		COUNT_OUM_DQRTK,
+		(
+		COUNT_OUM_DQRTK1 -
+		COUNT_OUM_DQRTK
+		) AS DQRTKSL_JZZR /*待确认退款数量-截止昨日*/from (
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		count(t1.ORDER_NUM) AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		0 AS
+		COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS COUNT_OUM_DQRTK,
+		0 AS
+		COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1
+		JOIN S_ORDER_X T2 ON T2.ROW_ID =
+		T1.ROW_ID
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order' /*and t1.created > trunc(now(),'hh')
+		/*当天*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(now(), '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(now(), '%d')
+		AND
+		t2.Attrib_48 = 'To Pick Up' /*订单状态 */
+		AND t2.ATTRIB_37 =
+
+		IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /*城市筛选*/
+		UNION
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		count(t1.ORDER_NUM) AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		0 AS
+		COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS COUNT_OUM_DQRTK,
+		0 AS
+		COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1
+		JOIN S_ORDER_X T2 ON T2.ROW_ID =
+		T1.ROW_ID
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order' /*and
+		t1.created > trunc(sysdate,'hh') /*当天*/
+		AND t2.Attrib_48 =
+		'To Pick Up'
+		/*订单状态*/
+		AND t2.ATTRIB_37 =
+		IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*未配送数量-今日*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		count(t1.ORDER_NUM) AS COUNT_OUM_WPS,
+		0 AS
+		COUNT_OUM_WPS1,
+		0 AS COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS
+		COUNT_OUM_DQRTK,
+		0 AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1 join 
+		S_ORDER_X T2 on T2.ROW_ID = T1.ROW_ID
+		WHERE
+		1=1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(now(), '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(now(), '%d')
+		AND
+		t2.Attrib_48 = 'To Receive' /*订单状态*/
+		AND T2.ATTRIB_07 = 'Order Picked' /*物流状态*/
+		/*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*未配送数量-所有*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		count(t1.ORDER_NUM) AS
+		COUNT_OUM_WPS1,
+		0 AS COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS
+		COUNT_OUM_DQRTK,
+		0 AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1,
+		S_ORDER_X T2
+		WHERE
+		T2.ROW_ID = T1.ROW_ID
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		t2.Attrib_48 = 'To Receive' /*订单状态*/
+		AND T2.ATTRIB_07 = 'Order Picked' /*物流状态*/
+		/*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*未录码数量-今日*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		count(t1.ORDER_NUM) AS COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS
+		COUNT_OUM_DQRTK,
+		0 AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1,
+		S_ORDER_X T2
+		WHERE
+		T2.ROW_ID = T1.ROW_ID
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(now(), '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(now(), '%d')
+		AND
+		t2.Attrib_48 = 'To Receive' /*订单状态*/
+		AND T2.ATTRIB_07 = 'Shipping' /*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*未录码数量-所有*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		0 AS
+		COUNT_OUM_WLM,
+		count(t1.ORDER_NUM) AS COUNT_OUM_WLM1,
+		0 AS
+		COUNT_OUM_DQRTK,
+		0 AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1,
+		S_ORDER_X T2
+		WHERE
+		T2.ROW_ID = T1.ROW_ID
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		t2.Attrib_48 = 'To Receive' /*订单状态 */
+		AND T2.ATTRIB_07 = 'Shipping' /*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF (LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*待确认退款数量-今日*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		0 AS
+		COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		count(t1.ORDER_NUM) AS
+		COUNT_OUM_DQRTK,
+		0 AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1,
+		S_ORDER_X T2
+		WHERE
+		T2.ROW_ID = T1.ROW_ID
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(now(), '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(now(), '%d')
+		AND
+		t2.Attrib_48 = 'Refunding' /*订单状态 */
+		AND T2.ATTRIB_07 <![CDATA[ <> ]]>
+		'Not Picked Up' /*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*待确认退款数量-所有*/
+		SELECT
+		T2.ATTRIB_37 as ATTRIB_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_ALL,
+		0 AS COUNT_OUM_WPS,
+		0 AS COUNT_OUM_WPS1,
+		0 AS
+		COUNT_OUM_WLM,
+		0 AS COUNT_OUM_WLM1,
+		0 AS COUNT_OUM_DQRTK,
+		count(t1.ORDER_NUM) AS COUNT_OUM_DQRTK1
+		FROM
+		S_ORDER t1,
+		S_ORDER_X T2
+		WHERE
+		T2.ROW_ID = T1.ROW_ID
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 =
+		'Platform Order' /*and t1.created >
+		trunc(sysdate,'hh') /*当天*/
+		AND
+		t2.Attrib_48 = 'Refunding' /*订单状态 */
+		AND T2.ATTRIB_07 <![CDATA[ <> ]]>
+		'Not Picked Up' /*物流状态*/
+		AND t2.ATTRIB_37 =
+		IF
+		(LENGTH(trim(#{O2O_CITY})) <![CDATA[<]]>
+		1,t2.ATTRIB_37,#{O2O_CITY})
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		)a GROUP BY
+		a.ATTRIB_37
+
+	</select>
+	<select id="queryUserVisitCountReport" resultMap="userVisitCountReport"
+		parameterType="com.hand.base.common.model.UserVisitCountReportParam">
+		SELECT
+		location AS location,
+		sum(COUNT_DT_HH) AS COUNT_DT_HH,
+		sum(COUNT_DT_HH_uv) AS COUNT_DT_HH_uv,
+		sum(COUNT_DZ_D) AS COUNT_DZ_D,
+		sum(COUNT_DZ_D_uv) AS COUNT_DZ_D_uv,
+		sum(COUNT_DY_MM) AS COUNT_DY_MM,
+		sum(COUNT_DY_MM_uv) AS COUNT_DY_MM_uv,
+		sum(COUNT_ZDY) AS COUNT_ZDY,
+		sum(COUNT_ZDY_uv) AS COUNT_ZDY_uv
+		FROM
+		(
+		/*当天 PV*/
+		SELECT
+		t1.location,
+		count(t1.Phone_Type) AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND DATE_FORMAT(T1.CREATED, '%m') =
+		DATE_FORMAT(now(), '%m')
+		AND DATE_FORMAT(T1.CREATED, '%d') =
+		DATE_FORMAT(now(), '%d')
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*当天 UV*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		count(DISTINCT t1.DEVICE_NUM) AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(now(), '%Y')
+		AND DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(now(), '%m')
+		AND DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(now(), '%d')
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		count(t1.Phone_Type) AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		DATE_ADD(t1.login_date, INTERVAL 1 DAY) > subdate(
+		curdate(),
+		date_format(curdate(), '%w') - 1
+		)
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*当周 UV*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		count(DISTINCT t1.DEVICE_NUM) AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		DATE_ADD(t1.login_date, INTERVAL 1 DAY) > subdate(
+		curdate(),
+		date_format(curdate(), '%w') - 1
+		)
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*当月注册人数*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		count(t1.Phone_Type) AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		t1.login_date > DATE_ADD(
+		curdate(),
+		INTERVAL - DAY (curdate()) + 1 DAY
+		)
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*当月注册uv*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		count(DISTINCT t1.DEVICE_NUM) AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		t1.login_date > DATE_ADD(
+		curdate(),
+		INTERVAL - DAY (curdate()) + 1 DAY
+		)
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*自定义日期注册人数*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		count(t1.Phone_Type) AS COUNT_ZDY,
+		0 AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		T1.created >= #{DATE_FROM}
+		AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		T1.location
+		UNION
+		/*自定义uv*/
+		SELECT
+		t1.location,
+		0 AS COUNT_DT_HH,
+		0 AS COUNT_DT_HH_uv,
+		0 AS COUNT_DZ_D,
+		0 AS COUNT_DZ_D_uv,
+		0 AS COUNT_DY_MM,
+		0 AS COUNT_DY_MM_uv,
+		0 AS COUNT_ZDY,
+		count(DISTINCT t1.DEVICE_NUM) AS COUNT_ZDY_uv
+		FROM
+		CX_O_LN_LOG T1
+		WHERE
+		T1.created >= #{DATE_FROM}
+		AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[ <= ]]>
+		#{DATE_TO}
+		AND t1.location =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t1.location,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t1.location
+		) a
+		GROUP BY
+		a.location
+	</select>
+	<!-- <select id="queryRePurchaseReport" resultMap="rePurchaseReport"
+			parameterType="com.hand.base.common.model.RePurchaseReportParam">
+				 SELECT
+				O2O_CITY as O2O_CITY,
+				COUNT_ZDY as COUNT_ZDY ,
+				LJGMGD_RS as
+				LJGMGD_RS,
+				COUNT_LJSYL as COUNT_LJSYL,
+				SUM(LJGMGD_RS_ONE) AS
+				LJGMGD_RS_ONE,
+				SUM(LJGMGD_RS_TWO) AS LJGMGD_RS_TWO,
+				SUM(LJGMGD_RS_THR)
+				AS LJGMGD_RS_THR,
+				SUM(LJGMGD_RS_THREE) AS LJGMGD_RS_THREE,
+				SUM(COUNT_LJFGL) AS COUNT_LJFGL
+				FROM
+				(SELECT
+				t1.O2O_CITY,
+				COUNT_ZDY,
+				LJGMGD_RS,
+		
+				IF (
+				COUNT_ZDY = 0,
+				0,
+				ljgmgd_rs / COUNT_ZDY
+				) AS COUNT_LJSYL,
+				/*累计使用率*/
+				LJGMGD_RS_ONE,
+				LJGMGD_RS_TWO,
+				LJGMGD_RS_THR,
+				LJGMGD_RS_THREE,
+		
+				IF
+				(
+				ljgmgd_rs = 0,
+				0,
+				(
+				ljgmgd_rs_two + ljgmgd_rs_THR + ljgmgd_rs_THREE
+				) /
+				ljgmgd_rs
+				) AS COUNT_LJFGL                 
+		FROM ( SELECT t1.O2O_CITY,count(T1.OU_NUM) AS COUNT_ZDY 
+		    FROM lnk_accnt t1
+		   WHERE 1=1
+		AND t1.O2O_CITY = IF (
+							LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+							1,
+							t1.O2O_CITY,
+						#{O2O_CITY}
+						) 
+		   AND t1.O2O_ACCT_TYPE = 'Customer'
+		   AND DATE_ADD(T1.created, INTERVAL - 1 DAY)  <![CDATA[  <=  ]]>#{DATE_TO}
+		    group by t1.O2O_CITY
+		)t1 join (
+		SELECT
+			t2.O2O_CITY,
+			count(DISTINCT T2.OU_NUM) AS ljgmgd_rs
+		FROM
+			S_ORDER T1
+		JOIN lnk_accnt T2 ON T1.ACCNT_ID = T2.ROW_ID
+		JOIN S_ORDER_X t3 ON T1.row_id = T3.row_id
+		WHERE
+			1 = 1
+		AND T2.O2O_ACCT_TYPE = 'Customer'
+		AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+		AND T2.O2O_CITY =
+		IF (
+			LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+			t2.O2O_CITY,
+			#{O2O_CITY}
+		)
+		AND (
+			t3.ATTRIB_48 = 'To Pick Up'
+			OR t3.ATTRIB_48 = 'To Pick Up'
+			OR t3.ATTRIB_48 = 'To Receive'
+			OR t3.ATTRIB_48 = 'To Appraise'
+			OR t3.ATTRIB_48 = 'Finished'
+		)
+		GROUP BY
+			T2.O2O_CITY)t2 on t1.O2O_CITY =  t2.O2O_CITY
+		          join (
+		SELECT
+			O2O_CITY,
+			OU_NUM,
+			sum(ljgmgd_rs_one) AS ljgmgd_rs_one
+		FROM
+			(SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					count(DISTINCT T2.OU_NUM) AS ljgmgd_rs_one
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+				HAVING
+					COUNT(*)=1
+		union  all 
+		SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					0 AS ljgmgd_rs_one
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+		)a3
+		GROUP BY
+			a3.O2O_CITY
+		
+		)t3 on t1.O2O_CITY =  t3.O2O_CITY
+							join (
+		SELECT
+			O2O_CITY,
+			OU_NUM,
+			sum(ljgmgd_rs_TWO) AS ljgmgd_rs_TWO
+		FROM
+			(SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					count(DISTINCT T2.OU_NUM) AS ljgmgd_rs_TWO
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+				HAVING
+					COUNT(*) = 2
+					union  all 
+		SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					0 AS ljgmgd_rs_TWO
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer'
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM)a4
+		GROUP BY
+			a4.O2O_CITY)t4 on t1.O2O_CITY =  t4.O2O_CITY
+							join (
+			SELECT
+			O2O_CITY,
+			OU_NUM,
+			sum(ljgmgd_rs_THR) AS ljgmgd_rs_THR
+		FROM
+			(SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					count(DISTINCT T2.OU_NUM) AS ljgmgd_rs_THR
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+				HAVING
+					COUNT(*) = 3
+								union  all 
+		SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					0 AS ljgmgd_rs_THR
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer'
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM)a5
+		GROUP BY
+			a5.O2O_CITY)t5 on t1.O2O_CITY =  t5.O2O_CITY
+							join (SELECT
+			O2O_CITY,
+			OU_NUM,
+			sum(ljgmgd_rs_THREE) AS ljgmgd_rs_THREE
+		FROM
+			(SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					count(DISTINCT T2.OU_NUM) AS ljgmgd_rs_THREE
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+				HAVING
+					COUNT(*)>3
+		union  all 
+		SELECT
+					t2.O2O_CITY,
+					T2.OU_NUM,
+					0 AS ljgmgd_rs_THREE
+				FROM
+					S_ORDER T1,
+					lnk_accnt t2,
+					S_ORDER_X t3
+				WHERE
+					T2.ROW_ID = T1.ACCNT_ID
+				and t2.O2O_ACCT_TYPE = 'Customer '
+				AND t3.row_id = t1.row_id
+				AND DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]> #{DATE_TO}
+				
+				AND t2.O2O_CITY = IF (
+					LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]> 1,
+					t2.O2O_CITY,
+					#{O2O_CITY}
+				)
+				AND t3.ATTRIB_48 IN (
+					'To Pick Up',
+					'To Receive',
+					'To Appraise',
+					'Finished'
+				)
+				GROUP BY
+					t2.O2O_CITY,
+					t2.OU_NUM
+		)a6
+		GROUP BY
+			a6.O2O_CITY)t6 on t1.O2O_CITY =  t6.O2O_CITY
+		where 1=1 )a7
+		where a7.O2O_CITY!=#{O2O_CITY}
+		GROUP BY
+				a7.O2O_CITY,
+				a7.COUNT_ZDY,
+				a7.ljgmgd_rs,
+				a7.COUNT_LJSYL 
+		</select>-->
+				
+	<select id="queryRePurchaseReport" resultMap="rePurchaseReport"
+			parameterType="com.hand.base.basic.model.CallParam">			
+	SELECT
+			ROW_ID AS id,
+			o2o_city AS O2O_CITY,
+			ROUND(count_zdy,0) AS COUNT_ZDY,
+			ROUND(ljgmgd_rs,0) AS LJGMGD_RS,
+			ROUND(ljgmgd_rs / count_zdy,4) AS COUNT_LJSYL,
+			ROUND(ljgmgd_rs_one,0) AS LJGMGD_RS_ONE,
+			ROUND(ljgmgd_rs_two,0) AS LJGMGD_RS_TWO,
+			ROUND(ljgmgd_rs_three,0) AS LJGMGD_RS_THR,
+			ROUND(ljgmgd_rs_more,0) AS LJGMGD_RS_THREE,
+			ROUND(IFNULL(( ljgmgd_rs_two + ljgmgd_rs_three + ljgmgd_rs_more ) / ljgmgd_rs ,0),4) AS COUNT_LJFGL
+		FROM
+			lnk_chart_order_count_info
+	    WHERE integration_id = #{msgData}		
+	</select>
+	<select id="queryUserGrowthReport" resultMap="userGrowthReport"
+		parameterType="com.hand.base.common.model.UserGrowthReportParam">
+		SELECT O2O_CITY,sum(COUNT_DT_HH) as COUNT_DT_HH ,sum(COUNT_DZ_D)as
+		COUNT_DZ_D,sum(COUNT_DY_MM)as COUNT_DY_MM,sum(COUNT_ZDY)as COUNT_ZDY
+		from (
+		/*当天注册人数*/
+		SELECT t1.O2O_CITY, count( T1.OU_NUM) AS COUNT_DT_HH,0
+		AS COUNT_DZ_D ,0 AS
+		COUNT_DY_MM,0 AS COUNT_ZDY
+
+		FROM lnk_accnt t1
+		WHERE
+		1=1
+		/*and t1.created > trunc(sysdate,'hh')*/
+		and DATE_FORMAT(T1.CREATED,
+		'%Y') = DATE_FORMAT(now(), '%Y')
+		AND DATE_FORMAT(T1.CREATED, '%m') =
+		DATE_FORMAT(now(), '%m')
+		AND DATE_FORMAT(T1.CREATED, '%d') =
+		DATE_FORMAT(now(), '%d')
+		and t1.O2O_ACCT_TYPE = 'Customer'
+		AND
+		t1.O2O_CITY = IF(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,t1.O2O_CITY,#{O2O_CITY})group by T1.O2O_CITY
+		union
+		/*当周注册人数*/
+		SELECT
+		t1.O2O_CITY,0 AS COUNT_DT_HH , count( T1.OU_NUM) AS COUNT_DZ_D,0 AS
+		COUNT_DY_MM,0 AS COUNT_ZDY
+		FROM lnk_accnt t1
+		WHERE 1=1
+		and
+		DATE_ADD(t1.created, INTERVAL 1 DAY) > subdate(
+		curdate(),
+		date_format(curdate(), '%w') - 1
+		)
+		and t1.O2O_ACCT_TYPE = 'Customer'
+		AND
+		t1.O2O_CITY = IF(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,t1.O2O_CITY,#{O2O_CITY})group by T1.O2O_CITY
+		union/*当月注册人数*/
+		SELECT
+		t1.O2O_CITY,0 AS COUNT_DT_HH ,0 AS COUNT_DZ_D,count( T1.OU_NUM) AS
+		COUNT_DY_MM,0 AS COUNT_ZDY
+		FROM lnk_accnt t1
+		WHERE 1=1
+		and t1.created >
+		DATE_ADD(curdate(),INTERVAL - DAY (curdate()) + 1 DAY)
+		and
+		t1.O2O_ACCT_TYPE = 'Customer'
+		AND t1.O2O_CITY =
+		IF(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,t1.O2O_CITY,#{O2O_CITY})group by T1.O2O_CITY
+		union/*自定义日期注册人数*/
+		SELECT t1.O2O_CITY,0 AS COUNT_DT_HH ,0 AS COUNT_DZ_D ,0 AS
+		COUNT_DY_MM,count(T1.OU_NUM) AS COUNT_ZDY
+
+		FROM lnk_accnt t1
+		WHERE 1=1
+		and t1.O2O_ACCT_TYPE = 'Customer'
+		AND t1.O2O_CITY =
+		IF(LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,t1.O2O_CITY,#{O2O_CITY})
+		AND T1.created >= #{DATE_FROM}
+		AND
+		DATE_ADD(T1.created, INTERVAL - 1 DAY) <![CDATA[  <=  ]]>
+		#{DATE_TO} group by t1.O2O_CITY
+		)a1
+		group by a1.O2O_CITY
+	</select>
+	<select id="queryCancelOrderReport" resultMap="cancelOrderReport"
+		parameterType="com.hand.base.common.model.CancelOrderReportParam">
+
+		SELECT ATTRIB_37 as O2O_CITY,sum(COUNT_OUM) AS COUNT_OUM
+		,SUM(COUNT_OUM_ZFQ) as COUNT_OUM_ZFQ,SUM(COUNT_OUM_ZFH) AS
+		COUNT_OUM_ZFH FROM (
+		select T2.ATTRIB_37,count(t1.ORDER_NUM) as
+		COUNT_OUM,0 as COUNT_OUM_ZFQ,0 as
+		COUNT_OUM_ZFH
+		from S_ORDER
+		t1  join S_ORDER_X T2 on T2.ROW_ID = T1.ROW_ID
+		where 1=1
+		AND T2.ATTRIB_09 = 'Y'
+		AND
+		T2.ATTRIB_44 = 'Platform Order'
+		AND T1.created >=#{DATE_FROM}
+		AND
+		DATE_FORMAT(DATE_ADD(T1.created,INTERVAL - 1 day),'%Y-%m-%d') <![CDATA[ <= ]]>#{DATE_TO}
+		and (t2.Attrib_48 = 'Cancelled' or t2.Attrib_48 = 'Waiting For Determined')/*订单状态 */
+		and T2.O2O_PAY_TYPE = 'COD'/*支付方式*/
+		and
+		t2.ATTRIB_37 = IF (LENGTH(trim(#{O2O_CITY}))<![CDATA[ < ]]>1,T2.ATTRIB_37
+		,#{O2O_CITY})/* 城市筛选*/
+		group by t2.ATTRIB_37
+		union
+		select T2.ATTRIB_37,0
+		AS COUNT_OUM,count(t1.ORDER_NUM) as COUNT_OUM_ZFQ,0 as
+		COUNT_OUM_ZFH
+		from S_ORDER t1 join S_ORDER_X T2 on T2.ROW_ID = T1.ROW_ID
+		where 1=1
+		AND
+		T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND T1.created
+		>=#{DATE_FROM}
+		AND DATE_FORMAT(DATE_ADD(T1.created,INTERVAL - 1 day),'%Y-%m-%d') <![CDATA[ <= ]]>#{DATE_TO}
+		and t2.Attrib_48 = 'Cancelled'/*订单状态 */
+		and T2.O2O_PAY_TYPE =
+		'OLP'/*支付方式*/
+		and t2.ATTRIB_37 =IF (LENGTH(trim(#{O2O_CITY}))<![CDATA[ < ]]>1,T2.ATTRIB_37,#{O2O_CITY})/* 城市筛选*/
+		group by t2.ATTRIB_37
+		union
+		select T2.ATTRIB_37,0
+		AS COUNT_OUM,0 as COUNT_OUM_ZFQ,count(t1.ORDER_NUM) as
+		COUNT_OUM_ZFH
+		from S_ORDER t1 join S_ORDER_X T2 on T2.ROW_ID = T1.ROW_ID
+		where 1=1
+		AND
+		T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND T1.created
+		>=#{DATE_FROM}
+		AND DATE_FORMAT(DATE_ADD(T1.created,INTERVAL - 1 day),'%Y-%m-%d') <![CDATA[ <= ]]>#{DATE_TO}
+		and (t2.Attrib_48 = 'Refunding' OR t2.Attrib_48 = 'Refund Determined'
+		OR t2.Attrib_48 = 'Refunded') /*订单状态 */
+		and T2.O2O_PAY_TYPE =
+		'OLP'/*支付方式*/
+		and t2.ATTRIB_37 =IF (LENGTH(trim(#{O2O_CITY}))<![CDATA[ < ]]>1,T2.ATTRIB_37
+		,#{O2O_CITY})/* 城市筛选*/
+		group by t2.ATTRIB_37
+		)a
+		group by a.ATTRIB_37
+	</select>
+	<select id="queryDeliveryDaysReport" resultMap="deliveryDaysReport"
+		parameterType="com.hand.base.common.model.DeliveryDaysReportParam">
+		SELECT
+		ATTRIB_37 as O2O_CITY,
+		/*城市*/
+		COUNT_OUM,
+		/*考核时间点前-总订单量*/
+		COUNT_OUM_DR,
+		/*考核时间点前-当日送达量*/
+		IF (
+		COUNT_OUM = 0,
+		0,
+		COUNT_OUM_DR /
+		COUNT_OUM
+		) AS KHQ_DRSD_LV,
+		/*考核时间点前-当日送达率*/
+		COUNT_OUM_CR,
+		/*考核时间点前-次日送达量*/
+		IF (
+		COUNT_OUM = 0,
+		0,
+		COUNT_OUM_CR / COUNT_OUM
+		) AS
+		KHQ_CRSD_LV,
+		/*考核时间点前-次日送达率*/
+		(
+		COUNT_OUM - COUNT_OUM_DR - COUNT_OUM_CR -
+		COUNT_OUM_WSD
+		) AS COUNT_OUM_QT,
+		/*考核时间点前-其他时间送达量*/
+		IF (
+		COUNT_OUM = 0,
+		0,
+		(
+		COUNT_OUM - COUNT_OUM_DR - COUNT_OUM_CR - COUNT_OUM_WSD
+		) / COUNT_OUM
+		) AS KHQ_QTSD_LV,
+		/*考核时间点前-其他时间送达率*/
+		COUNT_OUM_WSD,
+		/*考核时间点前-未送达订单量*/
+		COUNT_KHH_OUM,
+		/*考核时间点后-总订单量*/
+		COUNT_OUM_KHHDR,
+		/*考核时间点后-当日送达量*/
+		IF (
+		COUNT_KHH_OUM = 0,
+		0,
+		COUNT_OUM_KHHDR / COUNT_KHH_OUM
+		) AS KHH_DRSD_LV,
+		/*考核时间点后-当日送达率*/
+		COUNT_OUM_KHHCR,
+		/*考核时间点后-次日送达量*/
+		IF (
+		COUNT_KHH_OUM = 0,
+		0,
+		COUNT_OUM_KHHCR / COUNT_KHH_OUM
+		) AS KHH_CRSD_LV,
+		/*考核时间点后-次日送达率*/
+		(
+		COUNT_KHH_OUM - COUNT_OUM_KHHDR - COUNT_OUM_KHHCR - COUNT_OUM_KHHWSD
+		)
+		AS COUNT_OUM_KHHQT,
+		/*考核时间点后-其他时间送达量*/
+		IF (
+		COUNT_KHH_OUM = 0,
+		0,
+		(
+		COUNT_KHH_OUM - COUNT_OUM_KHHDR - COUNT_OUM_KHHCR - COUNT_OUM_KHHWSD
+		)
+		/ COUNT_KHH_OUM
+		) AS KHH_QTSD_LV,
+		/*考核时间点后-其他时间送达率*/
+		COUNT_OUM_KHHWSD /*
+		考核时间点后-未送达订单量*/
+		FROM
+		(
+		SELECT
+		ATTRIB_37,
+		SUM(COUNT_OUM) AS COUNT_OUM,
+		SUM(COUNT_OUM_DR) AS COUNT_OUM_DR,
+		SUM(COUNT_OUM_CR) AS COUNT_OUM_CR,
+		SUM(COUNT_OUM_WSD) AS COUNT_OUM_WSD,
+		SUM(COUNT_KHH_OUM) AS
+		COUNT_KHH_OUM,
+		SUM(COUNT_OUM_KHHDR) AS COUNT_OUM_KHHDR,
+		SUM(COUNT_OUM_KHHCR) AS COUNT_OUM_KHHCR,
+		SUM(COUNT_OUM_KHHWSD) AS
+		COUNT_OUM_KHHWSD
+		FROM
+		(
+		/*考核时间点前总订单量*/
+		SELECT
+		Attrib_37,
+		count(t1.ORDER_NUM) AS COUNT_OUM,
+		0 AS COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS
+		COUNT_OUM_KHHCR,
+		0 AS COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X
+		T2 ON t2.row_id = t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND
+		T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') <![CDATA[ < ]]>
+		IF (LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24) /*考核时间点前*/
+		AND T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*考核时间点前-当日送达量*/
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		count(t1.ORDER_NUM)
+		AS COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS
+		COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') <![CDATA[ < ]]>
+		IF (LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24) /*考核时间点前*/
+		AND T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29!=0 /*收货时间 不为空*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(T2.ATTRIB_29, '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(T2.ATTRIB_29, '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(T2.ATTRIB_29, '%d')
+		AND
+		t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*考核时间点前-次日送达量*/
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS COUNT_OUM_DR,
+		count(t1.ORDER_NUM) AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS
+		COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') <![CDATA[ < ]]>
+		IF (LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24) /*考核时间点前*/
+		AND T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29!=0/*收货时间 不为空*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(T2.ATTRIB_29, '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(T2.ATTRIB_29, '%m')
+		AND (
+		DATE_FORMAT(T2.ATTRIB_29, '%d') - DATE_FORMAT(T1.CREATED, '%d') = 1
+		)
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		/*考核时间点前-未送达订单量*/
+		UNION
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		count(t1.ORDER_NUM) AS COUNT_OUM_WSD,
+		0
+		AS COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') <![CDATA[ < ]]>
+		IF (LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24) /*考核时间点前*/
+		AND T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29=0 /*收货时间为空，未送达。*/
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		/*考核时间点后总订单量*/
+		UNION
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		count(t1.ORDER_NUM)
+		AS COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') >=
+		IF
+		(LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24) /*考核时间点后*/
+		AND
+		T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		/*考核时间点后-当日送达量*/
+		UNION
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS COUNT_KHH_OUM,
+		count(t1.ORDER_NUM) AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') >=
+		IF (
+		LENGTH(trim(#{KHSJ_PERIOD})) > 1,
+		#{KHSJ_PERIOD},
+		24
+		) /*考核时间点后*/
+		AND
+		T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29!=0 /*收货时间 不为空*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(T2.ATTRIB_29, '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(T2.ATTRIB_29, '%m')
+		AND
+		DATE_FORMAT(T1.CREATED, '%d') = DATE_FORMAT(T2.ATTRIB_29, '%d')
+		AND
+		t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		UNION
+		/*考核时间点后-次日送达量*/
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS COUNT_OUM_DR,
+		0
+		AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS COUNT_KHH_OUM,
+		0 AS
+		COUNT_OUM_KHHDR,
+		count(t1.ORDER_NUM) AS COUNT_OUM_KHHCR,
+		0 AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') >=
+		IF
+		(LENGTH(trim(#{KHSJ_PERIOD})) > 1, #{KHSJ_PERIOD}, 24)
+		AND T1.created
+		>= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29!=0 /*收货时间 不为空*/
+		AND
+		DATE_FORMAT(T1.CREATED, '%Y') = DATE_FORMAT(T2.ATTRIB_29, '%Y')
+		AND
+		DATE_FORMAT(T1.CREATED, '%m') = DATE_FORMAT(T2.ATTRIB_29, '%m')
+		AND (
+		DATE_FORMAT(T2.ATTRIB_29, '%d') - DATE_FORMAT(T1.CREATED, '%d') = 1
+		)
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY})) <![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		/*考核时间点后-未送达订单量*/
+		UNION
+		SELECT
+		t2.Attrib_37,
+		0 AS COUNT_OUM,
+		0 AS
+		COUNT_OUM_DR,
+		0 AS COUNT_OUM_CR,
+		0 AS COUNT_OUM_WSD,
+		0 AS COUNT_KHH_OUM,
+		0 AS COUNT_OUM_KHHDR,
+		0 AS COUNT_OUM_KHHCR,
+		count(t1.ORDER_NUM) AS
+		COUNT_OUM_KHHWSD
+		FROM
+		S_ORDER T1
+		LEFT JOIN S_ORDER_X T2 ON t2.row_id =
+		t1.row_id
+		WHERE
+		1 = 1
+		AND T2.ATTRIB_09 = 'Y'
+		AND T2.ATTRIB_44 = 'Platform Order'
+		AND DATE_FORMAT(T1.CREATED, '%H') >=
+		IF (
+		LENGTH(trim(#{KHSJ_PERIOD})) > 1,
+		#{KHSJ_PERIOD},
+		24
+		) /*考核时间点后*/
+		AND
+		T1.created >= #{DATE_FROM}
+		AND T1.created <![CDATA[  <=  ]]>
+		#{DATE_TO}
+		AND T2.ATTRIB_29=0 /*收货时间为空，未送达。*/
+		AND t2.ATTRIB_37 =
+		IF (
+		LENGTH(trim(#{O2O_CITY}))<![CDATA[ < ]]>
+		1,
+		t2.ATTRIB_37,
+		#{O2O_CITY}
+		)
+		GROUP BY
+		t2.ATTRIB_37 /* 城市筛选*/
+		) a
+		GROUP BY
+		a.Attrib_37
+		) a1
+	</select>
+	<select id="getRePurchaseReport" statementType="CALLABLE">
+         CALL QUERY_CHART_ORDER_COUNT_INFO(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+			         					   #{msgData,mode=OUT,jdbcType=VARCHAR},
+			         					   #{param1,mode=IN,jdbcType=VARCHAR},
+			         					   #{param2,mode=IN,jdbcType=VARCHAR},
+			         					   #{param3,mode=IN,jdbcType=VARCHAR},
+			         					   #{param4,mode=IN,jdbcType=VARCHAR},
+			         					   #{param5,mode=IN,jdbcType=VARCHAR})
+	</select>
+
+	<!--复购统计为空查询    为空输出所有信息-->
+	<select id="queryRePurchaseReportNull" resultMap="rePurchaseReport"
+			parameterType="com.hand.base.common.model.MyChart">
+		SELECT
+		t1.o2oCity O2O_CITY,
+		t2.COUNT_ZDY COUNT_ZDY,
+		count(DISTINCT T1.ouNum) LJGMGD_RS,
+		ROUND(count(DISTINCT T1.ouNum) / t2.COUNT_ZDY,4) AS COUNT_LJSYL,
+		SUM(if(t1.num=1,1,0)) AS LJGMGD_RS_ONE,
+		SUM(if(t1.num=2,1,0)) AS LJGMGD_RS_TWO,
+		SUM(if(t1.num=3,1,0)) AS LJGMGD_RS_THR,
+		SUM(if(t1.num>3,1,0)) AS LJGMGD_RS_THREE,
+		ROUND(IFNULL(SUM(if(t1.num>1,1,0)) / count(DISTINCT T1.ouNum) ,0),4) AS COUNT_LJFGL
+		FROM
+		(
+		SELECT
+		T2.O2O_CITY o2oCity,
+		T2.OU_NUM ouNum,
+		COUNT(1) num
+		FROM
+		S_ORDER T1
+		JOIN lnk_accnt T2 ON T1.ACCNT_ID = T2.ROW_ID
+		JOIN S_ORDER_X t3 ON T1.row_id = T3.row_id
+		WHERE
+		1 = 1
+		AND T2.O2O_ACCT_TYPE = 'Customer'
+		AND T1.created &lt;= #{attr1}
+		AND (
+		t3.ATTRIB_48 in ('To Pick Up','To Receive','To Appraise','Finished')
+		)
+		AND T2.O2O_CITY IS NOT NULL
+		AND T2.O2O_CITY != ''
+		GROUP BY
+		T2.O2O_CITY,
+		T2.OU_NUM
+		) t1
+		LEFT JOIN(
+		SELECT
+		t1.O2O_CITY o2oCity,
+		count(T1.OU_NUM) AS COUNT_ZDY
+		FROM
+		lnk_accnt t1
+		WHERE
+		1 = 1
+		AND t1.O2O_CITY is not null
+		AND t1.O2O_CITY &lt;&gt; ''
+		AND t1.O2O_ACCT_TYPE = 'Customer'
+		AND T1.created&lt;= #{attr1}
+		GROUP BY
+		t1.O2O_CITY
+		) t2 on t1.o2oCity = t2.o2oCity
+		GROUP BY
+		t1.o2oCity
+	</select>
+
+
+	<!--品牌馆-->
+	<select id="brandQueryRePurchaseReport" resultMap="rePurchaseReport"
+			parameterType="com.hand.base.common.model.MyChart">
+		SELECT
+		t1.o2oCity O2O_CITY,
+		t2.COUNT_ZDY COUNT_ZDY,
+		count(DISTINCT T1.ouNum) LJGMGD_RS,
+		ROUND(count(DISTINCT T1.ouNum) / t2.COUNT_ZDY,4) AS COUNT_LJSYL,
+		SUM(if(t1.num=1,1,0)) AS LJGMGD_RS_ONE,
+		SUM(if(t1.num=2,1,0)) AS LJGMGD_RS_TWO,
+		SUM(if(t1.num=3,1,0)) AS LJGMGD_RS_THR,
+		SUM(if(t1.num>3,1,0)) AS LJGMGD_RS_THREE,
+		ROUND(IFNULL(SUM(if(t1.num>1,1,0)) / count(DISTINCT T1.ouNum) ,0),4) AS COUNT_LJFGL
+		FROM
+		(
+		SELECT
+		T2.O2O_CITY o2oCity,
+		T2.OU_NUM ouNum,
+		COUNT(1) num
+		FROM
+		s_order_x T1
+		JOIN lnk_accnt T2 ON T1.ACCNT_ID = T2.ROW_ID
+		JOIN S_ORDER_X t3 ON T1.row_id = T3.row_id
+		WHERE
+		1 = 1
+		<if test=" usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+		<if test=" usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101' and t1.corp_id != '' and t1.corp_id is not null
+		</if>
+		AND T2.O2O_ACCT_TYPE = 'Customer'
+		AND DATE_ADD(T1.created, INTERVAL - 1 DAY) &lt;= #{attr2}
+		AND (
+		t3.ATTRIB_48 in ('To Pick Up','To Receive','To Appraise','Finished')
+		)
+		<if test="attr3 != '' and attr3 != null">
+			AND T2.O2O_CITY = #{attr3}
+		</if>
+		AND T2.O2O_CITY IS NOT NULL
+		AND T2.O2O_CITY != ''
+		GROUP BY
+		T2.O2O_CITY,
+		T2.OU_NUM
+		) t1
+		LEFT JOIN(
+		SELECT
+		t1.O2O_CITY o2oCity,
+		count(T1.OU_NUM) AS COUNT_ZDY
+		FROM
+		lnk_accnt t1
+		WHERE
+		1 = 1
+		<if test="attr3 != '' and attr3 != null">
+			AND T1.O2O_CITY = #{attr3}
+		</if>
+		AND t1.O2O_CITY &lt;&gt; ''
+		AND t1.O2O_ACCT_TYPE = 'Customer'
+		AND DATE_ADD(T1.created, INTERVAL - 1 DAY) &lt;= #{attr2}
+		GROUP BY
+		t1.O2O_CITY
+		) t2 on t1.o2oCity = t2.o2oCity
+		GROUP BY
+		t1.o2oCity
+	</select>
+
+</mapper>

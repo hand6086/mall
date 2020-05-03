@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaccnt.dao.mybatis.mapper.StoreMapper">
+	<resultMap type="com.hand.base.o2oaccnt.model.Store" id="store"></resultMap>
+	<resultMap type="com.hand.base.o2oaccnt.model.StoreInfo" id="storeinfo"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+		T1.ROW_ID id
+		,T1.CREATED created
+		,T1.CREATED_BY as createdBy
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as
+		lastUpdated
+		,T1.LAST_UPD_BY as lastUpdatedBy
+		,T1.OU_NUM accntCode
+		/*客户编码*/
+		,T1.NAME accntName /*客户名称*/
+		,T1.O2O_STORE_TYPE storeType
+		/*商户类型*/
+		,T1.O2O_PROVINCE province /*省/直辖市*/
+		,T1.O2O_CITY city /*城市*/
+		,T1.O2O_DISTRICT district /*区/县*/
+		,T1.O2O_ADDRESS address /*详细地址*/
+		,T1.O2O_CONTACT contact /*联系人*/
+		,t1.O2O_CONTACT_PHONE contactPhone
+		/*联系电话*/
+		,t1.O2O_ALIPAY aliPay /*支付宝账号*/
+		,t1.O2O_ACCONT_NAME
+		o2oAccntName/*开户人*/
+		,t1.O2O_BANK bank /*开户银行*/
+		,t1.O2O_CREDIT_CARD
+		creaitCard /*银行卡号*/
+		,t1.O2O_GPS_LONGITUDE gpsLong /*GPS经度*/
+		,t1.O2O_GPS_LATITUDE gpsLati/*GPS纬度*/
+		,t1.X_ATTRIB_163 channelType
+		/*渠道类型*/
+		,t1.O2O_FORCED_STORE forcedStore /*是否兜底商户*/
+		,t1.O2O_GP_STORE
+		gpStore /*是否团购商户*/
+		,t1.O2O_STATUS status /*状态*/
+		,t1.O2O_ORDER_PICK_STATUS orderPickStatus /*接单状态*/
+		,t1.O2O_WAREHOUSE_ID wareHouseId /*仓库id*/
+		,t1.X_ATTRIB_165 cityId /*城市id*/ 
+		<!--,t2.L1_NAME parentOrgName /*城市大区*/ 
+		,t2.L2_NAME regionOrgName /*片区*/ #,t2.L3_NAME salesOrgName /*销售单位*/ -->
+		,t3.NAME wareHouse /*电商仓库*/
+		,IF(T1.O2O_STORE_TYPE ='NONE', 'N','Y') o2oStoreFlag
+		,t4.ROW_ID orgId
+	</sql>
+
+
+	<sql id="fromTableSql">
+		FROM lnk_accnt t1
+		LEFT JOIN (CX_O_AREA t2  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T2.T_ATTR_05) ON T2.ROW_ID = T1.X_ATTRIB_165
+		LEFT JOIN S_INVLOC t3 ON T1.O2O_WAREHOUSE_ID=T3.ROW_ID
+	</sql>
+
+	<sql id="whereAllSql">
+		WHERE 1 = 1
+		and t1.O2O_STORE_TYPE !='None'
+		and (t1.INT_ORG_FLG != 'Y' OR t1.PRTNR_FLG != 'N')
+		and t1.ACCNT_FLG != 'N'		
+		and t1.BU_ID is not NULL
+		<if test="storeType != null and storeType != '' ">
+		and T1.O2O_STORE_TYPE = #{storeType}
+		</if>
+		<if test="accntName != null and accntName != '' ">
+		and T1.NAME LIKE CONCAT('%',#{accntName},'%')
+		</if>
+		<if test="province != null and province != '' ">
+		and t1.O2O_PROVINCE LIKE CONCAT('%',#{province},'%')
+		</if>
+		<if test="city != null and city != '' ">
+		and t1.O2O_CITY LIKE CONCAT('%',#{city},'%')
+		</if>
+		<if test="district != null and district != '' ">
+		and t1.O2O_DISTRICT LIKE CONCAT('%',#{district},'%')
+		</if>
+		<if test="address != null and address != '' ">
+		and T1.O2O_ADDRESS LIKE CONCAT('%',#{address},'%')
+		</if>
+		<if test="contactPhone != null and contactPhone != '' ">
+		and t1.O2O_CONTACT_PHONE LIKE CONCAT('%',#{contactPhone},'%')
+		</if>
+		<if test="channelType != null and channelType != '' ">
+		and t1.X_ATTRIB_163 = #{channelType}
+		</if>
+		<if test="status != null and status != '' ">
+		and t1.O2O_STATUS = #{status}
+		</if>
+		<if test="orderPickStatus != null and orderPickStatus != '' ">
+		and t1.O2O_ORDER_PICK_STATUS = #{orderPickStatus}
+		</if>
+		<if test="o2oStoreFlag != null and o2oStoreFlag != '' ">
+		and IF(T1.O2O_STORE_TYPE ='NONE', 'N','Y') = #{o2oStoreFlag}
+		</if>
+	</sql>
+
+	<select id="queryById" resultMap="store"
+		parameterType="com.hand.base.o2oaccnt.model.Store">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		where t1.row_id=#{id}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="store"
+		parameterType="com.hand.base.o2oaccnt.model.Store">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+
+
+	<update id="update" parameterType="com.hand.base.o2oaccnt.model.Store">
+		update lnk_accnt
+		set row_id=#{id}
+		<if test=" accntCode != null and accntCode != '' ">
+		,OU_NUM =#{accntCode} /*客户编码*/
+		</if>
+		<if test=" accntName != null and accntName != '' ">
+		,NAME =#{accntName}/*客户名称*/
+		</if>
+		<if test=" storeType != null and storeType != '' ">
+		,O2O_STORE_TYPE =GET_LOV_val(#{usercorpid},'TB_O2O_STORE_TYPE',#{storeType}) /*商户类型*/
+		</if>
+		<if test=" province != null and province != '' ">
+		,O2O_PROVINCE =#{province} /*省/直辖市*/
+		</if>
+		<if test=" city != null and city != '' ">
+		,O2O_CITY =#{city} /*城市*/
+		</if>
+		<if test=" cityId != null and cityId != '' ">
+		,X_ATTRIB_165 =#{cityId} /*城市Id*/
+		</if>
+		<if test=" district != null and district != '' ">
+		,O2O_DISTRICT=#{district} /*区/县*/
+		</if>
+		<if test=" address != null and address != '' ">
+		,O2O_ADDRESS =#{address} /*详细地址*/
+		</if>
+		<if test=" contact != null and contact != '' ">
+		,O2O_CONTACT=#{contact} /*联系人*/
+		</if>
+		<if test=" contactPhone != null and contactPhone != '' ">
+		,O2O_CONTACT_PHONE =#{contactPhone} /*联系电话*/
+		</if>
+		<if test=" aliPay != null and aliPay != '' ">
+		,O2O_ALIPAY =#{aliPay} /*支付宝账号*/
+		</if>
+		<if test=" o2oAccntName != null and o2oAccntName != '' ">
+		,O2O_ACCONT_NAME =#{o2oAccntName}/*开户人*/
+		</if>
+		<if test=" bank != null and bank != '' ">
+		,O2O_BANK =GET_LOV_val(#{usercorpid},'TB_O2O_BANK',#{bank}) /*开户银行*/
+		</if>
+		<if test=" creaitCard != null and creaitCard != '' ">
+		,O2O_CREDIT_CARD =#{creaitCard} /*银行卡号*/
+		</if>
+		<if test=" gpsLong != null and gpsLong != '' ">
+			,O2O_GPS_LONGITUDE =#{gpsLong}/*GPS经度*/
+		</if>
+		<if test=" gpsLati != null and gpsLati != '' ">
+			,O2O_GPS_LATITUDE =#{gpsLati}/*GPS纬度*/
+		</if>
+		<if test=" channelType != null and channelType != '' ">
+		,X_ATTRIB_163 = #{channelType} /*渠道类型*/
+		</if>
+		<if test=" forcedStore != null and forcedStore != '' ">
+		,O2O_FORCED_STORE =GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{forcedStore}) /*是否兜底商户*/
+		</if>
+		<if test=" gpStore != null and gpStore != '' ">
+		,O2O_GP_STORE =GET_LOV_val(#{usercorpid}, 'TB_O2O_JUDGE_TYPE',#{gpStore}) /*是否团购商户*/
+		</if>
+		<if test=" status != null and status != '' ">
+		,O2O_STATUS =#{status} /*状态*/
+		</if>
+		<if test=" orderPickStatus != null and orderPickStatus != '' ">
+		,O2O_ORDER_PICK_STATUS =GET_LOV_val(#{usercorpid},'TB_O2O_ORDER_PICK_STATUS',#{orderPickStatus}) /*接单状态*/
+		</if>
+		where row_id=#{id}
+		
+	</update>
+	<update id="updateinvloc" parameterType="com.hand.base.o2oaccnt.model.Store">
+		update S_INVLOC
+		set
+		name = #{wareHouse}
+		where S_INVLOC.row_id =#{wareHouseId}
+	</update>
+
+	
+	<!--查询商户入驻是填写的信息 -->
+	<select id="queryStoreInfo" resultMap="storeinfo"
+		parameterType="com.hand.base.o2oaccnt.model.StoreInfo">
+		SELECT
+		row_id id,
+		created created,
+		created_by createdBy,
+		last_upd lastUpd,
+		last_upd_by lastUpdBy,
+		corp_id corpid,
+		applicant_name
+		applicantName,
+		applicant_mailbox applicantMailBox,
+		applicant_phone
+		applicantPhone,
+		if_thirdStore isThirdStore,
+		company_name companyName
+		from lnk_audit_userinfo
+	</select>
+
+	<select id="qureyAccentDetail" resultMap="store"
+		parameterType="com.hand.base.o2oaccnt.model.Store">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		where t1.OU_NUM=#{accntCode}
+	</select>
+	<select id="queryAccntBycode" resultMap="store"
+		parameterType="com.hand.base.o2oaccnt.model.Store">
+		select contact accntName,Accout_code accntCode, status status,ACCT_TYPE
+		empType,CONTACT_PHONE contactPhone,accout_name username from
+		cx_o2o_account_v where ACCOUT_CODE=#{accntCode}
+
+	</select>
+
+
+</mapper>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.core.autoconfig.dao.mybatis.mapper.LnkInnerFieldMapper">
+	<resultMap type="com.hand.core.autoconfig.model.LnkInnerField"
+		id="LnkInnerField"></resultMap>
+
+<sql id="queryAllSql">
+	select
+		created,
+		row_id as id,
+		T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,
+		parentid,
+		name,--字段名称
+		joinname,--连接
+		columnname,--列名称
+		queryflag,--查询标记
+		orderflag,--排序标记
+		activeflag,--激活的
+		displayname,--显示名称
+		updateflag,--可更新
+		insertflag,--可插入
+		uireadonly,--界面只读
+		uitype,--界面类型
+		fieldtype,--字段类型
+		columntype,--列类型
+		columnlength,--列长度
+		calcflag,--计算字段
+		calc,--计算逻辑
+		lovtype,--值列表
+		uirequired,--界面必输
+		uiqueryflag,--界面可查询
+		indextype,--索引类型
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+
+	</sql>
+	
+	<sql id="fromTableSql">
+	from LNK_INNER_FIELD t1
+	where 1 = 1
+	  and t1.CORP_ID = #{usercorpid}
+	</sql>
+	
+	 
+	
+	<sql id="orderByAllSql">
+	order by t1.created asc
+	</sql>	
+	
+
+	<delete id="deleteById" parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		DELETE FROM
+		LNK_INNER_FIELD WHERE ROW_ID = #{id}
+	</delete>
+
+ 
+	
+	
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+	 
+	</select>
+	<select id="queryById" resultMap="LnkInnerField"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerField">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+	<select id="queryByInner" resultMap="LnkInnerField"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and T1.parentid =#{parentid}
+	</select>
+	
+	
+	<select id="queryAllPage" resultMap="LnkInnerField"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	<select id="queryByExamplePage" resultMap="LnkInnerField"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	
+
+
+	<insert id="insert" parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		insert into
+		LNK_INNER_FIELD
+		(ROW_ID,
+		parentid,
+		name,--字段名称
+		joinname,--连接
+		columnname,--列名称
+		queryflag,--查询标记
+		orderflag,--排序标记
+		activeflag,--激活的
+		displayname,--显示名称
+		updateflag,--可更新
+		insertflag,--可插入
+		uireadonly,--界面只读
+		uitype,--界面类型
+		fieldtype,--字段类型
+		columntype,--列类型
+		columnlength,--列长度
+		calcflag,--计算字段
+		calc,--计算逻辑
+		lovtype,--值列表
+		uirequired,--界面必输
+		uiqueryflag,--界面可查询
+		indextype,--索引类型
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+		)
+		values
+		(#{id},
+		#{parentid},
+		#{name},--字段名称
+		#{joinname},--连接
+		upper(#{columnname}),--列名称
+		#{queryflag},--查询标记
+		#{orderflag},--排序标记
+		#{activeflag},--激活的
+		#{displayname},--显示名称
+		#{updateflag},--可更新
+		#{insertflag},--可插入
+		#{uireadonly},--界面只读
+		#{uitype},--界面类型
+		#{fieldtype},--字段类型
+		#{columntype},--列类型
+		#{columnlength},--列长度
+		#{calcflag},--计算字段
+		#{calc},--计算逻辑
+		#{lovtype},--值列表
+		#{uirequired},--界面必输
+		#{uiqueryflag},--界面可查询
+		#{indextype},--索引类型
+		#{coms},--说明
+		#{attr01},--备注1
+		#{attr02},--备注2
+		#{attr03},--备注3
+		#{attr04},--备注4
+		#{attr05},--备注5
+		#{attr06},--备注6
+		#{attr07},--备注7
+		#{attr08},--备注8
+		#{attr09},--备注9
+		#{attr10}--备注10
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.core.autoconfig.model.LnkInnerField">
+		UPDATE
+		LNK_INNER_FIELD
+		SET
+		name=#{name},--字段名称
+		joinname=#{joinname},--连接
+		columnname=upper(#{columnname}),--列名称
+		queryflag=#{queryflag},--查询标记
+		orderflag=#{orderflag},--排序标记
+		activeflag=#{activeflag},--激活的
+		displayname=#{displayname},--显示名称
+		updateflag=#{updateflag},--可更新
+		insertflag=#{insertflag},--可插入
+		uireadonly=#{uireadonly},--界面只读
+		uitype=#{uitype},--界面类型
+		fieldtype=#{fieldtype},--字段类型
+		columntype=#{columntype},--列类型
+		columnlength=#{columnlength},--列长度
+		calcflag=#{calcflag},--计算字段
+		calc=#{calc},--计算逻辑
+		lovtype=#{lovtype},--值列表
+		uirequired=#{uirequired},--界面必输
+		uiqueryflag=#{uiqueryflag},--界面可查询
+		indextype=#{indextype},--索引类型
+		coms=#{coms},--说明
+		attr01=#{attr01},--备注1
+		attr02=#{attr02},--备注2
+		attr03=#{attr03},--备注3
+		attr04=#{attr04},--备注4
+		attr05=#{attr05},--备注5
+		attr06=#{attr06},--备注6
+		attr07=#{attr07},--备注7
+		attr08=#{attr08},--备注8
+		attr09=#{attr09},--备注9
+		attr10=#{attr10}--备注10
+		WHERE ROW_ID = #{id}
+	</update>
+
+</mapper>

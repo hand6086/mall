@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaccnt.dao.mybatis.mapper.RestaurantMapper">
+	<resultMap type="com.hand.base.o2oaccnt.model.Restaurant"
+		id="restaurant"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T1.ROW_ID as id
+		,t1.created created
+		,T1.CREATED_BY as createdBy
+		,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+		,T1.LAST_UPD_BY as lastUpdatedBy
+		,T1.CORP_ID  corpid
+		,T1.name name/*餐厅名称*/
+		,T1.Logo logoId/*Logo图片id*/
+		,T6.path logoUrl/*Logo图片URL*/
+		,T1.province_id provinceId/*省/直辖市id*/
+		,T2.name province/*省/直辖市*/
+		,T1.city_id cityId/*市id*/
+		,T3.name city/*市*/
+		,t1.district_id districtId/*区/县id*/
+		,t4.name district/*区/县*/
+		,t1.street street/*街道*/
+		,T1.address address/*详细地址*/
+		,t1.phone phone/*餐厅电话*/
+		,t1.merchants_id merchantsId/*配送商id*/
+		,t5.NAME merchantsName/*配送商名称*/
+		,t5.O2O_CONTACT merchantsContact/*配送商联系人*/
+		,t5.O2O_CONTACT_PHONE merchantsPhone/*配送商联系方式*/
+		,t1.status 	status /*状态*/
+		,t7.row_id orgId
+	</sql>
+
+
+	<sql id="fromTableSql">
+		from lnk_restaurant t1
+		LEFT JOIN CX_O_AREA T2 ON T2.ROW_ID = T1.province_id	
+		LEFT JOIN (CX_O_AREA t3  LEFT JOIN lnk_org_ext T7 ON T7.ROW_ID = T3.T_ATTR_05) ON T3.ROW_ID = T1.city_id	
+		LEFT JOIN CX_O_AREA T4 ON T4.ROW_ID = T1.district_id	
+		LEFT JOIN lnk_accnt T5 ON T5.ROW_ID = T1.merchants_id
+		LEFT JOIN cx_o_img T6 ON T6.ROW_ID = T1.Logo
+	</sql>
+
+	<sql id="whereAllSql">
+		WHERE 1 = 1
+	</sql>
+
+	<select id="queryById" resultMap="restaurant" parameterType="com.hand.base.o2oaccnt.model.Restaurant">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		AND T1.ROW_ID =#{id}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="restaurant"
+		parameterType="com.hand.base.o2oaccnt.model.Restaurant">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+	
+	<update id="update" 
+	 parameterType="com.hand.base.o2oaccnt.model.Restaurant">
+	UPDATE lnk_restaurant
+	SET
+		name 				=#{name}/*餐厅名称*/
+		,Logo 				=#{logoId}/*Logo图片id*/
+		,province_id 		=#{provinceId}/*省/直辖市id*/
+		,city_id 			=#{cityId}/*市id*/
+		,district_id 		=#{districtId}/*区/县id*/
+		,street 			=#{street}/*街道*/
+		,address 			=#{address}/*详细地址*/
+		,phone 				=#{phone}/*餐厅电话*/
+		,merchants_id 		=#{merchantsId} /*配送商id*/
+		,status 			=#{status}/*状态*/
+	WHERE row_id =#{id}	
+	</update>
+	
+ 	 <insert id="insert" 
+	 	parameterType="com.hand.base.o2oaccnt.model.Restaurant">
+		insert into lnk_restaurant (
+			row_id
+			,name
+			,Logo
+			,province_id
+			,city_id
+			,district_id
+			,street
+			,address
+			,phone
+			,merchants_id
+			,status
+			) VALUES (
+			#{id}
+			,#{name}/*餐厅名称*/
+			,#{logoId}/*Logo图片id*/
+			,#{provinceId}/*省/直辖市id*/
+			,#{cityId}/*市id*/
+			,#{districtId}/*区/县id*/
+			,#{street}/*街道*/
+			,#{address}/*详细地址*/
+			,#{phone}/*餐厅电话*/
+			,#{merchantsId}/*配送商id*/
+			,#{status} /*状态*/
+			)
+	</insert>  
+
+	<delete id="deleteById" parameterType="com.hand.base.o2oaccnt.model.Restaurant">
+		DELETE FROM
+		lnk_restaurant WHERE row_id = #{id}
+	</delete>
+	
+</mapper>

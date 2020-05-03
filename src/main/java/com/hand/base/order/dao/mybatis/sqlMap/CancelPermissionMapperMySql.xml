@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.CancelPermissionMapper">
+	<resultMap type="com.hand.base.order.model.CancelPermission" id="cancelPermission"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.ATTRIB_48 attrib48,/*订单状态*/
+			t1.ORDER_NUM orderNum,/*订单编号*/
+			t2.ATTRIB_54 attrib54,/*外部订单编号*/
+			t3.NAME customerName,/*消费者名称*/
+			t3.OU_NUM customerOuNum,/*消费者编码*/
+			t3.MAIN_PH_NUM mainPhNum,/*消费者电话*/
+			t2.ATTRIB_39 attrib39,/*店铺名称*/
+			t4.CONTACT contact,/*收货人*/
+			t4.CONTACT_PHONE contactPhone,/*收货人电话*/
+			t2.ATTRIB_36 attrib36,/*省/直辖市*/
+			t2.ATTRIB_37 attrib37,/*城市*/
+			t2.ATTRIB_38 attrib38,/*区/县*/
+			t2.ATTRIB_01 attrib01,/*详细地址*/
+			t4.GPS_LONGITUDE gpsLongitude,/*GPS经度*/
+			t4.GPS_LATITUDE gpsLatitude,/*GPS纬度*/
+			ROUND(t2.ATTRIB_14,2) attrib14,/*商品总价*/
+			ROUND(t2.ATTRIB_16,2) attrib16,/*特价优惠金额*/
+			ROUND(t2.ATTRIB_22,2) attrib22,/*买赠优惠金额*/
+			ROUND(t2.ATTRIB_21,2) attrib21,/*满减优惠金额*/
+			ROUND(t2.ATTRIB_20,2) attrib20,/*优惠券金额*/
+			ROUND((IFNULL(t2.ATTRIB_16,0) + IFNULL(t2.ATTRIB_20,0) + IFNULL(t2.ATTRIB_22,0) + IFNULL(t2.ATTRIB_21,0)),2) offerSum,/*优惠总金额*/
+			ROUND(t2.O2O_TIP,2) o2oTip,/*小费*/
+			ROUND(t2.ATTRIB_17,2) attrib17,/*订单总金额*/
+			t2.O2O_PAY_TYPE o2oPayType,/*支付方式*/
+			t2.ATTRIB_47 attrib47,/*买家留言*/
+			t2.ATTRIB_40 attrib40,/*配送方式*/
+			t2.ATTRIB_07 attrib07,/*物流状态*/
+			t5.NAME merchantName,/*商户名称*/
+			t5.OU_NUM merchantOuNum,/*商户编码*/
+			t5.O2O_CONTACT_PHONE o2oContactPhone,/*商户电话*/
+			t5.O2O_STORE_TYPE o2oStoreType,/*商户类型*/
+			CONCAT(t6.LAST_NAME, t6.FST_NAME) distributor,/*配送员*/
+			t7.ATTRIB_42 attrib42,/*配送员电话*/
+			t2.ATTRIB_44 attrib44,/*O2O订单分类*/
+			t2.O2O_FORCED_PICKUP o2oForcedPickup,/*是否兜底订单*/
+			t2.ATTRIB_50 attrib50,/*是否团购订单*/
+			t2.ATTRIB_55 attrib55,/*是否秒杀订单*/
+			t2.ATTRIB_43 attrib43,/*校验码*/
+			t2.ATTRIB_49 attrib49,/*校验状态*/
+			date_format(t1.created,'%Y-%m-%d %H:%i:%s') created,/*下单时间*/
+			date_format(t2.ATTRIB_26,'%Y-%m-%d %H:%i:%s') attrib26,/*付款时间*/
+			date_format(t2.ATTRIB_27,'%Y-%m-%d %H:%i:%s') attrib27,/*接单时间*/
+			date_format(t2.ATTRIB_28,'%Y-%m-%d %H:%i:%s') attrib28,/*配送时间*/
+			date_format(t2.ATTRIB_29,'%Y-%m-%d %H:%i:%s') attrib29,/*收货时间*/
+			t2.ATTRIB_46 attrib46,/*结算状态*/
+			t2.ATTRIB_53 attrib53,/*来源系统*/
+			t8.NAME typeName,/*类型*/
+			t2.ATTRIB_09 attrib09,/*是否O2O订单*/
+			date_format(t2.ATTRIB_30,'%Y-%m-%d %H:%i:%s') attrib30,/*第一轮推送时间*/
+			date_format(t2.ATTRIB_31,'%Y-%m-%d %H:%i:%s') attrib31,/*第二轮推送时间*/
+			date_format(t2.ATTRIB_32,'%Y-%m-%d %H:%i:%s') attrib32,/*第三轮推送时间*/
+			date_format(t2.ATTRIB_57,'%Y-%m-%d %H:%i:%s') attrib57 /*取消时间*/
+			,t100.T_ATTR_05 orgId
+	</sql>
+	<sql id="fromTableSql">
+		FROM S_ORDER t1 
+		LEFT JOIN (S_ORDER_X t2 join cx_o_area t100 on t2.x_attrib_68 = t100.row_id)ON t2.PAR_ROW_ID = t1.ROW_ID
+		LEFT JOIN LNK_ACCNT t3 ON t3.ROW_ID = t1.ACCNT_ID
+		LEFT JOIN CX_O_ADDRESS t4 ON t4.ROW_ID = t2.O2O_RECIEVER_ID
+		LEFT JOIN LNK_ACCNT t5 ON t5.ROW_ID = t2.ATTRIB_41
+		LEFT JOIN S_CONTACT t6 ON t6.ROW_ID = t2.ATTRIB_42
+		LEFT JOIN S_CONTACT_X t7 ON t7.ROW_ID = t2.ATTRIB_42
+		LEFT JOIN S_ORDER_TYPE t8 ON t8.ROW_ID = t1.ORDER_TYPE_ID
+	</sql>
+	<sql id="whereTableSql">
+		WHERE 1 = 1
+	</sql>
+	<select id="queryByExamplePage" resultMap="cancelPermission" parameterType="com.hand.base.order.model.CancelPermission">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+	</select>
+	
+	<select id="queryProductOrderPage" resultMap="cancelPermission" parameterType="com.hand.base.order.model.CancelPermission">
+		SELECT
+			t1.ROW_ID id,
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t2.O2O_DISPLAY_NAME o2oDisplayName,/*商品名称*/
+			t2.O2O_INT_CODE o2oIntCode,/*商品编码*/
+			ROUND(t1.BASE_UNIT_PRI,2) baseUnitPri,/*报价*/
+			t1.QTY_REQ qtyReq,/*数量*/
+			ROUND(t3.ATTRIB_17,2) attrib17,/*报价总金额*/
+			ROUND(t1.NET_PRI,2) netPri,/*成交价*/
+			ROUND(t3.ATTRIB_19,2) attrib19,/*成交金额*/
+			t3.O2O_GP_PROD o2oGpProd,/*是否团购商品*/
+			t3.ATTRIB_11 attrib11,/*是否赠品*/
+			ROUND(IF(t3.ATTRIB_11 = 'Y',0,t3.ATTRIB_17 - t3.ATTRIB_19),2) merchantOfferSum,/*商品优惠金额*/
+		 	ROUND(((T4.ATTRIB_20 + T4.ATTRIB_22 + T4.ATTRIB_21) * t3.ATTRIB_17 / T4.ATTRIB_14),2) orderOfferSum, /*订单优惠金额分摊*/
+		 	T1.ORDER_ID orderId	/*与父级相关*/
+		FROM S_ORDER_ITEM t1
+		LEFT JOIN S_PROD_INT_X t2 ON t2.ROW_ID = t1.PROD_ID
+		LEFT JOIN S_ORDER_ITEM_X t3 ON t3.PAR_ROW_ID = t1.ROW_ID
+		LEFT JOIN S_ORDER_X t4 ON t4.ROW_ID = t1.ORDER_ID
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.order.model.CancelPermission">
+		INSERT INTO CX_O_ORDER_CNCL(
+			ROW_ID,
+			ORDER_NUM,
+			ORDER_CITY,
+			DETERMINE_CANCEL,
+			DETERMINE_TIME,
+			ALREADY_CANCEL,
+			MODIFICATION_NUM, 
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			DB_LAST_UPD_SRC
+		)
+		VALUES(
+			#{id},
+			#{orderNum},
+			#{attrib37},
+			'Y',
+			now(),
+			'N',
+			0,
+			'0',
+			now(),
+			'User'
+		)
+	</insert>
+	
+	<select id="queryById" resultMap="cancelPermission" parameterType="com.hand.base.order.model.CancelPermission">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		AND t1.ROW_ID = #{id}
+	</select>
+	
+	<select id="querycancelPermissionCount" resultType="java.lang.Integer" parameterType="com.hand.base.order.model.CancelPermission">
+		
+		select count(ROW_ID)
+		FROM S_ORDER t1 
+	</select>
+</mapper>

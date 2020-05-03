@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.params.dao.mybatis.mapper.AddressLabelMapper">
+	<resultMap type="com.hand.base.params.model.AddressLabel" id="addressLabel"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+			t1.ROW_ID id,/*id*/
+			t1.CREATED created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpd,
+			t1.CORP_ID corpId,
+			t1.LAST_UPD_BY lastUpdBy,
+			t1.LABEL_ACTIVE labelActive,/*是否有效*/
+			t1.LABEL_COMMENTS labelComments,/*备注*/
+			t1.LABEL_NAME labelName /*地址标签名称*/
+	</sql>
+	 
+	<sql id="fromTableSql">
+		FROM
+			CX_O_ADDR_LBL t1
+		WHERE 1 = 1
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="addressLabel" parameterType="com.hand.base.params.model.AddressLabel">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="addressLabel" parameterType="com.hand.base.params.model.AddressLabel">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		AND t1.ROW_ID=#{id}
+	</select>
+    <insert id="insert" parameterType="com.hand.base.params.model.AddressLabel">
+    	INSERT INTO CX_O_ADDR_LBL(
+	    	ROW_ID,
+			MODIFICATION_NUM,
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			LABEL_ACTIVE,
+			DB_LAST_UPD_SRC,
+			LABEL_COMMENTS,
+			LABEL_NAME
+    		)
+    	VALUES(
+    		#{id},
+    		0,
+    		'0',
+    		now(),
+    		#{labelActive},
+    		'User',
+    		#{labelComments},
+    		#{labelName}
+    	)
+    </insert>
+  
+    <update id="update" parameterType="com.hand.base.params.model.AddressLabel">
+    	UPDATE CX_O_ADDR_LBL 
+    	SET 
+			LABEL_ACTIVE = #{labelActive},
+			LABEL_COMMENTS = #{labelComments},
+			LABEL_NAME = #{labelName}
+    	WHERE ROW_ID = #{id}
+    </update>
+</mapper>

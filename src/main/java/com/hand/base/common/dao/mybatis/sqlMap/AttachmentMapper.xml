@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.AttachmentMapper">
+  <resultMap type="com.hand.base.common.model.Attachment" id="attachment"></resultMap>
+   <sql id="queryAllSql">
+	SELECT 
+		T1.ROW_ID            as id,
+		t1.created as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       t1.HEAD_ID headId,
+		       t1.ATTACHMENT_NAME attachmentName,
+		       t1.ATTACHMENT_TYPE attachmentType,
+		       t1.ATTACHMENT_PATH attachmentFilePath,
+		       GET_HTTP_PATH('web', t1.SMALL_URL) smallurl,
+		       GET_HTTP_PATH('web', t1.BIG_URL) bigurl,
+		       GET_HTTP_PATH('web', t1.ATTACHMENT_PATH) attachmentPath,
+		       t1.ATTACHMENT_SIZE attachmentSize,
+		       t1.COMMMENTS comments,
+		       t1.source source,
+		        t1.module_type moduleType,
+		        t1.document_type documentType,
+		       t1.ATTACHMENT_NAME_ORIGINAL attachmentOriginal
+	</sql>
+	
+	<sql id="whereAllSql">
+		<if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid} 
+		</if>
+		<if test="id != null and id != '' ">
+			and T1.ROW_ID = #{id} 
+		</if>
+		<if test="created != null and created != '' ">
+			and T1.CREATED =  TO_DATE(#{created},'YYYY-MM-DD HH24:MI') 
+		</if>
+		<if test="headId != null and headId != '' ">
+			and T1.HEAD_ID = #{headId} 
+		</if>
+		<if test="attachmentName != null and attachmentName != '' ">
+			and T1.ATTACHMENT_NAME = #{attachmentName} 
+		</if>
+		<if test="attachmentType != null and attachmentType != '' ">
+			and T1.ATTACHMENT_TYPE = #{attachmentType} 
+		</if>
+		<if test="comments != null and comments != '' ">
+			and T1.COMMMENTS = #{comments} 
+		</if>
+		<if test="source != null and source != '' ">
+			and T1.source = #{source} 
+		</if>
+		<if test="moduleType != null and moduleType != '' ">
+			and T1.module_type = GET_LOV_VAL(#{usercorpid}, 'ATTACHMENT_MODULE_TYPE',#{moduleType}) 
+		</if>
+		<if test="documentType != null and documentType != '' ">
+			and T1.document_type = GET_LOV_VAL(#{usercorpid}, 'DOCUMENT_TYPE',#{documentType}) 
+		</if>
+		<if test="attachmentOriginal != null and attachmentOriginal != '' ">
+			and T1.ATTACHMENT_NAME_ORIGINAL = #{attachmentOriginal}
+		</if>
+	</sql>
+	
+	<sql id="fromTableSql">
+	 FROM LNK_ATTACHMENT t1
+		 where 1 = 1
+	</sql>
+	
+	<select id="queryById" resultMap="attachment"
+		parameterType="com.hand.base.common.model.Attachment">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.common.model.Attachment">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="attachment"
+		parameterType="com.hand.base.common.model.Attachment">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="attachment"
+		parameterType="com.hand.base.common.model.Attachment">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+  
+    <insert id="insert" parameterType="com.hand.base.common.model.Attachment">
+		INSERT INTO LNK_ATTACHMENT
+		  (ROW_ID,
+		   HEAD_ID,
+		   ATTACHMENT_NAME,
+		   ATTACHMENT_TYPE,
+		   ATTACHMENT_PATH,
+		   ATTACHMENT_SIZE,
+		   ATTACHMENT_NAME_ORIGINAL,
+		   COMMMENTS,
+		   module_type,
+		   document_type,
+		   head_code,
+		   head_name,
+		   source,
+		   SMALL_URL,
+		   BIG_URL)
+		VALUES
+		  (#{id},
+		   #{headId},
+		   #{attachmentName},
+		   #{attachmentType},
+		   #{attachmentPath},
+		   #{attachmentSize},
+		   #{attachmentOriginal},
+		   #{comments},
+		   #{moduleType},
+		   GET_LOV_VAL(#{usercorpid}, 'DOCUMENT_TYPE',#{documentType}),
+		   #{headCode},
+		   #{headName},
+		   'web',
+		   #{smallurl},
+		   #{bigurl})
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.common.model.Attachment">
+   			update LNK_ATTACHMENT t set
+   			         t.commments 	 = #{comments},
+   			         t.document_type = #{documentType}
+   			where  t.row_id = #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="java.lang.String">
+  	delete from LNK_ATTACHMENT t where t.row_id = #{id}
+  </delete>
+  
+  
+  <select id="queryAttachmentLibraryListPage" resultMap="attachment" parameterType="com.hand.base.common.model.Attachment">
+		SELECT id,
+		       created,
+		       createdBy,
+		       lastUpdated,
+		       lastUpdatedBy,
+		       attachmentName,
+		       attachmentType,
+		       GET_HTTP_PATH('web',attachmentPath) attachmentPath,
+		       attachmentPath attachmentFilePath,
+		       attachmentSize,
+		       comments,
+		       attachmentOriginal,
+		       source,
+		       headId,
+		        moduleType moduleType,
+		        documentType documentType,
+		       headCode,
+		       headName
+		  FROM LNK_ATTACHMENT_LIBRARY_V
+		  where corpid = #{usercorpid}
+  </select>
+  
+  <delete id="deleteAttachmentByAnnounceId" parameterType="com.hand.base.common.model.Announce">
+	delete from LNK_ATTACHMENT t1
+	where exists
+	(
+	select 1 from LNK_ANNOUNCE_ATTACH t2 where t2.attach_id=row_id and t2.announce_id = #{id}
+	)
+  </delete>
+  
+  <select id="queryAttachmentListByAnnounceId" parameterType="com.hand.base.common.model.Announce" resultType="com.hand.base.common.model.Attachment">
+  		SELECT t1.ROW_ID          id,
+		       t1.ATTACHMENT_NAME attachmentName,
+		       t1.ATTACHMENT_TYPE attachmentType,
+		       t1.ATTACHMENT_PATH attachmentPath,
+		       t1.ATTACHMENT_SIZE attachmentSize,
+		       t1.COMMMENTS       comments,
+		       TO_CHAR(t1.CREATED  ,'yyyy-mm-dd hh24:mi:ss')        created,
+		       t1.CREATED_BY      createdBy,
+		       TO_CHAR(t1.LAST_UPD   ,'yyyy-mm-dd hh24:mi:ss')       lastUpdated,
+		       t1.LAST_UPD_BY     lastUpdatedBy,
+		       ATTACHMENT_NAME_ORIGINAL	attachmentOriginal   
+		    from LNK_ATTACHMENT t1, LNK_ANNOUNCE_ATTACH t2
+			 where t1.row_id = t2.attach_id(+)
+			   and t2.announce_id = #{id}
+  </select>
+  
+  <select id="queryAnnouceByAttachmentId" parameterType="com.hand.base.common.model.Attachment" resultType="com.hand.base.common.model.Announce">
+		SELECT t1.ROW_ID      id,
+		         t1.captions    captions,
+		         t1.contents    contents,
+		         TO_CHAR(t1.start_date,'yyyy-mm-dd hh24:mi:ss') startDate,
+		         TO_CHAR(t1.end_date,'yyyy-mm-dd hh24:mi:ss') endDate,
+		         TO_CHAR(t1.CREATED,'yyyy-mm-dd hh24:mi:ss')     created,
+		         t1.CREATED_BY  createdBy,
+		         TO_CHAR(t1.LAST_UPD,'yyyy-mm-dd hh24:mi:ss')    lastUpdated,
+		         t1.LAST_UPD_BY lastUpdatedBy,
+		         t1.STATUS status
+	    FROM LNK_ANNOUNCE t1, LNK_ANNOUNCE_ATTACH t2
+	    where t1.row_id = t2.announce_id(+)
+	    and t2.attach_id = #{id}
+  </select>
+  
+</mapper>

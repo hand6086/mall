@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.core.autoconfig.dao.mybatis.mapper.LnkInnerWhereMapper">
+	<resultMap type="com.hand.core.autoconfig.model.LnkInnerWhere"
+		id="LnkInnerWhere"></resultMap>
+
+
+
+	
+<sql id="queryAllSql">
+	select
+		created,
+		row_id as id,
+		T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,
+		name,--名称
+		parentid,--父亲id
+		linkcoms,--连接条件
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+	
+	</sql>
+	
+	<sql id="fromTableSql">
+		from
+		LNK_INNER_WHERE t1
+		where 1 = 1
+          and t1.CORP_ID = #{usercorpid}
+	</sql>
+	
+	  
+	
+	
+	
+
+<resultMap type="com.hand.base.basic.model.ListOfValue"
+		id="listOfValue"></resultMap>
+
+	 
+	
+ 
+<select id="queryObjectWhere" resultMap="listOfValue"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		select
+		created,
+		row_id as id,
+		name as name,--名称
+		name as val
+		from LNK_INNER_WHERE 
+		where T1.parentid =#{parentid}
+	</select>
+	
+	<delete id="deleteById" parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		DELETE FROM
+		LNK_INNER_WHERE WHERE ROW_ID = #{id}
+	</delete>
+	
+	
+	
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+	</select>
+	<select id="queryById" resultMap="LnkInnerWhere"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+	
+		<select id="queryByInner" resultMap="LnkInnerWhere"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and T1.parentid =#{parentid}
+	</select>
+	
+	<select id="queryAllPage" resultMap="LnkInnerWhere"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	<select id="queryByExamplePage" resultMap="LnkInnerWhere"
+		parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 
+	</select>
+	
+	
+ 
+
+	<insert id="insert" parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		insert into
+		LNK_INNER_WHERE
+		(ROW_ID,
+		name,--名称
+		parentid,--父亲id
+		linkcoms,--连接条件
+		coms,--说明
+		attr01,--备注1
+		attr02,--备注2
+		attr03,--备注3
+		attr04,--备注4
+		attr05,--备注5
+		attr06,--备注6
+		attr07,--备注7
+		attr08,--备注8
+		attr09,--备注9
+		attr10--备注10
+		)
+		values
+		(#{id},
+		#{name},--名称
+		#{parentid},--父亲id
+		#{linkcoms},--连接条件
+		#{coms},--说明
+		#{attr01},--备注1
+		#{attr02},--备注2
+		#{attr03},--备注3
+		#{attr04},--备注4
+		#{attr05},--备注5
+		#{attr06},--备注6
+		#{attr07},--备注7
+		#{attr08},--备注8
+		#{attr09},--备注9
+		#{attr10}--备注10
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.core.autoconfig.model.LnkInnerWhere">
+		UPDATE
+		LNK_INNER_WHERE
+		SET
+		name=#{name},--名称
+		parentid=#{parentid},--父亲id
+		linkcoms=#{linkcoms},--连接条件
+		coms=#{coms},--说明
+		attr01=#{attr01},--备注1
+		attr02=#{attr02},--备注2
+		attr03=#{attr03},--备注3
+		attr04=#{attr04},--备注4
+		attr05=#{attr05},--备注5
+		attr06=#{attr06},--备注6
+		attr07=#{attr07},--备注7
+		attr08=#{attr08},--备注8
+		attr09=#{attr09},--备注9
+		attr10=#{attr10}--备注10
+		WHERE ROW_ID = #{id}
+	</update>
+
+</mapper>

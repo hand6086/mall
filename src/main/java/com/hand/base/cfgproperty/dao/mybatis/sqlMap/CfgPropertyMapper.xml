@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.cfgproperty.dao.mybatis.mapper.CfgPropertyMapper">
+	<resultMap type="com.hand.base.cfgproperty.model.CfgProperty"
+		id="cfgProperty"></resultMap>
+
+	<sql id="querySql">
+		select t1.row_id id,
+		t1.created_by createdBy,
+		t1.last_upd_by lastUpdatedBy,
+		TO_CHAR(t1.last_upd, 'yyyy-mm-dd hh24:mi:ss') lastUpdated,
+		t1.created created,
+		t1.CORP_ID corpid,
+
+		t1.prop_name propName,
+		t1.is_readOnly isReadOnly,
+		t1.key key,
+		t1.value value,
+		t1.type type,
+		t1.scope scope,
+		t1.Comments comments
+		from LNK_CFG_PROPERTY t1
+		where 1=1
+		<!-- 参数不分公司账套 -->
+		<!-- <if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid} 
+		</if> -->
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="cfgProperty"
+		parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		<include refid="querySql"></include>
+	</select>
+	
+	<select id="countByExample" resultType="int" parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		select count(1) from ( <include refid="querySql"></include> )
+	</select>
+	
+	<select id="queryById" resultMap="cfgProperty" parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		<include refid="querySql" />
+		and t1.row_id=#{id}
+	</select>
+
+	<select id="queryAllPage" resultMap="cfgProperty"
+		parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		<include refid="querySql"></include>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		insert into LNK_CFG_PROPERTY
+		(ROW_ID,
+		prop_name,
+		is_readonly,
+		key,
+		value,
+		type,
+		scope,
+		Comments
+		)
+		values
+		(
+		#{id},
+		#{propName},
+		#{isReadOnly},
+		#{key},
+		#{value},
+		#{type},
+		#{scope},
+		#{comments}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		UPDATE LNK_CFG_PROPERTY
+		SET
+		prop_name = #{propName},
+		is_ReadOnly = #{isReadOnly},
+		key = #{key},
+		value = #{value},
+		type = #{type},
+		scope = #{scope},
+		Comments = #{comments}
+		WHERE ROW_ID = #{id}
+	</update>
+
+
+	<delete id="deleteById" parameterType="com.hand.base.cfgproperty.model.CfgProperty">
+		DELETE FROM
+		LNK_CFG_PROPERTY WHERE ROW_ID = #{id}
+	</delete>
+</mapper>

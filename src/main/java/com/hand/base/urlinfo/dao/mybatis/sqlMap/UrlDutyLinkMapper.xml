@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.urlinfo.dao.mybatis.mapper.UrlDutyLinkMapper">
+	<resultMap type="com.hand.base.urlinfo.model.UrlDutyLink"
+		id="urlDutyLink"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+	 T1.ROW_ID            as id                  /*记录ID*/
+	,T1.CREATED           as created             /*创建时间*/
+	,T1.CREATED_BY        as createdBy           /*创建者ID*/
+	,TO_CHAR(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+	,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+	,T1.ORG_ID            as orgId               /*组织ID*/
+	,T1.POSTN_ID          as postnId             /*职位ID*/
+	,T1.URL_ID            as urlId               /*urlId*/
+	,T1.DUTY_ID           as dutyId              /*dutyId*/
+	,T1.ACCESS_FLAG 		as accessFlag    /* 可访问标记 */
+	,T2.COMMENTS          as dutyComments        /*职责备注*/
+	,T2.NAME              as dutyName            /*职责*/
+	,T3.DEF_ACCESS_FLAG   as defaultAccessFlag   /*默认访问*/
+	,T3.SELECT_FLAG       as selectFlag          /*查询*/
+	,T3.UPDATE_FLAG       as updateFlag          /*更新*/
+	,T3.INSERT_FLAG       as insertFlag          /*新建*/
+	,T3.DEL_FLAG          as delFlag             /*删除*/
+	,T3.URL               as url                 /*url*/
+	,T3.COMMENTS          as urlComments         /*url 备注*/
+
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_URL_DUTY_INTER T1
+		,LNK_DUTY T2
+		,LNK_URL_INFO T3
+	WHERE 1=1
+		AND (T1.DUTY_ID = T2.ROW_ID)
+		AND (T1.URL_ID = T3.ROW_ID)
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	<if test="accessFlag != null and accessFlag !='' ">
+		AND T1.ACCESS_FLAG = #{accessFlag}
+	</if>
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="urlDutyLink"
+		parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="urlDutyLink"
+		parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="urlDutyLink"
+		parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<insert id="insert" parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		INSERT INTO LNK_URL_DUTY_INTER(
+		 ROW_ID              /*记录ID*/
+		,URL_ID              /*urlId*/
+		,DUTY_ID             /*dutyId*/
+		,ACCESS_FLAG 
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{urlId}            /*urlId*/
+		,#{dutyId}           /*dutyId*/
+		,#{accessFlag}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		UPDATE LNK_URL_DUTY_INTER SET
+		 URL_ID              =#{urlId}            /*urlId*/
+		,DUTY_ID             =#{dutyId}           /*dutyId*/
+		,ACCESS_FLAG		=#{accessFlag}
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.urlinfo.model.UrlDutyLink">
+		DELETE FROM LNK_URL_DUTY_INTER WHERE ROW_ID=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.home.dao.mybatis.mapper.HomeMapper">
+    <select id="queryCLueCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_CLUE t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+    
+    <select id="queryOptyCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_OPTY t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+    
+    <select id="queryAccountCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_ACCNT t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+    
+    <select id="queryOrderCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_SALE_ORDER t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+    
+    <select id="queryActivityCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_EVT_ACT t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		AND t1.TODO_CD <![CDATA[ <> ]]>  'TUDO_CD_FLOW_UP'
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+    
+    <select id="queryWorkPlanCurentWeekCount"  parameterType="com.hand.base.user.model.User" resultType ="java.lang.String">
+		 SELECT
+			NVL(COUNT (1),0) AS RESULT
+		FROM
+			LNK_MOBILE_WORK_PLAN t1
+		WHERE
+			t1.CREATED <![CDATA[ < ]]> TRUNC (SYSDATE, 'd') + 8
+		AND t1.CREATED <![CDATA[ >= ]]> TRUNC (SYSDATE, 'd') + 1 
+		AND t1.corp_id=#{usercorpid}
+		<!-- AND t1.CREATED_BY = #{id} -->
+    </select>
+
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.InterObjectMapper">
+  <resultMap type="com.hand.base.common.model.InterObject" id="interObject"></resultMap>
+  
+  <insert id="announceAttachInsert" parameterType="com.hand.base.common.model.InterObject">
+  		INSERT INTO LNK_ANNOUNCE_ATTACH
+		  (ROW_ID,
+		   ANNOUNCE_ID,
+		   ATTACH_ID)
+		VALUES
+		  (
+		  #{id},
+		  #{preObjId},
+		  #{rearObjId})
+  </insert>
+
+  <delete id="deleteAnnounceAttachByAnnounceId" parameterType="com.hand.base.common.model.Announce">
+  	DELETE FROM LNK_ANNOUNCE_ATTACH WHERE ANNOUNCE_ID = #{id}
+  </delete>
+  
+  <delete id="deleteAnnounceAttachByAttachId" parameterType="com.hand.base.common.model.Attachment">
+  	DELETE FROM LNK_ANNOUNCE_ATTACH WHERE ATTACH_ID = #{id}
+  </delete>
+  
+  
+  
+  
+  
+
+</mapper>

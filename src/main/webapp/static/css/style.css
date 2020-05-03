@@ -1,0 +1,139 @@
+#mainFrame{
+	min-height:400px;
+	min-width:960px;
+}
+body{
+	font-size:14px;
+}
+li { list-style-type:none; }
+.pro-steps{
+	margin-top:0px;
+	clear:both;
+}
+.jiben_message1{ padding:20px 40px; overflow:hidden;}
+.jiben_message1 li{width:70px; float:left; width:10%; text-align:center; line-height:30px;}
+.jiben_message1 li.sf{ height:70px; background:url(/static/images/line2.png) repeat-x left center; width:10%;}
+.jiben_message1 li .processBar {width:36px;height:45px;background: url(/static/images/processBar2.png);background-repeat: no-repeat;margin-left: auto;margin-right: auto;
+	color: #fff;font-size: 20px;font-weight: bold;
+	algin:center;text-algin:center;padding-top:5px;}
+.jiben_message1 li .actived {background: url(/static/images/processBar1.png) !important;background-repeat: no-repeat;}
+
+
+.input-label{
+	float: left;
+	width:38%;
+	padding-top: 5px;
+    margin-bottom: 0;
+    text-align: right;
+}
+
+.form-control{
+	width:52%;
+	padding-top:5px;
+	float: right;
+}
+
+.row-control{
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+.picklist-control{
+	width:65%;
+	margin-top:2px;
+}
+
+.datetime-control{
+	width:65%;
+	margin-top:2px;
+}
+
+.text-control {
+  width:65%;
+  padding-top: 7px;
+  margin-bottom: 0;
+  text-align: left;
+}
+
+.form-control-9 {
+	width:84%;
+	margin-top:3px;
+}
+
+.input-label-9{
+	float: left;
+	width: 11%;
+	padding-top: 7px;
+    margin-bottom: 0;
+    text-align: right;
+}
+.form-control-12 {
+	width:89%;
+	margin-top:3px;
+}
+
+.input-label-12{
+	float: left;
+	width: 8%;
+	padding-top: 7px;
+    margin-bottom: 0;
+    text-align: right;
+}
+.text-control-12 {
+	width:89%;
+	margin-top:7px;
+}
+
+.input-label-8{
+	float: left;
+	width: 14.5%;
+	padding-top: 7px;
+    margin-bottom: 0;
+    text-align: right;
+}
+.text-control-8 {
+	float: right;
+	width:83.5%;
+	margin-top:7px;
+}
+
+
+.input-label-6{
+	float: left;
+	width: 14%;
+	padding-top: 7px;
+    margin-bottom: 0;
+    text-align: right;
+}
+.text-control-6 {
+	width:83.5%;
+	margin-top:7px;
+}
+
+.form-control-6 {
+	width:83.5%;
+	margin-top:7px;
+}
+
+
+
+.form-table fieldset legend {
+    abackground-color: #dddddd;
+    border-bottom: 1px solid #dddddd;
+    padding-left: 5px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    width: 100%;
+}
+
+.form-table fieldset {
+    /* margin: 0px auto; */
+    width: 300px;
+}
+.form-table fieldset {
+    border: 0px !important;
+}
+
+.form-table tbody td {
+        vertical-align: top;
+}

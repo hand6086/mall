@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.basic.dao.mybatis.mapper.JobLogMapper">
+  <resultMap type="com.hand.base.basic.model.JobLog" id="jobLog"></resultMap>
+  <resultMap type="com.hand.base.basic.model.Job" id="job"></resultMap>
+  
+  
+  <select id="queryJobLogListPage" resultMap="jobLog" parameterType="com.hand.core.basic.query.QueryParams">
+  		select 
+  		T.ROW_ID            as id,
+		T.CREATED as created,
+		T1.CREATED_BY        as createdBy,
+		TO_CHAR(T.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+		T.CORP_ID corpid,
+		       t.start_date startDate,
+		       t.end_date   endDate,
+		       t.r_type     rType,
+		       t.r_number   rNumber,
+		       t.r_message  rMessage,
+		       t.head_id    headId
+		  from LNK_JOB_LOG t
+  </select>
+  
+  
+</mapper>

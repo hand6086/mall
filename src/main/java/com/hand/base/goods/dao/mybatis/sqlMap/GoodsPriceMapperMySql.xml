@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsPriceMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsPrice" id="goodsPrice"></resultMap>
+	
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.O2O_DISPLAY_NAME prodDisplayName,
+	t1.O2O_INT_CODE prodIntCode,
+	t.PROD_ID prodId,
+	t.T_ATTR_02 isRetailMerchandise,
+	round(t.RETAIL_PRICE,2) retailPrice,
+	t.T_ATTR_01 isGpMerchandise,
+	round(t.GROUP_PURCHASE_MIN_QTY) groupPurchaseMinQty,
+	round(t.GROUP_PURCHASE_PRICE,2) groupPurchasePrice,
+	t.T_ATTR_03 payMode,
+	round(t.T_ATTR_11) displaySequence,
+	t.T_ATTR_06 sellingPoint,
+	t.T_ATTR_05 sellingPointColor,
+	t.STATUS status,
+	t.NOTES notes,
+	t.app_pic appPic,
+	t.one_pic onePic,
+	t.T_ATTR_04 partialMerchantSellFlag,
+	t.DISTRICT_ID districtId,
+	t2.NAME districtName,/*城市*/
+	t.is_drink_now isDrinkNow,
+	t.is_new_product isNewProduct,
+	t.is_send_restaurant isSendRestaurant,
+	t3.`name` freightName,
+	t3.row_id freightId,
+	date_format(t.start_time,'%Y-%m-%d %H:%i:%S') as startTime,
+	date_format(t.end_time,'%Y-%m-%d %H:%i:%S') as endTime,
+	t.type type,
+	t.prod_url prodUrl,
+	t.prod_url prodPricUrl,
+	t.is_display isDisplay,
+	t4.path appPicUrl,
+	t5.path onePicUrl,
+	t.dn_display_sequence dnDisplaySequence,
+	t.sr_display_sequence srDisplaySequence,
+	t.np_display_sequence npDisplaySequence,
+	t6.row_id orgId
+	</sql>
+
+	<sql id="fromSql">
+		 from CX_O_PRICE_LIST t
+	     LEFT JOIN S_PROD_INT_X t1 on t1.ROW_ID=t.PROD_ID
+	     LEFT JOIN (CX_O_AREA t2  LEFT JOIN lnk_org_ext T6 ON T6.ROW_ID = T2.T_ATTR_05) on t2.row_id=t.DISTRICT_ID
+	     LEFT JOIN lnk_freight t3 on t.freight_id = t3.row_id
+	     left join cx_o_img t4 on t4.row_id = t.app_pic
+	     left join cx_o_img t5 on t5.row_id = t.one_pic
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and t.type='Retail Pricelist'
+  		<if test="attr5 == 'detail'">
+	     and t.PROD_ID=#{prodId}
+	     </if>
+	      <if test="isSendRestaurant != '' and isSendRestaurant != null ">
+	     	and t.is_send_restaurant = #{isSendRestaurant}
+	     </if>
+	      <if test="isDrinkNow != '' and isDrinkNow != null ">
+	     	and t.is_drink_now = #{isDrinkNow}
+	     </if>
+	      <if test="isNewProduct != '' and isNewProduct != null ">
+	     	and t.is_new_product = #{isNewProduct}
+	     </if>
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsPrice" resultMap="goodsPrice">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsPrice"
+		parameterType="com.hand.base.goods.model.GoodsPrice">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsPrice">
+		insert into CX_O_PRICE_LIST
+		  (ROW_ID, PROD_ID , T_ATTR_02, RETAIL_PRICE , T_ATTR_01, GROUP_PURCHASE_PRICE, GROUP_PURCHASE_MIN_QTY, T_ATTR_03
+		  , T_ATTR_11 , T_ATTR_06, T_ATTR_05, STATUS , NOTES, T_ATTR_04,DISTRICT_ID,type, is_new_product,is_send_restaurant,is_drink_now,freight_id
+		  ,start_time
+		  ,end_time
+		  ,prod_url
+		  ,is_display
+		  ,app_pic
+		  ,one_pic
+		  ,dn_display_sequence
+		  ,sr_display_sequence
+		  ,np_display_sequence)
+		values
+		  (#{id},#{prodId},#{isRetailMerchandise},lnk_blank_str_to_null(#{retailPrice,jdbcType=FLOAT})
+		  ,#{isGpMerchandise},lnk_blank_str_to_null(#{groupPurchasePrice,jdbcType=FLOAT})
+		  ,lnk_blank_str_to_null(#{groupPurchaseMinQty,jdbcType=FLOAT}),#{payMode}
+		  ,lnk_blank_str_to_null(#{displaySequence,jdbcType=FLOAT}),#{sellingPoint},#{sellingPointColor},#{status},#{notes},#{partialMerchantSellFlag}
+		  ,#{districtId},'Retail Pricelist',#{isNewProduct},#{isSendRestaurant},#{isDrinkNow},#{freightId}
+		  ,lnk_blank_str_to_null(#{startTime})
+		  ,lnk_blank_str_to_null(#{endTime})
+		  ,#{prodUrl}
+		  ,#{isDisplay}
+		  ,#{appPic}
+		  ,#{onePic}
+		  ,#{dnDisplaySequence}
+		  ,#{srDisplaySequence}
+		  ,#{npDisplaySequence})
+	</insert>
+	
+	<insert id="insertPic" parameterType="com.hand.base.goods.model.GoodsPrice">
+		INSERT INTO lnk_inter_poster_pic(
+			ROW_ID,
+			created,
+			CREATED_BY,
+	        LAST_UPD,
+			LAST_UPD_BY,
+			CORP_ID,
+			price_id,
+			pic_id
+			)
+			values
+			<foreach collection ="picArray" item="picId" index= "index" separator =",">
+			(s_sequence_pkg_get_next_rowid(),
+			now(),
+			#{createdBy},
+			now(),
+			#{lastUpdatedBy},
+			#{usercorpid},
+			#{id},
+	        #{picId}
+	        )
+	        </foreach >
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsPrice">
+		update CX_O_PRICE_LIST t
+		   set t.row_id = #{id}
+		   		<if test="prodId != null and prodId != ''">
+		   	   ,t.PROD_ID = #{prodId}
+		   	   </if>
+		   	   <if test="isRetailMerchandise != null and isRetailMerchandise != ''">
+		   	   ,t.T_ATTR_02 = #{isRetailMerchandise}
+		   	   </if>
+		   	   <if test="retailPrice != null and retailPrice != ''">
+		   	   ,t.RETAIL_PRICE = lnk_blank_str_to_null(#{retailPrice,jdbcType=FLOAT})
+		   	   </if>
+		   	   <if test="isGpMerchandise != null and isGpMerchandise != ''">
+		       ,t.T_ATTR_01 = #{isGpMerchandise}
+		       </if>
+		   	   <if test="groupPurchasePrice != null and groupPurchasePrice != ''">
+		       ,t.GROUP_PURCHASE_PRICE=lnk_blank_str_to_null(#{groupPurchasePrice,jdbcType=FLOAT})
+		       </if>
+		   	   <if test="groupPurchaseMinQty != null and groupPurchaseMinQty != ''">
+		       ,t.GROUP_PURCHASE_MIN_QTY = lnk_blank_str_to_null(#{groupPurchaseMinQty,jdbcType=FLOAT})
+		       </if>
+		   	   <if test="payMode != null and payMode != ''">
+		       ,t.T_ATTR_03 = #{payMode}
+		       </if>
+		   	   <if test="sellingPoint != null and sellingPoint != ''">
+		       ,t.T_ATTR_06 = #{sellingPoint}
+		       </if>
+		   	   <if test="sellingPointColor != null and sellingPointColor != ''">
+		       ,t.T_ATTR_05 = #{sellingPointColor}
+		       </if>
+		   	   <if test="status != null and status != ''">
+		       ,t.STATUS = #{status}
+		       </if>
+		   	   <if test="notes != null and notes != ''">
+		       ,t.NOTES = #{notes}
+		       </if>
+		   	   <if test="partialMerchantSellFlag != null and partialMerchantSellFlag != ''">
+		       ,t.T_ATTR_04 = #{partialMerchantSellFlag}
+		       </if>
+		   	   <if test="isNewProduct != null and isNewProduct != ''">
+		       ,t.is_new_product = #{isNewProduct}
+		       </if>
+		   	   <if test="isSendRestaurant != null and isSendRestaurant != ''">
+		       ,t.is_send_restaurant = #{isSendRestaurant}
+		       </if>
+		   	   <if test="isDrinkNow != null and isDrinkNow != ''">
+		       ,t.is_drink_now = #{isDrinkNow}
+		       </if>
+		   	   <if test="freightId != null">
+		       ,t.freight_id = #{freightId}
+		       </if>
+		   	   <if test="dnDisplaySequence != null and dnDisplaySequence != ''">
+		       ,t.dn_display_sequence = #{dnDisplaySequence}
+		       </if>
+		   	   <if test="srDisplaySequence != null and srDisplaySequence != ''">
+		       ,t.sr_display_sequence = #{srDisplaySequence}
+		       </if>
+		   	   <if test="npDisplaySequence != null and npDisplaySequence != ''">
+		       ,t.np_display_sequence = #{npDisplaySequence}
+		       </if>
+		       <if test="districtId != null and districtId != ''">
+		       ,t.DISTRICT_ID = #{districtId}
+		       </if>
+		       <if test="attr1 != 'sendRestaurant' and attr1 != 'drinkNow'">
+		       ,t.T_ATTR_11 =lnk_blank_str_to_null(#{displaySequence,jdbcType=FLOAT})
+		       ,t.start_time = lnk_blank_str_to_null(#{startTime})
+		       ,t.end_time = lnk_blank_str_to_null(#{endTime})
+		       ,t.prod_url = #{prodUrl}
+		       ,t.is_display = #{isDisplay}
+		       ,t.prod_url = #{prodUrl}
+		       ,t.one_pic = #{onePic}
+		       ,t.app_pic = #{appPic}
+		       </if>
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsPrice">
+		DELETE FROM CX_O_PRICE_LIST WHERE ROW_ID = #{id}
+	</delete>
+	
+	<select id="queryMerchandisePage" parameterType="com.hand.base.goods.model.GoodsPrice" resultMap="goodsPrice">
+	select
+	T1.ROW_ID as id
+	,date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created
+	,T.CREATED_BY as createdBy
+	,date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated
+	,T.LAST_UPD_BY as lastUpdatedBy
+	,t1.O2O_DISPLAY_NAME o2oDisplayName
+	,t1.O2O_INT_CODE o2oIntCode
+	<if test="attr1 == 'price'">
+	,t1.ATTRIB_09 suitProductFlg
+	,CASE t1.ATTRIB_09 WHEN 'Y' then round(GET_SUIT_PROD_PRICE(T1.ROW_ID,T1.corp_id,#{districtId}),2)
+	ELSE NULL END retailPrice
+	</if>
+	<if test="attr1 == 'promotion'">
+	,t2.retail_price totalPrice
+	,t4.row_id orgId
+	</if>
+	<if test="attr1 == 'campaign'">
+	,t4.row_id orgId
+	</if>
+	from S_PROD_INT t
+	LEFT JOIN S_PROD_INT_X t1 on t1.PAR_ROW_ID =t.ROW_ID
+	<if test="attr1 == 'promotion'">
+	LEFT JOIN CX_O_PRICE_LIST t2 on t.ROW_ID=t2.PROD_ID
+	LEFT JOIN (CX_O_AREA t3  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T3.T_ATTR_05) on t3.row_id = t2.DISTRICT_ID
+	</if>
+	<if test="attr1 == 'campaign'">
+	LEFT JOIN (CX_O_AREA t3  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T3.T_ATTR_05) on t3.row_id=#{districtId}
+	</if>
+	<if test="attr1 == 'free'">
+	LEFT JOIN CX_O_PRICE_LIST t2 on t.ROW_ID=t2.PROD_ID
+	</if>
+	where t.SALES_SRVC_FLG = 'Y'
+	<if test="suitProductFlg != null and suitProductFlg != '' ">
+		and t1.ATTRIB_09 = #{suitProductFlg}
+	</if>
+	<if test="attr1 == 'free' ">
+		and t2.type='Retail Pricelist'
+		and t2.DISTRICT_ID = #{districtId}
+		and t2.STATUS = 'Active'
+	 </if>
+	<if test="attr1 == 'promotion' ">
+		and t2.type='Retail Pricelist'
+		and t2.DISTRICT_ID = #{districtId}
+		and t2.T_ATTR_02 = 'Y'
+		and t2.STATUS = 'Active'
+		and T1.ROW_ID not in (
+		  		select t1.merchandise_id
+				from CX_O_PMO_SP_ln t1
+				LEFT JOIN CX_O_PMO_SP t2 ON t2.row_id = t1.head_id
+				where t2.CITY_ID=#{districtId}
+				AND t1.STATUS ='Active'
+				AND T2.STATUS='Active'
+				AND ((#{startTime} BETWEEN t2.start_time AND t2.end_time)
+				OR (#{endTime} BETWEEN t2.start_time AND t2.end_time)
+				or (#{startTime} <![CDATA[<]]> t2.start_time and #{endTime}>t2.end_time))
+			  )
+	 </if>
+		
+	<if test="attr1 == 'price'">
+		AND T.ROW_ID NOT IN (
+								SELECT	
+									t2.prod_id
+								FROM
+									CX_O_PRICE_LIST t2
+								WHERE t2.type = 'Retail Pricelist'
+								AND t2.DISTRICT_ID = #{districtId}
+							)
+	</if>
+	<if test="attr1 == 'campaign'">
+		AND T.ROW_ID IN (
+								SELECT	
+									t2.prod_id
+								FROM
+									CX_O_PRICE_LIST t2
+								WHERE t2.type = 'Retail Pricelist'
+								and t2.DISTRICT_ID = #{districtId}
+								and t2.T_ATTR_02 = 'Y'
+								and t2.STATUS = 'Active'
+							)
+	  </if>
+		order by t.CREATED desc
+  	</select>
+	
+	<!-- 品牌馆商品picklist -->
+	<select id="brandQueryMerchandisePage" parameterType="com.hand.base.goods.model.GoodsPrice" resultMap="goodsPrice">
+		select
+			T1.ROW_ID as id
+			,date_format(T1.CREATED,'%Y-%m-%d %H:%i:%S') as created
+			,T1.CREATED_BY as createdBy
+			,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+			,T1.LAST_UPD_BY as lastUpdatedBy
+			,t1.corp_id corpId
+			,CONCAT(t1.O2O_DISPLAY_NAME,if(t1.BAR_CODE is null,'',t1.BAR_CODE)) o2oDisplayName        /*商品名称*/
+			,t1.O2O_INT_CODE o2oIntCode									/*商品编码*/
+			,IFNULL(t1.ORIGINAL_PRICE,0) originalPrice					/*商品市场价*/
+			,IFNULL(t1.history_price,0) historyPrice					/*商品一口价*/
+		from S_PROD_INT_X t1
+		where t1.channel = 'brand'
+		and t1.SALE_STATUS = 'SELLING'
+		and t1.O2O_DISPLAY_NAME is not null
+		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		 </if>
+		 <if test="usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101'
+		 </if>
+		<if test="attr1 == 'promotion' ">
+			and T1.ROW_ID not in (
+		  		select t1.merchandise_id
+				from CX_O_PMO_SP_ln t1
+				LEFT JOIN CX_O_PMO_SP t2 ON t2.row_id = t1.head_id
+				where t1.STATUS ='Active'
+				AND T2.STATUS='Active'
+				AND t1.SOURCE = 'brand'
+				AND ((#{startTime} BETWEEN t2.start_time AND t2.end_time)
+				OR (#{endTime} BETWEEN t2.start_time AND t2.end_time)
+				or (#{startTime} &lt; t2.start_time and #{endTime} >t2.end_time))
+			  )
+		  </if>
+		order by t1.CREATED desc
+  	</select>
+  	
+  	<select id="queryAccountPage" parameterType="com.hand.base.goods.model.GoodsPrice" resultMap="goodsPrice">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.ROW_ID merchantId,
+	t1.NAME name,
+	t1.OU_NUM csn,
+	t1.O2O_STORE_TYPE o2oStoreType,
+	t1.O2O_STATUS o2oAccountStatus,
+	t1.O2O_PROVINCE o2oProvince,
+	t1.O2O_CITY o2oCity,
+	t1.O2O_DISTRICT o2oDistrict,
+	t1.O2O_CONTACT o2oContact,
+	t1.O2O_CONTACT_PHONE o2oContactPhone,
+	t1.O2O_FORCED_STORE o2oForcedStore
+	from S_PARTY t,lnk_accnt t1 
+	where t.ROW_ID = t1.PAR_ROW_ID
+ 	and (T1.O2O_STORE_TYPE = 'Dealer' OR T1.O2O_STORE_TYPE ='End') AND T1.O2O_STATUS ='Active') 
+	AND ((T1.INT_ORG_FLG != 'Y' OR T1.PRTNR_FLG != 'N') AND T1.ACCNT_FLG != 'N')
+	order by t1.CREATED desc
+  	</select>
+  	
+  	<select id="queryPosterPicAll" resultMap="goodsPrice" parameterType="com.hand.base.goods.model.GoodsPrice">
+		SELECT
+			t1.ROW_ID id,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.pic_id picId,
+			t3.path path
+		FROM
+			lnk_inter_poster_pic t1
+		LEFT JOIN CX_O_PRICE_LIST t2 ON t2.row_id = t1.price_id
+		LEFT JOIN cx_o_img t3 ON t3.row_id = t1.pic_id
+		WHERE
+			t1.price_id =  #{id}
+	</select>
+  	
+  	<delete id="deletePicById" parameterType="com.hand.base.goods.model.GoodsPrice">
+		DELETE FROM lnk_inter_poster_pic WHERE price_id = #{id} and pic_id in 
+		<foreach collection="delPicArray" item="picId" open="(" separator=", " close=")">
+	        #{picId}
+	    </foreach>
+	</delete>
+	
+	<select id="countByCityIdAndName" parameterType="com.hand.base.goods.model.GoodsPrice" resultType="java.lang.Integer">
+		select count(1) from CX_O_PRICE_LIST t where 1 = 1 and corp_id = #{usercorpid} 
+		<if test="prodId != '' and prodId != null">
+			and PROD_ID = #{prodId}
+		</if>
+		<if test="districtId != '' and districtId != null">
+			and DISTRICT_ID = #{districtId}
+		</if>
+		<if test="id != '' and id != null">
+			and row_id != #{id}
+		</if>
+	
+	</select>
+</mapper>

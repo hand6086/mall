@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.tablemanage.dao.mybatis.mapper.tableManageMapper">
+	<resultMap type="com.hand.base.tablemanage.model.tableManage"
+		id="tableManage"></resultMap>
+
+	<select id="queryByExamplePage" resultMap="tableManage"
+		parameterType="com.hand.base.tablemanage.model.tableManage">
+		SELECT
+		t1.ROW_ID id,
+		t1.CREATED created,
+		t1.CREATED_BY createdBy,
+		date_format(
+		t1.last_upd,
+		'%Y-%m-%d %H:%i:%S'
+		) lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.table_name tableName,
+		t1.t_comment tComment
+		FROM
+		lnk_table_manage t1
+		where 1=1
+		order by t1.CREATED desc
+	</select>
+	<select id="queryFieldPage" resultMap="tableManage"
+		parameterType="com.hand.base.tablemanage.model.tableManage">
+		SELECT
+		t1.ROW_ID id,
+		t1.CREATED created,
+		t1.CREATED_BY createdBy,
+		t1.head_id headId,
+		date_format(
+		t1.last_upd,
+		'%Y-%m-%d %H:%i:%S'
+		) lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.field_name fieldName,
+		t1.f_comment fComment
+		FROM
+		lnk_field_manage t1
+		where 1=1
+		order by t1.CREATED desc
+	</select>
+
+
+
+	<insert id="insert" parameterType="com.hand.base.tablemanage.model.tableManage">
+		insert into lnk_table_manage
+		(ROW_ID ,
+		table_name,
+		t_comment
+
+		)
+		values
+		(
+		#{id},
+		#{tableName},
+		#{tComment}
+		)
+
+
+	</insert>
+	<select id="queryById" resultMap="tableManage"
+		parameterType="com.hand.base.tablemanage.model.tableManage">
+		SELECT
+		t1.ROW_ID id,
+		t1.CREATED created,
+		t1.CREATED_BY createdBy,
+		date_format(
+		t1.last_upd,
+		'%Y-%m-%d %H:%i:%S'
+		) lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.table_name tableName,
+		t1.t_comment tComment
+		FROM
+		lnk_table_manage t1
+		where 1=1
+		and t1.row_id=#{id}
+	</select>
+	<update id="update" parameterType="com.hand.base.tablemanage.model.tableManage">
+		update lnk_table_manage set table_name=#{tableName},t_comment=#{tComment}
+		where row_id=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.tablemanage.model.tableManage">
+		DELETE FROM
+		lnk_table_manage WHERE ROW_ID = #{id}
+	</delete>
+
+
+	<insert id="filedInsert" parameterType="com.hand.base.tablemanage.model.tableManage">
+		insert into
+		lnk_field_manage
+		(ROW_ID ,
+		field_name,
+		f_comment,
+		head_id
+
+		)
+		values
+		(
+		#{id},
+		#{fieldName},
+		#{fComment},
+		#{headId}
+		)
+
+
+	</insert>
+	<update id="filedupdate" parameterType="com.hand.base.tablemanage.model.tableManage">
+		update lnk_field_manage
+		set field_name=#{fieldName},f_comment=#{fComment} where row_id=#{id}
+	</update>
+
+	<delete id="deletefiledId" parameterType="com.hand.base.tablemanage.model.tableManage">
+		DELETE FROM
+		lnk_field_manage WHERE ROW_ID = #{id}
+	</delete>
+</mapper>

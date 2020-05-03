@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsSkuMapper">
+	<resultMap type="com.hand.base.goods.model.Goods" id="goods"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S')
+	as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.O2O_DISPLAY_NAME productDisplayName,#商品名称
+	t1.O2O_INT_CODE productIntCode,#商品编码
+	round(t.QUANTITY) quantity,#数量
+	t.PRODUCT_ID productId,
+	t.PARENT_PRODUCT_ID parentProductId #link
+	</sql>
+
+	<sql id="fromSql">
+	from CX_O_PROD_SKU t
+	LEFT JOIN S_PROD_INT_X t1 on t1.row_id = t.PRODUCT_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.Goods" resultMap="goods">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		and t.PARENT_PRODUCT_ID=#{parentProductId}
+  	</select>
+  	
+  	<select id="queryById" resultType="com.hand.base.goods.model.Goods"
+		parameterType="com.hand.base.goods.model.Goods">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.Goods">
+		insert into CX_O_PROD_SKU
+		  (ROW_ID, QUANTITY, PRODUCT_ID,PARENT_PRODUCT_ID)
+		values
+		  (#{id},lnk_blank_str_to_null(#{quantity,jdbcType=FLOAT}),#{productId},#{parentProductId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.Goods">
+		update CX_O_PROD_SKU t
+		   set t.QUANTITY = lnk_blank_str_to_null(#{quantity,jdbcType=FLOAT}), t.PRODUCT_ID = #{productId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.Goods">
+		DELETE FROM CX_O_PROD_SKU WHERE ROW_ID = #{id}
+	</delete>
+	
+</mapper>

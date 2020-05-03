@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.params.dao.mybatis.mapper.PlatformOrderPushRuleMapper">
+	<resultMap type="com.hand.base.params.model.PlatformOrderPushRule" id="platformOrderPushRule"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+			T1.ROW_ID id,/*id*/
+			T1.CREATED created,
+			T1.CREATED_BY createdBy,
+			date_format(T1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpd,
+			T1.CORP_ID corpId,
+			T1.LAST_UPD_BY lastUpdBy,
+			T2.NAME name,/*城市*/
+			T1.ROUNDS rounds,/*推送轮数*/
+			T1.FIRST_RND_DIST firstRndDist,/*第1轮推送距离(米)*/
+			T1.FIRST_RND_TIME firstRndTime,/*第1轮等待时间(分钟)*/
+			T1.SECOND_RND_DIST secondRndDist,/*第2轮推送距离(米)*/
+			T1.SECOND_RND_TIME secondRndTime,/*第2轮等待时间(分钟)*/
+			T1.THIRD_RND_DIST thirdRndDist,/*第3轮推送距离(米)*/
+			T1.THIRD_RND_TIME thirdRndTime,/*第3轮等待时间(分钟)*/
+			T1.T_ATTR_10 tAttr10,/*兜底短信发送间隔*/
+			T1.T_ATTR_09 tAttr09, /*兜底短信发送次数上限*/
+			T1.LOC_ID locId
+	</sql>
+	 
+	<sql id="fromTableSql">
+		FROM
+			CX_O_ORD_DSB T1
+		LEFT JOIN CX_O_AREA T2 ON T2.ROW_ID = T1.LOC_ID
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1=1
+		AND T1.T_ATTR_01 = 'Platform Order'
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="platformOrderPushRule" parameterType="com.hand.base.params.model.PlatformOrderPushRule">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="platformOrderPushRule" parameterType="com.hand.base.params.model.PlatformOrderPushRule">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+		AND t1.ROW_ID=#{id}
+	</select>
+    <insert id="insert" parameterType="com.hand.base.params.model.PlatformOrderPushRule">
+		INSERT INTO CX_O_ORD_DSB (
+			ROW_ID,
+			MODIFICATION_NUM,
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			FIRST_RND_DIST,
+			FIRST_RND_TIME,
+			ROUNDS,
+			SECOND_RND_DIST,
+			SECOND_RND_TIME,
+			THIRD_RND_DIST,
+			THIRD_RND_TIME,
+			T_ATTR_10,
+			T_ATTR_09,
+			DB_LAST_UPD_SRC,
+			LOC_ID,
+			T_ATTR_01
+			)
+		VALUES(
+			#{id},
+			0,
+			'0',
+			now(),
+			if(#{firstRndDist} = '',null,#{firstRndDist}),
+			if(#{firstRndTime} = '',null,#{firstRndTime}),
+			if(#{rounds} = '',null,#{rounds}),
+			if(#{secondRndDist} = '',null,#{secondRndDist}),
+			if(#{secondRndTime} = '',null,#{secondRndTime}),
+			if(#{thirdRndDist} = '',null,#{thirdRndDist}),
+			if(#{thirdRndTime} = '',null,#{thirdRndTime}),
+			if(#{tAttr10} = '',null,#{tAttr10}),
+			if(#{tAttr09} = '',null,#{tAttr09}),
+			'User',
+			#{locId},
+			'Platform Order'
+		)
+    </insert>
+  
+    <update id="update" parameterType="com.hand.base.params.model.PlatformOrderPushRule">
+		UPDATE CX_O_ORD_DSB 
+		SET 
+		 	<if test="firstRndDist != null and firstRndDist != '' " >
+				FIRST_RND_DIST = #{firstRndDist},
+      		</if>
+      		<if test="firstRndTime != null and firstRndTime != '' " >
+      			FIRST_RND_TIME = #{firstRndTime},
+      		</if>
+		    <if test="rounds != null and rounds != '' " >
+      			ROUNDS = #{rounds},
+      		</if>	
+		    <if test="secondRndDist != null and secondRndDist != '' " >
+				SECOND_RND_DIST = #{secondRndDist},
+      		</if>	
+		    <if test="secondRndTime != null and secondRndTime != '' " >
+				SECOND_RND_TIME = #{secondRndTime},
+      		</if>	
+		    <if test="thirdRndDist != null and thirdRndDist != '' " >
+				THIRD_RND_DIST = #{thirdRndDist},
+      		</if>	
+		    <if test="thirdRndTime != null and thirdRndTime != '' " >
+				THIRD_RND_TIME = #{thirdRndTime},
+      		</if>	
+		    <if test="tAttr10 != null and tAttr10 != '' " >
+				T_ATTR_10 = #{tAttr10},
+      		</if>	
+		    <if test="tAttr09 != null and tAttr09 != '' " >
+				T_ATTR_09 = #{tAttr09},
+      		</if>	
+			LOC_ID = #{locId}
+		WHERE ROW_ID = #{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="com.hand.base.params.model.PlatformOrderPushRule">
+		DELETE FROM CX_O_ORD_DSB WHERE ROW_ID = #{id}
+    </delete>
+</mapper>

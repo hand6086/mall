@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.sale.mapper.SalesGoodsMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.goods.model.GoodsPrice" id="goodsPrice"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="goodsPrice" parameterType="com.hand.base.goods.model.GoodsPrice">
+	select
+		t1.ROW_ID as id,
+		t1.O2O_DISPLAY_NAME o2oDisplayName,
+		t1.O2O_INT_CODE o2oIntCode
+	from S_PROD_INT t
+	LEFT JOIN S_PROD_INT_X t1 on t1.PAR_ROW_ID =t.ROW_ID
+	where not exists (
+		  		select t2.product_id
+				from LNK_INTER_PRODUCT_SALE t2
+				where t2.product_id = t.row_id
+				and t2.sale_schema_id = #{mvgParentId}
+			  )
+	and t.SALES_SRVC_FLG = 'Y' and t1.O2O_DISPLAY_NAME != ''
+	and t.corp_id = #{usercorpid}
+  </select>
+  
+  <select id="queryRightListPage" resultMap="goodsPrice" parameterType="com.hand.base.goods.model.GoodsPrice">
+	select
+		T4.ROW_ID as id,
+		t4.O2O_DISPLAY_NAME o2oDisplayName,
+		t4.O2O_INT_CODE o2oIntCode,
+		1 errorTimes,
+		(case when (@rowno:=@rowno+1)=1 then 'Y' else 'N' end) isDefault
+	from (select @rowno:=0) t,/*暂时使用行号筛选第一个为默认*/
+		  LNK_INTER_PRODUCT_SALE t1 left join LNK_SALE_SCHEMA t2 on t1.sale_schema_id = t2.row_id
+	left join (S_PROD_INT t3 left join S_PROD_INT_X t4 on t3.ROW_ID=t4.PAR_ROW_ID) on t1.product_id = t3.row_id
+	where 1=1
+		and t1.sale_schema_id = #{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+	INSERT INTO LNK_INTER_PRODUCT_SALE 
+	   (row_id,
+	   product_id,
+	   sale_schema_id
+	   )
+	VALUES
+	  (#{id},
+	   #{mvgSubsetId},
+	   #{mvgParentId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		delete from LNK_INTER_PRODUCT_SALE 
+		where sale_schema_id = #{mvgParentId} 
+		and product_id = #{mvgSubsetId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+  		delete from LNK_INTER_PRODUCT_SALE 
+		where sale_schema_id = #{mvgParentId} 
+  </delete>
+  
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.message.dao.mybatis.mapper.PushNoticeMapper">
+  <resultMap type="com.hand.base.message.model.PushNotice" id="pushNotice"></resultMap>
+  
+  <sql id="queryAllSql">
+	select t1.row_id id,
+		   t1.created_by createdBy,
+		   t1.last_upd_by lastUpdatedBy,
+		   date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+	       t1.created created,
+	       t1.CORP_ID corpid,
+	       t1.push_note pushNote,
+	       t1.deal_message dealMessage,
+	       t1.integration_id intergationId,
+	       t1.login userId,
+	       t1.parameter parameter,
+	       t1.push_type pushType,
+	       t1.is_read isRead,
+	       t1.type type,
+	       t1.web_push_status webPushStatus
+	</sql>
+	
+	<sql id="fromTableSql">
+		 from lnk_push_note t1
+		where T1.corp_id = #{usercorpid}
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!-- <if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid}
+		</if> -->
+	</sql>	
+	
+	<sql id="orderByAllSql">
+		ORDER BY t1.created DESC
+  	</sql>
+	
+	<select id="queryById" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.message.model.PushNotice">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAll" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+	
+	<!-- 根据条件查询记录 -->
+	<select id="brandQueryByExamplePage" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+  
+  <insert id="insert" parameterType="com.hand.base.message.model.PushNotice">
+  	 INSERT INTO LNK_PUSH_NOTE 
+		(ROW_ID,LOGIN,PUSH_TYPE,PUSH_NOTE,TYPE) 
+		VALUES (#{id},#{userId},'Web推送',#{pushNote},#{type})
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.message.model.PushNotice">
+	UPDATE LNK_PUSH_NOTE
+		SET 
+       deal_message = #{dealMessage},
+       integration_id = #{intergationId},
+       parameter =#{parameter},
+       push_type = #{pushType},
+       is_read = #{isRead},
+       type = #{type},
+       web_push_status = #{webPushStatus}
+	   WHERE ROW_ID =  #{id}
+  </update>
+  
+  <update id="updateRead" parameterType="com.hand.base.message.model.PushNotice">
+	  UPDATE LNK_PUSH_NOTE
+		SET 
+		IS_READ = 'Y'
+	   WHERE ROW_ID =  #{id}
+  </update>
+  
+  <update id="updateReadAll" parameterType="com.hand.base.message.model.PushNotice">
+	  UPDATE LNK_PUSH_NOTE
+		SET 
+		IS_READ = 'Y'
+	   WHERE LOGIN =  #{userId}
+  </update>
+  
+   <update id="updateWebPushStatus" parameterType="com.hand.base.message.model.PushNotice">
+	  UPDATE LNK_PUSH_NOTE
+		SET 
+		web_push_status = #{webPushStatus}
+	   WHERE row_id =  #{id}
+  </update>
+  
+  
+  <delete id="deleteById" parameterType="com.hand.base.message.model.PushNotice">
+		DELETE FROM LNK_PUSH_NOTE WHERE ROW_ID = #{id}
+  </delete>
+  
+  <!-- 根据管理员查询待办事项记录 -->
+  <select id="queryFlowByAdminPage" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		SELECT a.* FROM (
+			(SELECT '待审核商品提示' type, CONCAT('您好！您有',COUNT(1),'个商品等待审核，请及时处理') pushNote, NOW() created ,'' id,'' integrationId
+			FROM S_PROD_INT_X WHERE corp_id != '101' AND STATUS = 'PENDING') UNION ALL
+			(SELECT '待审核促销活动提示' type, CONCAT('您好！',t1.NAME,'促销活动等待您的审核，请及时处理') pushNote,t1.last_upd created ,t1.row_id id,
+			t1.schema_id integrationId FROM CX_O_PMO_SP t1 LEFT JOIN LNK_SALE_SCHEMA t2 on t1.schema_id = t2.row_id WHERE 
+			t1.corp_id != '101' AND t1.SOURCE = 'brand' AND t1.delete_flg != 'Y' AND t2.SOURCE = 'brand' AND t2.delete_flg != 'Y' 
+			AND t1.approval_status = 'Pending') UNION ALL
+			(SELECT '企业资质审核提示' type, CONCAT('您好！',t1.store_name,'已经提交入驻申请，请及时审核') pushNote, t1.last_upd created ,t1.row_id id,'' integrationId
+			FROM lnk_enterprise t1 LEFT JOIN lnk_emp_info t2 on t1.user_id = t2.row_id WHERE t2.store_status = 'CHECK_PENDING') UNION ALL
+			(SELECT '企业转账审核提示' type, CONCAT('您好！',t1.store_name,'已经提交转账申请，请及时审核') pushNote, t1.last_upd created ,t1.row_id id,'' integrationId
+			FROM lnk_enterprise t1 LEFT JOIN lnk_emp_info t2 on t1.user_id = t2.row_id WHERE t2.store_status = 'PASSED_NOPAID')
+			) a ORDER BY created desc
+  </select>
+  
+  <!-- 根据店铺查询待办事项记录 -->
+  <select id="queryFlowPage" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		SELECT a.* FROM (
+			(SELECT '待发货订单提示' type, CONCAT('您好！您有',COUNT(1),'个订单等待发货，请及时处理') pushNote, NOW() created ,'' id
+			FROM S_ORDER_X WHERE corp_id = #{usercorpid} AND ATTRIB_09 = 'Y' AND ORDER_TYPE = 'brand' 
+			AND ATTRIB_48 = 'To Deliver' ) UNION ALL
+			(SELECT '待退款订单提示' type, CONCAT('您好！订单',ORDER_NUM,'等待确认退款，请及时处理') pushNote, last_upd created ,row_id id
+			FROM s_order_x WHERE corp_id = #{usercorpid} AND ATTRIB_09 = 'Y' AND ORDER_TYPE = 'brand' 
+			AND ATTRIB_48 IN ('Cancelling', 'Refunding') ) UNION ALL
+			(SELECT '售后订单生成提示' type, CONCAT('您好！订单',t2.ORDER_NUM,'申请退货/退款，请及时处理') pushNote, t1.last_upd created ,t1.row_id id
+			FROM lnk_aftermarket t1 LEFT JOIN s_order_x t2 ON t2.row_id = t1.order_Id WHERE t1.corp_id = #{usercorpid} 
+			AND t1.processing_status = 'APPLYING' )
+		) a ORDER BY created DESC
+  </select>
+	
+  <!-- 根据店铺查询系统通知记录 -->
+  <select id="queryPushNoticePage" resultMap="pushNotice"
+		parameterType="com.hand.base.message.model.PushNotice">
+		SELECT a.* FROM (
+			(SELECT '消费者退货提示' type,CONCAT('您好！订单',t2.ORDER_NUM,'消费者已退货，物流公司：',IFNULL(GET_LOV_NAME('','LOGISTICS_COMPANY'
+			,t1.logistics_company),''),'，物流单号：',IFNULL(t1.logistics_odd_number, ''),'，请注意查收退货。') pushNote,t1.last_upd created,
+			t2.ORDER_NUM attr1,'' attr2 FROM lnk_aftermarket t1 LEFT JOIN s_order_x t2 ON t2.row_id = t1.order_Id
+				WHERE t1.corp_id = #{usercorpid} AND t1.processing_status = 'TO_M_RECEIVE') UNION ALL
+			(SELECT '商品通过审核' type,CONCAT('您好！您的商品',o2o_display_name,'已经通过审核，可以上架啦!') pushNote,last_upd created,
+			o2o_display_name attr1,row_id attr2 FROM S_PROD_INT_X
+				WHERE corp_id = #{usercorpid} AND STATUS = 'APPROVED' AND SALE_STATUS = 'WAIT_FOR_SALES') UNION ALL
+			(SELECT '商品未通过审核' type,CONCAT('您好！您的商品',o2o_display_name,'商品未通过审核') pushNote,last_upd created,
+			o2o_display_name attr1,row_id attr2 FROM S_PROD_INT_X
+				WHERE corp_id = #{usercorpid} AND STATUS = 'REFUSED') UNION ALL
+			(SELECT '商品强制下架' type,CONCAT('抱歉，您的商品',o2o_display_name,'已被管理员强制下架，请您尽快修改商品信息!') pushNote,last_upd created,
+			o2o_display_name attr1,row_id attr2 FROM S_PROD_INT_X
+				WHERE corp_id = #{usercorpid} AND SALE_STATUS = 'FORBID_SALE') UNION ALL
+			(SELECT '促销活动通过审核' type,CONCAT('您好！您报名的促销活动',NAME,'已经通过审核!')  pushNote,last_upd created,NAME attr1,type attr2 FROM CX_O_PMO_SP 
+				WHERE corp_id = #{usercorpid} AND SOURCE = 'brand' AND delete_flg != 'Y' AND approval_status = 'Approved') UNION ALL
+			(SELECT '促销活动未通过审核' type,CONCAT('抱歉，您报名的促销活动',NAME,'审批被拒绝，请您修改促销活动信息后再次提交!') pushNote,last_upd created,NAME attr1,type attr2 FROM CX_O_PMO_SP
+				WHERE corp_id = #{usercorpid} AND SOURCE = 'brand' AND delete_flg != 'Y' AND approval_status = 'Rejected')
+		) a ORDER BY created DESC
+  </select>
+	
+</mapper>

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.platformfavorable.dao.mybatis.mapper.PlatformfavorableMapper">
+  <resultMap type="com.hand.base.platformfavorable.model.Platformfavorable" id="platformfavorable"></resultMap>
+  <sql id="queryAllSql">
+SELECT
+	t1.ROW_ID   id,
+	t1.CREATED  created,
+	t1.CREATED_BY  createdBy,
+	date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+	t1.LAST_UPD_BY  lastUpdatedBy,
+	t1.MODIFICATION_NUM,
+	t1.CONFLICT_ID,
+	t1.DB_LAST_UPD,
+	t2.NAME  cityName,
+	t1.NOTES  notes,
+	t1.CITY_ID   cityId,
+	t3.row_id orgId
+	
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM
+	CX_O_CITY t1
+	left join (CX_O_AREA t2  LEFT JOIN lnk_org_ext T3 ON T3.ROW_ID = T2.T_ATTR_05) 
+	on  t1.CITY_ID= t2.ROW_ID
+
+
+	</sql>
+	<sql id="wheresql">
+	where 1=1   
+	</sql>
+	<sql id="queryActivitySql" >
+		SELECT
+			t1.ROW_ID id,
+		t1.CREATED_BY createdBy,
+		t1.last_upd lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') created,
+		t1.NAME activityName,
+		/*活动名称*/
+		t1.CODE activityCode,
+		/*活动编码*/
+	   t1.MIN_ORD_AMOUNT minOrdAmount,
+		/*订单满金额（元）*/
+		t1.PMO_TYPE pmoType,	
+		/*优惠方式*/
+		t1.DEDUCED_CASH deducedCash,
+		/*优惠金额*/
+		t3.NAME onCouponName,
+		/*优惠券名称*/
+	   t2.O2O_DISPLAY_NAME merchName,
+	    /*满囎商品*/
+		date_format(t1.START_TIME,'%Y-%m-%d %H:%i:%S') startTime,
+		/*有效开始时间*/
+		date_format(t1.END_TIME,'%Y-%m-%d %H:%i:%S') endTime,
+		/*有效结束时间*/
+		t1.STATUS status,
+		/*状态*/
+		t1.TYPE type,
+		/*类型*/
+		t1.T_ATTR_02 doubleFlag,
+		/*是否倍增*/
+		t1.T_ATTR_03 noCouponUse,
+		/*是否可用优惠券*/
+		t1.COST_SHARE_PPT_D costProportionD,
+		/*经销商承担费用比例*/
+		t1.COST_SHARE_MAX_D costMaxProportionD,
+		/*经销商承担费用上限*/
+		t1.COST_SHARE_MIN_D costMinProportionD,
+		/*经销商承担费用下限*/
+		t1.COST_SHARE_PPT_W costProportionW,
+		/*二批商承担费用比例*/
+		t1.COST_SHARE_MAX_W costMaxProportionW,
+		/*二批商承担费用上限*/
+		t1.COST_SHARE_MIN_W costMinProportionW,
+		/*二批商承担费用下限*/
+		t1.COST_SHARE_PPT_R costProportionR,
+		/*终端承担费用比例*/
+		t1.COST_SHARE_MAX_R costMaxProportionR,
+		/*终端承担费用上限*/
+		t1.COST_SHARE_MIN_R costMinProportionR, /*终端承担费用下限*/
+		t1.CITY_ID cityId,
+		t4.name cityName,
+		t1.approval_status approvalStatus,/*审批状态*/
+		t5.APPROVAL_FLG approvalFlg,/*活动自动审批*/
+		t1.schema_id schemaId,/*方案ID*/
+		t1.T_ATTR_01 merchId,
+		t6.row_id orgId
+	</sql>
+	<sql id="ActivityFromSql"> 
+		FROM CX_O_PMO_SP t1 
+		left join S_PROD_INT_X t2 on  t1.T_ATTR_01=t2.row_id 
+		left join CX_O_PMO_SP t3 on  t1.COUPON_ID=t3.row_id
+		left join (CX_O_AREA t4  LEFT JOIN lnk_org_ext T6 ON T6.ROW_ID = T4.T_ATTR_05) on  t1.CITY_ID=t4.row_id
+		left join LNK_SALE_SCHEMA t5 on t1.schema_id = t5.row_id
+		where 1=1
+	</sql>
+	<sql id="ActivityWhereSql">
+		and t1.TYPE='Platform Promotion'
+	</sql>
+	
+	<select id="queryActivityPage" resultMap="platformfavorable" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+	    <include refid="queryActivitySql" />
+	    <include refid="ActivityFromSql"/>
+	    <include refid="ActivityWhereSql"/>
+	    <if test="id != null and id != ''">
+			AND t1.ROW_ID = #{id}
+		</if>
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryActivityCount" resultType="java.lang.Integer" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		select count(*)
+		FROM CX_O_PMO_SP t1 
+		left join S_PROD_INT_X t2 on t1.T_ATTR_01=t2.row_id 
+		left join CX_O_PMO_SP t3 on t1.COUPON_ID=t3.row_id 
+		where  t1.CITY_ID=#{cityId}
+		and t1.TYPE='Platform Promotion'
+		and t1.row_id != #{id}
+		AND (
+			(#{startTime} BETWEEN t1.start_time AND t1.end_time)
+			OR (#{endTime} BETWEEN t1.start_time AND t1.end_time)
+			or (#{startTime} <![CDATA[<]]> t1.start_time and #{endTime}>t1.end_time)
+			)
+	</select>
+	
+	<select id="queryActivityPageById" resultMap="platformfavorable" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+	 	<include refid="queryActivitySql" />
+    	<include refid="ActivityFromSql"/>
+    	and t1.row_id=#{id}
+	</select>
+	
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="platformfavorable"
+		parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="wheresql"/>
+	</select>
+	<insert id="insert" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		insert into CX_O_CITY
+		(ROW_ID ,	
+	    CITY_ID, 
+	    NOTES
+		)
+		values
+		(
+		#{id},
+		#{cityId},
+		#{notes}
+		)
+		
+		
+	</insert>
+		<insert id="CouponInsert" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+	insert into CX_O_PMO_SP(
+	ROW_ID,
+	NAME,
+	CODE,
+    MIN_ORD_AMOUNT,
+	##订单满金额（元）
+	PMO_TYPE,	
+	#优惠方式
+	DEDUCED_CASH,
+	T_ATTR_01,
+	#满赠商品
+	START_TIME,
+	#有效开始时间
+	END_TIME,
+	#有效结束时间
+	STATUS,
+	#状态
+	TYPE,
+	#类型
+	T_ATTR_02,
+	 #是否倍增
+	T_ATTR_03,
+	#是否可用优惠券
+	COST_SHARE_PPT_D,
+	##经销商承担费用比例
+	COST_SHARE_MAX_D,
+	##经销商承担费用上限
+	COST_SHARE_MIN_D,
+	##经销商承担费用下限
+	COST_SHARE_PPT_W,
+	##二批商承担费用比例
+	COST_SHARE_MAX_W,
+	##二批商承担费用上限
+	COST_SHARE_MIN_W,
+	##二批商承担费用下限
+	COST_SHARE_PPT_R,
+	##终端承担费用比例
+	COST_SHARE_MAX_R,   
+	##终端承担费用上限                                 
+	COST_SHARE_MIN_R, 
+	##终端承担费用下限
+	CITY_ID,
+	COUPON_ID) values (
+	#{id},
+	#{activityName},#{activityCode},if(#{minOrdAmount} = '',null,#{minOrdAmount}),#{pmoType},if(#{deducedCash}='',null,#{deducedCash}),
+#{merchId}, #{startTime}, #{endTime},
+get_lov_val(#{usercorpid},'TB_O2O_STATUS',#{status}),get_lov_val(#{usercorpid},'TB_O2O_CAMPAIGN_TYPE',#{type}),
+#{doubleFlag},get_lov_val(#{usercorpid},'TB_O2O_COUPON_USE',#{noCouponUse}),
+#{costProportionD},#{costMaxProportionD},
+#{costMinProportionD},#{costProportionW},#{costMaxProportionW},#{costMinProportionW},#{costProportionR},
+#{costMaxProportionR},#{costMinProportionR},#{cityId},#{couponId})
+</insert>
+	<update id="updateCity" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		UPDATE CX_O_CITY
+		SET
+		CITY_ID =#{cityId},
+		NOTES = #{notes}
+		WHERE ROW_ID = #{id}
+		
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		DELETE FROM
+		CX_O_CITY WHERE ROW_ID = #{id}
+	</delete>
+	<select id="queryById" resultMap="platformfavorable" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		and t1.row_id=#{id}
+		
+	</select>
+
+	
+	
+
+	<select id="queryFullOfGiftsPicklistPage" resultMap="platformfavorable" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+		SELECT
+			t1.ROW_ID   id,
+			t1.CREATED  created,
+			t1.CREATED_BY  createdBy,
+			date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+			t1.LAST_UPD_BY  lastUpdatedBy,
+			t2.ROW_ID merchId,
+			t2.O2O_DISPLAY_NAME merchName,
+     		t2.O2O_INT_CODE merchCode
+ 		FROM S_PROD_INT T1
+  		LEFT JOIN S_PROD_INT_X T2 ON T1.ROW_ID = T2.PAR_ROW_ID
+		WHERE T2.O2O_DISPLAY_NAME  IS NOT NULL
+		AND t1.SALES_SRVC_FLG='Y' 
+		AND t2.O2O_DISPLAY_NAME != '' /*去除picklist含有的空行*/
+		order by t1.CREATED desc
+	</select>
+	<select id="queryCouponpicklistPage" parameterType="com.hand.base.platformfavorable.model.Platformfavorable" resultMap="platformfavorable">
+		SELECT
+		    t1.ROW_ID   id, 
+			t1.CREATED  created,
+			t1.CREATED_BY  createdBy,
+			date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+			t1.LAST_UPD_BY  lastUpdatedBy,
+			t1.NAME onCouponName,
+			t1.CODE onCouponCode,
+			t1.FACE_VALUE faceValue,
+			t1.AMT_PER_CONSUMER amtPerConsumer,
+			#每人领取的数量 
+			t1.DRAW_TYPE drawType,#领取方式 
+			t1.RESTRICTION restriction, #使用限制
+			t3.row_id orgId
+ 		from CX_O_PMO_SP t1
+ 		left join (CX_O_AREA t2  LEFT JOIN lnk_org_ext T3 ON T3.ROW_ID = T2.T_ATTR_05) on  t1.CITY_ID=t2.row_id
+ 		where t1.NAME  is not null
+		and t1.DRAW_TYPE='Seller Dispatch'
+		order by t1.CREATED desc
+ 	</select> 
+	<select id="brandQueryCouponpicklistPage" parameterType="com.hand.base.platformfavorable.model.Platformfavorable" resultMap="platformfavorable">
+		SELECT
+		    t1.ROW_ID   id, 
+			t1.CREATED  created,
+			t1.CREATED_BY  createdBy,
+			date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+			t1.LAST_UPD_BY  lastUpdatedBy,
+			t1.NAME onCouponName,
+			t1.CODE onCouponCode,
+			t1.FACE_VALUE faceValue,
+			t1.RELEASE_AMT releaseAmt, 		   /* 发放数量*/
+			t1.AMT_PER_CONSUMER amtPerConsumer,/*每人领取的数量*/ 
+			t1.DRAW_TYPE drawType,/*领取方式 */
+			t1.RESTRICTION restriction /*使用限制*/
+ 		from CX_O_PMO_SP t1
+ 		where t1.NAME  is not null
+ 		and t1.source = 'brand'
+ 		and t1.corp_id = #{usercorpid}
+ 		and t1.type='Coupon'
+ 		and t1.status = 'Active'
+ 		and t1.coupon_type = 'shop'
+		order by t1.CREATED desc
+ </select> 
+
+	<update id="CouponUpdate" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+	update   CX_O_PMO_SP set 
+	CREATED_BY =#{createdBy}, 
+	last_upd =#{lastUpdated},
+	LAST_UPD_BY=#{lastUpdatedBy} , 
+	NAME=#{activityName},
+	/*活动名称*/
+	CODE=#{activityCode},
+	/*活动编码*/
+	
+   MIN_ORD_AMOUNT =#{minOrdAmount},
+  
+	##订单满金额（元）
+	PMO_TYPE=#{pmoType},	
+	#优惠方式
+ 	<if test="pmoType == 'Cash Deduction'">
+		DEDUCED_CASH = #{deducedCash},
+		COUPON_ID = null,		
+	 </if>
+	 <if test="pmoType == 'Dispatch Coupon' ">
+	 	DEDUCED_CASH = null,
+		COUPON_ID = #{couponId},
+	 </if>
+	T_ATTR_01=#{merchId},
+	START_TIME=#{startTime},
+	#有效开始时间
+	END_TIME=#{endTime},
+	#有效结束时间
+	STATUS=(get_lov_val(#{usercorpid},'TB_O2O_STATUS',#{status})),
+	#状态
+	TYPE=(get_lov_val(#{usercorpid},'TB_O2O_CAMPAIGN_TYPE',#{type})),
+	#类型
+	T_ATTR_02=#{doubleFlag},
+	 #是否倍增
+	T_ATTR_03=(get_lov_val(#{usercorpid},'TB_O2O_COUPON_USE',#{noCouponUse})),
+	#是否可用优惠券
+	COST_SHARE_PPT_D=IF(#{costProportionD} IS NULL or #{costProportionD}='', 0, #{costProportionD}),
+	##经销商承担费用比例
+	COST_SHARE_MAX_D=IF(#{costMaxProportionD} IS NULL or #{costMaxProportionD}='', 9999, #{costMaxProportionD}),
+	##经销商承担费用上限
+	COST_SHARE_MIN_D=IF(#{costMinProportionD} IS NULL or #{costMinProportionD}='', 0, #{costMinProportionD}),
+	##经销商承担费用下限
+	COST_SHARE_PPT_W=IF(#{costProportionW} IS NULL or #{costProportionW}='', 0, #{costProportionW}),
+	##二批商承担费用比例
+	COST_SHARE_MAX_W=IF(#{costMaxProportionW} IS NULL or #{costMaxProportionW}='', 9999, #{costMaxProportionW}),
+	##二批商承担费用上限
+	COST_SHARE_MIN_W=IF(#{costMinProportionW} IS NULL or #{costMinProportionW}='', 0, #{costMinProportionW}),
+	##二批商承担费用下限
+	COST_SHARE_PPT_R=IF(#{costProportionR} IS NULL or #{costProportionR}='', 0, #{costProportionR}),
+	##终端承担费用比例
+	COST_SHARE_MAX_R=IF(#{costMaxProportionR} IS NULL or #{costMaxProportionR}='', 9999, #{costMaxProportionR}),
+	##终端承担费用上限
+	COST_SHARE_MIN_R=IF(#{costMinProportionR} IS NULL or #{costMinProportionR}='', 0, #{costMinProportionR})  ##终端承担费用下限 IF
+	where row_id=#{id}
+</update>
+
+
+
+<select id="queryCityPicklistPage" resultMap="platformfavorable" parameterType="com.hand.base.platformfavorable.model.Platformfavorable">
+	SELECT
+	t1.ROW_ID id,
+t1.CREATED_BY createdBy,
+t1.last_upd lastUpdated,
+t1.LAST_UPD_BY lastUpdatedBy,
+date_format(t1.CREATED, '%Y-%m-%d %H:%i:%S') created,
+		t1. NAME  cityName,
+		t2. NAME  provinceName,
+		t1. CODE postcode
+	FROM
+		CX_O_AREA t1 left join CX_O_AREA t2 on t1.PARENT_ID = t2.ROW_ID 
+	where 1=1
+	and t1.t_attr_02='Y' 
+	and t1.type='City'
+	order by t1.CREATED desc
+	</select>
+	
+</mapper>

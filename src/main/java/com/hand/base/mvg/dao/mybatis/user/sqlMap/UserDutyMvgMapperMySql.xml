@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.user.mapper.UserDutyMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.duty.model.Duty" id="duty"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="duty" parameterType="com.hand.base.duty.model.Duty">
+		 select t1.row_id id,
+		 date_format(t1.created,'%Y-%m-%d %H:%i:%S') created, 
+		 t1.name name, 
+		 t1.comments comments,
+		 t1.CORP_ID corpid,
+		 t2.name corpName
+		 from 
+		  LNK_DUTY t1
+		 left join LNK_ENTERPRISE t2 on t1.CORP_ID = t2.CODE
+		 where not exists (
+		 			select s1.row_id
+		          from LNK_INTER_DUTY_USER s1
+		         where s1.duty_id = t1.row_id
+		           and s1.user_id = #{mvgParentId})
+			     and t1.corp_id = #{attr1}
+  </select>
+  
+  <select id="queryRightListPage" resultMap="duty" parameterType="com.hand.base.duty.model.Duty">
+		select t1.duty_id id, 
+   			   date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+   			   t2.name name, 
+   			   t2.comments comments,
+   			   t1.CORP_ID corpid,
+			   t4.name corpName,
+   			   (case when t3.duty_id = t2.row_id then 'Y' else 'N' end) isDefault
+		  from LNK_INTER_DUTY_USER t1 left join LNK_DUTY t2 on t1.duty_id = t2.row_id
+		   left join LNK_EMP_INFO t3 on t1.user_id = t3.row_id
+		    left join LNK_ENTERPRISE t4 on t1.CORP_ID = t4.CODE
+		 where 1=1
+			and t1.corp_id = #{attr1}
+		   and t1.user_id =#{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_DUTY_USER
+	      (row_id,
+	       user_id,
+	       duty_id)
+	    values
+	      (#{id},
+	       #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		delete from LNK_INTER_DUTY_USER
+		 where user_id = #{mvgParentId} 
+		   and duty_id = #{mvgSubsetId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_DUTY_USER WHERE user_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

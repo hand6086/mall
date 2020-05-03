@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.order.mapper.OrderProdMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.goods.model.Goods" id="goods"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="goods" parameterType="com.hand.base.goods.model.Goods">
+		select t1.row_id id,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       t2.O2O_DISPLAY_NAME o2oDisplayName
+		  FROM
+			S_PROD_INT t1 LEFT JOIN S_PROD_INT_X t2 ON t1.ROW_ID = t2.PAR_ROW_ID
+		 where 1=1
+		   and t1.SALES_SRVC_FLG = 'Y'
+		   and t2.ATTRIB_09 = 'N'
+		   and t1.corp_id = #{usercorpid}
+		   and not exists (select s1.prod_id
+		          from LNK_INTER_FREIGHT_PROD s1
+		         where t1.row_id = s1.prod_id)
+  </select>
+  
+  <select id="queryRightListPage" resultMap="goods" parameterType="com.hand.base.goods.model.Goods">
+		select t1.row_id id,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       (case
+		         when t2.commodity_scope_id = t3.row_id then
+		          'Y'
+		         else
+		          'N'
+		       end) isDefault,
+		       t3.O2O_DISPLAY_NAME o2oDisplayName
+		  from 
+		  LNK_INTER_FREIGHT_PROD t1 
+		  	left join LNK_FREIGHT t2 on t1.freight_id = t2.row_id
+		  	left join (select t4.row_id,t4.SALES_SRVC_FLG,t5.O2O_DISPLAY_NAME,t5.ATTRIB_09
+									from S_PROD_INT t4 LEFT JOIN S_PROD_INT_X t5 ON t4.ROW_ID = t5.PAR_ROW_ID) t3
+		  	on t1.prod_id = t3.row_id
+		 where 1=1
+		   and t3.SALES_SRVC_FLG = 'Y'
+		   and t3.ATTRIB_09 = 'N'
+		   and t1.corp_id = #{usercorpid}
+		   and t1.freight_id = #{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_FREIGHT_PROD
+		  (row_id,
+		   freight_id,
+		   prod_id)
+		values
+		  (#{id},
+		   #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_FREIGHT_PROD
+		 WHERE prod_id = #{mvgSubsetId}
+		   and freight_id = #{mvgParentId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_FREIGHT_PROD WHERE freight_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

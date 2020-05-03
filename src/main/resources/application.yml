@@ -1,0 +1,100 @@
+# 默认的profile为dev，其他环境通过指定启动参数使用不同的profile，比如：  
+#   测试环境：java -jar my-spring-boot.jar --spring.profiles.active=test  
+#   生产环境：java -jar my-spring-boot.jar --spring.profiles.active=prod  
+spring:  
+  profiles:  
+    active: dev
+  datasource:
+    driverClassName: com.mysql.jdbc.Driver
+    max-active: 20
+    max-idle: 8
+    min-idle: 8
+    initial-size: 10
+  mvc:
+    view:
+      prefix: /WEB-INF/
+      suffix: .jsp
+  redis:
+    port: 6379
+    database: 1
+  devtools:
+    restart:
+      additional-paths: src/main/java
+      exclude: META-INF/resources/**
+      enabled: true
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+  application:
+    name: lnkcrm-core
+
+server:
+  port: 8082
+  jsp-servlet:
+    init-parameters:
+      devlelopment: true
+
+#mybatis config
+mybatis:
+  typeAliasesPackage: com.hand.**.model
+  mapperLocations: com/hand/**/sqlMap/*MapperMySql.xml
+  config-location: mybatis-config.xml
+project:
+  build:
+    sourceEncoding: UTF-8
+multipart:
+  enabled: true
+  max-file-size: 5MB
+  max-request-size: 5MB
+application:
+  doc:
+    url: http://172.16.2.139
+  database: mysql
+
+---
+spring:
+  profiles: dev
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+    username: root
+    password: 123456
+  redis:
+#    host: 127.0.0.1
+#    password: handlinkcrm86381
+#    port: 6379
+
+    host: 127.0.0.1
+logging:
+  config: classpath:log4j2-local.xml
+  
+application:
+  static:
+    url: http://127.0.0.1:8082
+  doc:
+    url: http://172.16.2.139
+  uploadfile:
+    portal:
+      share: C://app/platform/share/portal
+      httpshare: http://localhost:8080/share/mobile
+    pic:
+#      share: /data/link_qingpi/pic
+#      httpshare: http://linkcrm.cn/qingpi/pic
+      share: /app/server/pic
+      httpshare: http://172.16.2.139/qingpi/pic
+  io:
+    temporary:
+      share: D://LINK-CRM/lnkcrm-core-qp/src/main/webapp/share/io # 导出功能，生成的csv的存放路径
+      httpshare: http://localhost:8082/share/io
+  user:
+    refund:
+      url: http://172.16.2.139/qingpi/order/userRefund # 用户退款URL
+  app:
+    img: /static/css/img/prod.png  # app二维码下载地址
+    appKey: lmxuhwagli0id #融云 appkey
+    appSecret: ZWEXFzmpOJCh #融云 appSecret
+  task:
+    defaultRun: N  # 是否运行定时任务
+    
+

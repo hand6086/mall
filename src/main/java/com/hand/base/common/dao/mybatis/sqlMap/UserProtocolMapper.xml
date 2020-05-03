@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.UserProtocolMapper">
+  <resultMap type="com.hand.base.common.model.UserProtocol" id="userProtocol"></resultMap>
+ 
+ 
+ 
+ 
+ 	<select id="queryProtocolStatusByLoginName" resultType="com.hand.base.common.model.UserProtocol" parameterType="java.lang.String">
+  	 	 select ROW_ID id,
+  	 	 		LOGIN_NAME loginName,
+  	 	 		ACCEPT_STATUS status,
+  	 	 		PROT_VERSION_NUM versionNum 
+  	 	 from CX_USER_PROT
+  	 	 where LOGIN_NAME=#{loginName}
+  	</select>
+  	
+  	
+  	<select id="queryUserNameExist" resultType="com.hand.base.common.model.UserProtocol" parameterType="java.lang.String">
+  	 	    
+        select login_name loginName from PT_EMP_INFO_V where login_name = #{loginName}
+  	 	 
+  	</select>
+  	
+  	
+  	<insert id="InsertUserProtocol" parameterType="com.hand.base.common.model.UserProtocol">
+  		INSERT INTO CX_USER_PROT
+		  (ROW_ID, LOGIN_NAME, ACCEPT_STATUS, PROT_VERSION_NUM)
+		VALUES
+		  (#{id},#{loginName},#{status},#{versionNum})
+  	</insert>
+  	
+  	<insert id="userProtocolInsert" parameterType="com.hand.base.common.model.UserProtocol">
+  		INSERT INTO CX_USERS_PROT
+		  (ROW_ID, LOGIN_NAME, ACCEPT_STATUS, PROT_VERSION_NUM)
+		VALUES
+		  (#{id},#{loginName},#{status},#{versionNum})
+  	</insert>
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+</mapper>

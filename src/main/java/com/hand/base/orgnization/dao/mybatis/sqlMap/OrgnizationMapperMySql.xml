@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.orgnization.dao.mybatis.mapper.OrgnizationMapper">
+	<resultMap type="com.hand.base.orgnization.model.Orgnization" id="orgnization"></resultMap>
+  
+	<sql id="queryAllSql">
+		select T1.ROW_ID as id,
+		       t1.created as created,
+		       T1.CREATED_BY as createdBy,
+		       DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		       T1.LAST_UPD_BY as lastUpdatedBy,
+		       T1.CORP_ID corpid,
+		       t1.org_code orgCode,
+		       t1.org_name text,
+		       t1.org_type orgType,
+		       t1.parent_org_id parentOrgId,
+		       t1.qd_dept_id qdDeptId,
+		       t1.CAR_SHELF_LIFE carShelfLife,
+		       t1.is_effective isEffective,
+		       t1.integration_id integrationId,
+		        t1.source source,
+		       t2.org_name parentOrgName,
+		       t2.qd_dept_id parentOrgQdDeptId,
+		       t1.acct_id acctId,
+		       t3.acct_name acctName
+	</sql>
+
+	<sql id="fromTableSql">
+		  from LNK_ORG_EXT t1
+		  			LEFT JOIN
+		  	   LNK_ORG_EXT t2 ON t1.parent_org_id = t2.row_id
+		  	   		LEFT JOIN
+		  	   LNK_ACCNT t3 on  t1.acct_id = t3.row_id
+		 where 1 = 1
+		   and t1.corp_id = #{usercorpid}
+		   and t1.is_org = 'Y'
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+		<if test="id != null and id != '' ">
+			and t1.row_id = #{id}
+		</if>
+		<if test="text != null and text != '' ">
+			and t1.org_name = #{text}
+		</if>
+		<if test="orgCode != null and orgCode != '' ">
+			and t1.org_code = #{orgCode}
+		</if>
+		<if test="isEffective != null and isEffective != '' ">
+			and t2.is_effective = GET_LOV_VAL(#{usercorpid}, 'IS_EFFECTIVE',#{isEffective})
+		</if>
+		<if test="parentOrgId != null and parentOrgId != '' ">
+			and t1.parent_org_id = #{parentOrgId}
+		</if>
+		<if test="parentOrgName != null and parentOrgName != '' ">
+			and t2.org_name = #{parentOrgName}
+		</if>
+		<if test="integrationId != null and integrationId != '' ">
+			and t1.integration_Id = #{integrationId}
+		</if>
+  	</sql>
+  	
+	<select id="queryById" resultType="com.hand.base.orgnization.model.Orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录,不分页 -->
+	<select id="queryAll" resultMap="orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_org_id is not null
+	</select>
+	
+	
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="orgnization"
+		parameterType="com.hand.base.orgnization.model.Orgnization">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and t1.parent_org_id is not null
+	</select>
+
+	
+  
+	<delete id="deleteById" parameterType="com.hand.base.orgnization.model.Orgnization">
+		DELETE FROM LNK_ORG_EXT WHERE ROW_ID = #{id}
+	</delete>
+  
+	<insert id="insert" parameterType="com.hand.base.orgnization.model.Orgnization">
+	  	INSERT INTO LNK_ORG_EXT
+		  (row_id,
+		  parent_org_id,
+		  org_code,
+		  org_name,
+		  org_type,
+		  is_effective,
+		  org_id,
+		  is_org,
+		  integration_id,
+		  source,
+		  acct_id
+		  )
+		VALUES
+		  (#{id},
+		   #{parentOrgId},
+		   #{orgCode},
+		   #{text},
+		   GET_LOV_val(#{usercorpid},'ORG_TYPE' ,#{orgType}),
+		   GET_LOV_val(#{usercorpid},'IS_EFFECTIVE' ,#{isEffective}),
+		   #{id},
+		   'Y',
+		    #{integrationId},
+		   #{source},
+		   #{acctId}
+		   )
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.orgnization.model.Orgnization">
+		UPDATE LNK_ORG_EXT
+		   SET org_code       = #{orgCode},
+		       org_name       = #{text},
+		       parent_org_id  = #{parentOrgId},
+		       org_type       = GET_LOV_val(#{usercorpid},'ORG_TYPE',#{orgType}),
+		       car_shelf_life = #{carShelfLife},
+		       is_effective   = GET_LOV_val(#{usercorpid},'IS_EFFECTIVE',#{isEffective}),
+		       acct_id = #{acctId}
+		 WHERE row_id = #{id}
+	</update>
+
+	<select id="queryRoot" resultType="com.hand.base.orgnization.model.Orgnization" parameterType="com.hand.base.orgnization.model.Orgnization">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	  	and (t1.parent_org_id is null or t1.parent_org_id = '')
+	</select>
+  
+	<!-- 查询非子职位 -->
+	<select id="queryListRemoveIdAndChildrenPage" resultMap="orgnization" parameterType="com.hand.base.orgnization.model.Orgnization">
+		select t1.row_id   id,
+		       t1.created created,
+		       T1.CREATED_BY as createdBy,
+		       date_format(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       T1.LAST_UPD_BY as lastUpdatedBy,
+		       T1.CORP_ID corpid,
+		       t1.org_code orgCode,
+		       t1.org_name text,
+		       t1.org_type orgType
+		  from LNK_ORG_EXT t1
+		 where 1=1
+		   and t1.corp_id = #{usercorpid}
+		   and t1.is_effective = 'Y'
+		   and t1.is_org = 'Y'
+		   and t1.row_id != #{id}
+		   and FIND_IN_SET(t1.row_id, #{attr6}) = 0
+	</select>
+	
+  	<select id="getOrgChildStr" resultType="String">
+  		select get_org_child_str(#{id}) str from dual
+  	</select>
+  	
+	<select id="getRunOrgUpdate" statementType="CALLABLE">
+         CALL RUN_ORG_UPDATE(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+         					#{msgData,mode=OUT,jdbcType=VARCHAR},
+         					#{param1,mode=IN,jdbcType=VARCHAR},
+         					#{param2,mode=IN,jdbcType=VARCHAR},
+         					#{param3,mode=IN,jdbcType=VARCHAR},
+         					#{param4,mode=IN,jdbcType=VARCHAR},
+         					#{param5,mode=IN,jdbcType=VARCHAR})
+	</select>
+  
+	<select id="getRunOrgSubUpdate" statementType="CALLABLE">
+         CALL RUN_ORG_SUB_UPDATE(#{returnStatus,mode=OUT,jdbcType=VARCHAR},
+         						#{msgData,mode=OUT,jdbcType=VARCHAR},
+         						#{param1,mode=IN,jdbcType=VARCHAR},
+         						#{param2,mode=IN,jdbcType=VARCHAR},
+         						#{param3,mode=IN,jdbcType=VARCHAR},
+         						#{param4,mode=IN,jdbcType=VARCHAR},
+         						#{param5,mode=IN,jdbcType=VARCHAR})
+	</select>
+	
+	<select id="queryCompanyInOrgnizationSelect" resultMap="orgnization" parameterType="com.hand.base.orgnization.model.Orgnization">
+		select t1.row_id   id,
+		       t1.created  created,
+		       t1.org_code orgCode,
+		       t1.org_name text,
+		       t1.org_type orgType
+		  from LNK_ORG_EXT t1
+		 where 1=1
+		   and t1.corp_id=#{usercorpid}
+		   and t1.is_effective = 'Y' 
+		   and t1.org_type = 'ORG_COMPANY'
+		   and t1.is_org = 'Y'
+  </select>
+  
+  	<update id="qdDeptIdUpdate" parameterType="com.hand.base.orgnization.model.Orgnization">
+		UPDATE LNK_ORG_EXT
+		   SET qd_dept_id = #{qdDeptId}
+		 WHERE row_id = #{id}
+	</update>
+  
+</mapper>

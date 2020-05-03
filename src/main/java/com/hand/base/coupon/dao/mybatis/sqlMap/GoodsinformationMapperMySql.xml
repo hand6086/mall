@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.coupon.dao.mybatis.mapper.GoodsinformationMapper">
+	<resultMap type="com.hand.base.coupon.model.Goodsinformation" id="goodsinformation"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+		t1.ROW_ID id,/*与子级相关字段*/
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		t1.PROMOTION_CODE_ID promotionCodeId,
+		t2.O2O_DISPLAY_NAME merchName,
+		t2.O2O_INT_CODE merchCode
+
+	</sql>
+
+	<sql id="fromSql">
+		from CX_O_PMO_CD_PRO t1 left join S_PROD_INT_X t2
+		on t1.PRODUCT_ID=t2.row_id
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.coupon.model.Goodsinformation" resultMap="goodsinformation">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		order by t1.CREATED desc
+  	</select>
+  	 	
+	<select id="queryById" resultType="com.hand.base.coupon.model.Goodsinformation"
+		parameterType="com.hand.base.coupon.model.Goodsinformation">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t1.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.coupon.model.Goodsinformation">
+		insert into CX_O_PMO_CD_PRO(row_id,PRODUCT_ID,PROMOTION_CODE_ID)
+		values(#{id}, #{merchId},#{promotionCodeId})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.coupon.model.Goodsinformation">
+		update CX_O_PMO_CD_PRO set PRODUCT_ID=#{merchId}
+		where row_id=#{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.coupon.model.Goodsinformation">
+		DELETE FROM CX_O_PMO_CD_PRO
+		WHERE ROW_ID = #{id}
+	</delete>
+
+</mapper>

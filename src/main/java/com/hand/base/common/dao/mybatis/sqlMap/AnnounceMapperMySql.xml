@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.AnnounceMapper">
+  <resultMap type="com.hand.base.common.model.Announce" id="announce"></resultMap>
+  <resultMap type="com.hand.base.orgnization.model.Orgnization" id="orgnization"></resultMap>
+    <sql id="queryAllSql">
+	SELECT 
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+       date_format(T1.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+       date_format(T1.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+       T1.CAPTIONS    captions,
+       T1.CONTENTS    contents,
+       T1.ORG_ID    	 orgId,
+       (SELECT org_name FROM LNK_ORG_EXT where row_id = T1.ORG_ID)  orgName,
+        T1.ANNE_STATUS anneStatus,
+       T1.anne_status anneStatusValue,
+        T1.ANNE_TYPE   anneType,
+       T1.ANNE_TYPE   anneTypeValue,
+        T1.ANNE_READER anneReader,
+        T1.IS_LIMITED  isLimited,
+       date_format(T1.PUBLISH_DATE, '%Y-%m-%d %H:%i:%S') publishDate,
+       t2.path path
+	</sql>
+	
+	<sql id="whereAllSql">
+		<!--
+		<if test="usercorpid != null and usercorpid != '' ">
+			and T1.corp_id = #{usercorpid}
+		</if> -->
+     /*添加注释*/
+		/*and T1.corp_id != '101'*/
+		<if test="id != null and id != '' ">
+			and T1.ROW_ID = #{id}
+		</if>
+		<if test="created != null and created != '' ">
+			and T1.CREATED =  str_to_date(#{created},'%Y-%m-%d %H:%i:%S')
+		</if>
+		<if test="startDate != null and startDate != '' ">
+			and T1.start_date =  str_to_date(#{startDate},'%Y-%m-%d %H:%i:%S')
+		</if>
+		<if test="endDate != null and endDate != '' ">
+			and T1.end_date =  str_to_date(#{endDate},'%Y-%m-%d %H:%i:%S')
+		</if>
+		<if test="captions != null and captions != '' ">
+			and T1.CAPTIONS = #{captions} 
+		</if>
+		<if test="contents != null and contents != '' ">
+			and T1.CONTENTS = #{contents} 
+		</if>
+		<if test="anneType != null and anneType != '' ">
+			and T1.ANNE_TYPE = GET_LOV_VAL(#{usercorpid}, 'ANNE_TYPE',#{anneType})
+		</if>
+		<if test="anneTypeValue != null and anneTypeValue != '' ">
+			and T1.ANNE_TYPE = #{anneTypeValue} 
+		</if>
+		<if test="anneReader != null and anneReader != '' ">
+			and T1.ANNE_READER = GET_LOV_VAL(#{usercorpid}, 'ANNE_READER',#{anneReader})
+		</if>
+		<if test="isLimited != null and isLimited != '' ">
+			and T1.IS_LIMITED = GET_LOV_VAL(#{usercorpid}, 'IS_LIMITED',#{isLimited})
+		</if>
+		<if test="publishDate != null and publishDate != '' ">
+			and T1.PUBLISH_DATE =  str_to_date(#{publishDate},'%Y-%m-%d %H:%i:%S')
+		</if>
+		<if test="anneStatus !=null and anneStatus!='' ">
+           and  T1.anne_status = #{anneStatus}
+		</if>
+		<if test="attr1 == 'home' ">
+           and  (now() between T1.start_date and T1.end_date)
+		</if>
+	</sql>
+
+	<sql id="fromTableSql">
+		FROM LNK_ANNOUNCE T1
+		left join cx_o_img t2 on t2.row_id = t1.announce_img_id
+		where T1.anne_status != 'N' 
+	</sql>
+	<select id="queryById" resultMap="announce"
+		parameterType="com.hand.base.common.model.Announce">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+	<select id="brandQueryById" resultMap="announce" parameterType="com.hand.base.common.model.Announce">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.common.model.Announce">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="announce"
+		parameterType="com.hand.base.common.model.Announce">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="announce"
+		parameterType="com.hand.base.common.model.Announce">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+        ORDER BY T1.PUBLISH_DATE DESC
+	</select>
+	
+    <insert id="announceInsert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_ANNOUNCE
+	      (ROW_ID,
+	       anne_status)
+	    VALUES
+	      (#{id},
+	       'N'
+	       )
+    </insert>
+	<!--快购插入数据-->
+	<insert id="insert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_ANNOUNCE
+	      (ROW_ID,
+	      captions,
+	      contents,
+	      start_date,
+	      end_date,
+	      anne_type,
+	      anne_status,
+	      org_id,
+	      anne_reader,
+	      is_limited,
+	      announce_img_id,
+	      publish_date
+	       )
+	    VALUES
+	      (#{id},
+	       #{captions},
+	       #{contents},
+	       str_to_date(lnk_blank_str_to_null(#{startDate}), '%Y-%m-%d %H:%i:%S'),
+	       str_to_date(lnk_blank_str_to_null(#{endDate}), '%Y-%m-%d %H:%i:%S'),
+	       GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+	       GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+	       #{orgId},
+	       GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+	       GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited}),
+	       #{announceImgId},
+	       str_to_date(lnk_blank_str_to_null(#{publishDate}), '%Y-%m-%d %H:%i:%S')
+	       )
+    </insert>
+    
+        <insert id="brandInsert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_ANNOUNCE
+	      (ROW_ID,
+	      captions,
+	      contents,
+	      start_date,
+	      end_date,
+	      anne_type,
+	      anne_status,
+	      org_id,
+	      anne_reader,
+	      is_limited,
+	      announce_img_id,
+	      publish_date
+	       )
+	    VALUES
+	      (#{id},
+	       #{captions},
+	       #{contents},
+	       str_to_date(lnk_blank_str_to_null(#{startDate}), '%Y-%m-%d %H:%i:%S'),
+	       str_to_date(lnk_blank_str_to_null(#{endDate}), '%Y-%m-%d %H:%i:%S'),
+	       GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+	       GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+	       #{orgId},
+	       GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+	       GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited}),
+	       #{announceImgId},
+	       str_to_date(lnk_blank_str_to_null(#{publishDate}), '%Y-%m-%d %H:%i:%S')
+	       )
+    </insert>
+    
+    <update id="update" parameterType="com.hand.base.common.model.Announce">
+     UPDATE LNK_ANNOUNCE
+      SET captions    = #{captions},
+          contents	  = #{contents},
+          <if test="startDate != null and startDate != ''">start_date=str_to_date(#{startDate},'%Y-%m-%d %T'),</if>
+		  <if test="startDate == '' or startDate == null">start_date=null,</if>
+		  <if test="endDate != null and endDate != ''">end_date=str_to_date(#{endDate},'%Y-%m-%d %T'),</if>
+		  <if test="endDate == '' or endDate == null">end_date=null,</if>
+          anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+          anne_status   = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+          org_id	  = #{orgId},
+          anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+          is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited})
+    WHERE ROW_ID = #{id}
+  </update>
+
+	<update id="brandUpdate" parameterType="com.hand.base.common.model.Announce">
+		UPDATE LNK_ANNOUNCE
+		SET captions    = #{captions},
+		contents	  = #{contents},
+		<if test="startDate != null and startDate != ''">start_date=str_to_date(#{startDate},'%Y-%m-%d %T'),</if>
+		<if test="startDate == '' or startDate == null">start_date=null,</if>
+		<if test="endDate != null and endDate != ''">end_date=str_to_date(#{endDate},'%Y-%m-%d %T'),</if>
+		<if test="endDate == '' or endDate == null">end_date=null,</if>
+		anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+		anne_status   = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+		org_id	  = #{orgId},
+		anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+		is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited})
+		WHERE ROW_ID = #{id}
+	</update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.common.model.Announce">
+  	DELETE FROM LNK_ANNOUNCE WHERE ROW_ID = #{id}
+  </delete>
+  
+  <insert id="orgOfAnnounceInsert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_INTER_ANNE_ORG
+	      (ROW_ID,
+	       anne_id,
+	       org_id)
+	    VALUES
+	      (s_sequence_pkg_get_next_rowid(),
+	       #{id},
+	       #{orgId}
+	      )
+  </insert>
+  
+  <delete id="orgOfAnnounceDel" parameterType="com.hand.base.common.model.Announce">
+  	DELETE FROM LNK_INTER_ANNE_ORG WHERE ROW_ID = #{id}
+  </delete>
+  
+  <select id="querySelectedOrgListPage" resultMap="orgnization" parameterType="com.hand.core.basic.query.QueryParams">
+     select t1.row_id        id,
+            date_format(t3.created, '%Y-%m-%d %H:%i:%S') created,
+            t3.org_code      orgCode,
+            t3.row_id      	 orgId,
+            t3.org_name      text,
+             t3.org_type orgType,
+             t3.is_effective isEffective,
+            t3.parent_org_id parentOrgId,
+            t4.org_name      parentOrgName
+       from LNK_INTER_ANNE_ORG t1,
+            LNK_ANNOUNCE    t2,
+            LNK_ORG_EXT     t3 left join LNK_ORG_EXT t4 on t3.parent_org_id = t4.row_id
+       where 1=1
+       and t2.corp_id=#{usercorpid}
+        and t1.anne_id = t2.row_id
+        and t1.org_id = t3.row_id
+        and t3.parent_org_id is not null
+        and t3.is_effective = 'Y'
+        and t1.anne_id = #{id} 
+        
+  </select>
+  
+   <select id="queryUnSelectedOrgListPage" resultMap="orgnization" parameterType="com.hand.core.basic.query.QueryParams">
+     select 
+     	T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+            t1.org_code orgCode,
+            t1.org_name text,
+            t1.parent_org_id parentOrgId,
+             t1.org_type orgType,
+             t1.is_effective isEffective,
+            t2.org_name parentOrgName
+       from LNK_ORG_EXT t1 left join LNK_ORG_EXT t2 on t1.parent_org_id = t2.row_id
+      where 1 = 1 
+        and t1.corp_id=#{usercorpid}
+        and t1.parent_org_id is not null
+        and t1.org_type = 'ORG_CHANNEL'
+        and not exists (SELECT 1 FROM LNK_INTER_ANNE_ORG where anne_id = #{id} and org_id = t1.row_id)
+
+  </select>
+  
+  <update id="publishAnnounceUpdate" parameterType="com.hand.base.common.model.Announce">
+     UPDATE LNK_ANNOUNCE
+      SET 
+      	publish_date = sysdate()
+      	,anne_status = 'PUBLISHED'
+          <if test="captions != null and captions != ''">
+         	 ,captions    = #{captions}
+          </if>
+          <if test="captions != null and captions != ''">
+         	 ,contents	 = #{contents}
+          </if>
+          <if test="startDate != null and startDate != ''">
+         	 ,start_date=str_to_date(#{startDate},'%Y-%m-%d %T')
+          </if>
+		  <if test="endDate != null and endDate != ''">
+		  	 ,end_date=str_to_date(#{endDate},'%Y-%m-%d %T')
+		  </if>
+          <if test="anneType != '' and anneType != null">
+		  	 ,anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType})
+		  </if>
+          <if test="anneReader != '' and anneReader != null">
+		  	 ,anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader})
+		  </if>
+          <if test="isLimited != '' and isLimited != null">
+		  	 ,is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited})
+		  </if>
+    WHERE ROW_ID = #{id}
+  </update>
+  
+  <update id="announceManageUpdate" parameterType="com.hand.base.common.model.Announce">
+   UPDATE LNK_ANNOUNCE
+      SET captions    = #{captions},
+      <if test="startDate != null and startDate != ''">start_date=str_to_date(#{startDate},'%Y-%m-%d %T'),</if>
+		  <if test="startDate == '' or startDate == null">start_date=null,</if>
+		  <if test="endDate != null and endDate != ''">end_date=str_to_date(#{endDate},'%Y-%m-%d %T'),</if>
+		  <if test="endDate == '' or endDate == null">end_date=null,</if>
+          anne_status = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+          anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+          anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+          is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited}),
+          <if test="publishDate != null and publishDate != ''">publish_date=str_to_date(#{publishDate},'%Y-%m-%d %T')</if>
+		  <if test="publishDate == '' or publishDate == null">publish_date=null</if>
+    WHERE ROW_ID = #{id}
+
+  </update>
+  
+  <select id="queryAnneInterPage" resultMap="announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT 
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       date_format(t1.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t1.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t1.captions captions,
+		       t1.contents contents,
+		        t1.anne_status anneStatus,
+		        t1.anne_type anneType,
+		        t1.anne_reader anneReader,
+		        t1.is_limited isLimited,
+		       date_format(t1.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t1
+		 where t1.anne_status = 'PUBLISHED'   and t1.corp_id=#{usercorpid}
+		   and t1.anne_type = 'INTER'
+		   and (now() between t1.start_date and t1.end_date)
+		   and (('INTER_EMP' = #{attr1} and
+		       (t1.is_limited = 'N' or exists
+		        (SELECT 1
+		             FROM LNK_INTER_ANNE_ORG   t2,
+		                  LNK_PARTY_REL      t3,
+		                  LNK_INTER_USER_POSTN t4,
+		                  LNK_EMP_INFO      t5,
+		                  LNK_POSTN_EXT     t6,
+		                  LNK_ORG_EXT      t7
+		            where t2.anne_id = t1.row_id
+		              and t4.user_id = t5.row_id
+		              and t4.postn_id = t6.row_id
+		              and t6.dept_id = t7.row_id
+		              and t4.user_id = #{attr2}
+		              and (t2.org_id = t7.org_id or
+		                  (t3.party_id = t2.org_id and t3.sub_party_id = t7.org_id) or
+		                  (t3.party_id = t7.org_id and t3.sub_party_id = t2.org_id))))) or
+		       ('OUTER_EMP' = #{attr1} and t1.anne_reader = 'INCLUDE_DEALER' and
+		       (t1.is_limited = 'N' or exists
+		        (SELECT 1
+		             FROM LNK_INTER_ANNE_ORG         t9,
+		                  LNK_PARTY_REL            t10,
+		                  LNK_ACCNT_BUSINESS_SCOPE t11
+		            where t9.anne_id = t1.row_id
+		              and t11.acct_id = #{attr3}
+		              and (t9.org_id = t11.org_id or (t10.party_id = t9.org_id and
+		                  t10.sub_party_id = t11.org_id) or
+		                  (t10.party_id = t11.org_id and
+		                  t10.sub_party_id = t9.org_id))))))
+
+
+  </select>
+  
+  <select id="queryAnneSalesTrendListPage" resultMap="announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT 
+		T1.ROW_ID            as id,
+		t1.created created,
+		T1.CREATED_BY        as createdBy,
+		date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T1.LAST_UPD_BY       as lastUpdatedBy,
+		T1.CORP_ID corpid,
+		       date_format(t.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t.captions    captions,
+		       t.contents    contents,
+		        t.anne_status anneStatus,
+		        t.anne_type   anneType,
+		        t.anne_reader anneReader,
+		        t.is_limited  isLimited,
+		       date_format(t.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t
+		 where t.anne_status = 'PUBLISHED'   and t.corp_id=#{usercorpid}
+		   and t.anne_type = 'SALES_TREND'
+		   and (sysdate() between t.start_date and t.end_date)
+  </select>
+  
+  <select id="querySimpleAnnounceListSelect" resultType="com.hand.base.common.model.Announce" parameterType="com.hand.core.basic.query.QueryParams">
+  		SELECT *
+		  from (SELECT ROWNUM      rn,
+		               ROW_ID      id,
+		               captions    captions,
+		               contents    contents,
+		               start_date  startDate,
+		               end_date    endDate,
+		               CREATED     created,
+		               CREATED_BY  createdBy,
+		               LAST_UPD    lastUpdated,
+		               LAST_UPD_BY lastUpdatedBy
+		          FROM LNK_ANNOUNCE t1 where t1.corp_id=#{usercorpid})
+		 where rn &lt; 7
+  </select>
+  
+</mapper>
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.AnnounceMapper">
+  <resultMap type="com.hand.base.common.model.Announce" id="announce"></resultMap>
+  <resultMap type="com.hand.base.orgnization.model.Orgnization" id="orgnization"></resultMap>
+  
+  <insert id="announceInsert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_ANNOUNCE
+	      (ROW_ID,
+	       anne_status)
+	    VALUES
+	      (#{id},
+	       'N'
+	       )
+  </insert>
+  
+  <insert id="orgOfAnnounceInsert" parameterType="com.hand.base.common.model.Announce">
+	    INSERT INTO LNK_INTER_ANNE_ORG
+	      (ROW_ID,
+	       anne_id,
+	       org_id)
+	    VALUES
+	      (s_sequence_pkg_get_next_rowid(),
+	       #{id},
+	       #{orgId}
+	       )
+  </insert>
+  
+  <delete id="orgOfAnnounceDel" parameterType="com.hand.base.common.model.Announce">
+  	DELETE FROM LNK_INTER_ANNE_ORG WHERE ROW_ID = #{id}
+  </delete>
+  
+  <select id="querySelectedOrgListPage" resultMap="orgnization" parameterType="com.hand.core.basic.query.QueryParams">
+     select t1.row_id        id,
+            t3.created       created,
+            t3.org_code      orgCode,
+            t3.row_id      	 orgId,
+            t3.org_name      text,
+             t3.org_type orgType,
+             t3.is_effective isEffective,
+            t3.parent_org_id parentOrgId,
+            t4.org_name      parentOrgName
+       from LNK_INTER_ANNE_ORG t1,
+            LNK_ANNOUNCE    t2,
+            LNK_ORG_EXT     t3,
+            LNK_ORG_EXT     t4
+      where 1 = 1 and t2.corp_id=#{usercorpid}
+        and t1.anne_id = t2.row_id
+        and t1.org_id = t3.row_id
+        and t3.parent_org_id is not null
+        and t3.is_effective = 'Y'
+        and t3.parent_org_id = t4.row_id(+)
+        and t1.anne_id = #{id}
+  </select>
+  
+   <select id="queryUnSelectedOrgListPage" resultMap="orgnization" parameterType="com.hand.core.basic.query.QueryParams">
+     select t1.row_id id,
+            t1.created created,
+            t1.org_code orgCode,
+            t1.org_name text,
+            t1.parent_org_id parentOrgId,
+             t1.org_type orgType,
+             t1.is_effective isEffective,
+            t2.org_name parentOrgName
+       from LNK_ORG_EXT t1, LNK_ORG_EXT t2
+      where 1 = 1 and t1.corp_id=#{usercorpid}
+        and t1.parent_org_id is not null
+        and t1.org_type = 'ORG_CHANNEL'
+        and t1.parent_org_id = t2.row_id(+)
+        and not exists (SELECT 1 FROM LNK_INTER_ANNE_ORG where anne_id = #{id} and org_id = t1.row_id)
+
+  </select>
+  
+  <update id="publishAnnounceUpdate" parameterType="com.hand.base.common.model.Announce">
+     UPDATE LNK_ANNOUNCE
+      SET captions    = #{captions},
+          contents	  = #{contents},
+          start_date  = str_to_date(#{startDate}, '%Y-%m-%d %H:%i:%S'),
+          end_date    = str_to_date(#{endDate}, '%Y-%m-%d %H:%i:%S'),
+          anne_status = 'PUBLISHED',
+          anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+          anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+          is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited}),
+          publish_date = sysdate
+    WHERE ROW_ID = #{id}
+  </update>
+  
+  <update id="announceManageUpdate" parameterType="com.hand.base.common.model.Announce">
+   UPDATE LNK_ANNOUNCE
+      SET captions    = #{captions},
+          start_date  = str_to_date(#{startDate}, '%Y-%m-%d %H:%i:%S'),
+          end_date    = str_to_date(#{endDate}, '%Y-%m-%d %H:%i:%S'),
+          anne_status = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+          anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+          anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+          is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited}),
+          publish_date = str_to_date(#{publishDate}, '%Y-%m-%d %H:%i:%S')
+    WHERE ROW_ID = #{id}
+
+  </update>
+  
+  <select id="queryAnneInterPage" resultMap="announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t1.ROW_ID id,
+		       t1.created created,
+		       t1.CREATED_BY createdBy,
+		       t1.LAST_UPD_BY lastUpdatedBy,
+		       date_format(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       date_format(t1.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t1.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t1.captions captions,
+		       t1.contents contents,
+		        t1.anne_status anneStatus,
+		        t1.anne_type anneType,
+		        t1.anne_reader anneReader,
+		        t1.is_limited isLimited,
+		       date_format(t1.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t1
+		 where t1.anne_status = 'PUBLISHED'   and t1.corp_id=#{usercorpid}
+		   and t1.anne_type = 'INTER'
+		   and (sysdate between t1.start_date and t1.end_date)
+		   and (('INTER_EMP' = #{attr1} and
+		       (t1.is_limited = 'N' or exists
+		        (SELECT 1
+		             FROM LNK_INTER_ANNE_ORG   t2,
+		                  LNK_PARTY_REL      t3,
+		                  LNK_INTER_USER_POSTN t4,
+		                  LNK_EMP_INFO      t5,
+		                  LNK_POSTN_EXT     t6,
+		                  LNK_ORG_EXT      t7
+		            where t2.anne_id = t1.row_id
+		              and t4.user_id = t5.row_id
+		              and t4.postn_id = t6.row_id
+		              and t6.dept_id = t7.row_id
+		              and t4.user_id = #{attr2}
+		              and (t2.org_id = t7.org_id or
+		                  (t3.party_id = t2.org_id and t3.sub_party_id = t7.org_id) or
+		                  (t3.party_id = t7.org_id and t3.sub_party_id = t2.org_id))))) or
+		       ('OUTER_EMP' = #{attr1} and t1.anne_reader = 'INCLUDE_DEALER' and
+		       (t1.is_limited = 'N' or exists
+		        (SELECT 1
+		             FROM LNK_INTER_ANNE_ORG         t9,
+		                  LNK_PARTY_REL            t10,
+		                  LNK_ACCNT_BUSINESS_SCOPE t11
+		            where t9.anne_id = t1.row_id
+		              and t11.acct_id = #{attr3}
+		              and (t9.org_id = t11.org_id or (t10.party_id = t9.org_id and
+		                  t10.sub_party_id = t11.org_id) or
+		                  (t10.party_id = t11.org_id and
+		                  t10.sub_party_id = t9.org_id))))))
+
+
+  </select>
+  
+  <select id="queryAnneSalesTrendListPage" resultMap="announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t.ROW_ID     id,
+		       T.CREATED created,
+		       t.CREATED_BY  createdBy,
+		       t.LAST_UPD_BY lastUpdatedBy,
+		       date_format(t.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       date_format(t.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t.captions    captions,
+		       t.contents    contents,
+		        t.anne_status anneStatus,
+		        t.anne_type   anneType,
+		        t.anne_reader anneReader,
+		        t.is_limited  isLimited,
+		       date_format(t.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t
+		 where t.anne_status = 'PUBLISHED'   and t.corp_id=#{usercorpid}
+		   and t.anne_type = 'SALES_TREND'
+		   and (sysdate between t.start_date and t.end_date)
+
+  </select>
+  
+  <select id="queryAllAnnounceListPage" resultMap="announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t.ROW_ID     id,
+		       date_format(t.CREATED, '%Y-%m-%d %H:%i:%S') created,
+		       t.CREATED_BY  createdBy,
+		       t.LAST_UPD_BY lastUpdatedBy,
+		       date_format(t.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       date_format(t.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t.captions    captions,
+		       t.contents    contents,
+		       t.org_id    	 orgId,
+		       (SELECT org_name FROM LNK_ORG_EXT where row_id = t.org_id)  orgName,
+		        t.anne_status anneStatus,
+		       t.anne_status anneStatusValue,
+		        t.anne_type   anneType,
+		       t.anne_type   anneTypeValue,
+		        t.anne_reader anneReader,
+		        t.is_limited  isLimited,
+		       date_format(t.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t
+		  where t.anne_status != 'N' and t.corp_id=#{usercorpid}
+  </select>
+  
+  <select id="queryAnnounceByIdSelect" resultType="com.hand.base.common.model.Announce" parameterType="com.hand.core.basic.query.QueryParams">
+		SELECT t.ROW_ID     id,
+		       T.CREATED created,
+		       t.CREATED_BY  createdBy,
+		       t.LAST_UPD_BY lastUpdatedBy,
+		       date_format(t.LAST_UPD, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		       date_format(t.start_date, '%Y-%m-%d %H:%i:%S') startDate,
+		       date_format(t.end_date, '%Y-%m-%d %H:%i:%S') endDate,
+		       t.captions    captions,
+		       t.contents    contents,
+		       t.org_id    	 orgId,
+		       (SELECT org_name FROM LNK_ORG_EXT where row_id = t.org_id)  orgName,
+		        t.anne_status anneStatus,
+		       t.anne_status anneStatusValue,
+		        t.anne_type   anneType,
+		       t.anne_type   anneTypeValue,
+		        t.anne_reader anneReader,
+		        t.is_limited  isLimited,
+		       date_format(t.publish_date, '%Y-%m-%d %H:%i:%S') publishDate
+		  FROM LNK_ANNOUNCE t
+  
+  </select>
+  
+  <select id="querySimpleAnnounceListSelect" resultType="com.hand.base.common.model.Announce" parameterType="com.hand.core.basic.query.QueryParams">
+  		SELECT *
+		  from (SELECT ROWNUM      rn,
+		               ROW_ID      id,
+		               captions    captions,
+		               contents    contents,
+		               start_date  startDate,
+		               end_date    endDate,
+		               CREATED     created,
+		               CREATED_BY  createdBy,
+		               LAST_UPD    lastUpdated,
+		               LAST_UPD_BY lastUpdatedBy
+		          FROM LNK_ANNOUNCE t1 where t1.corp_id=#{usercorpid})
+		 where rn &lt; 7
+  </select>
+  
+  <update id="announceUpdate" parameterType="com.hand.base.common.model.Announce">
+     UPDATE LNK_ANNOUNCE
+      SET captions    = #{captions},
+          contents	  = #{contents},
+          start_date  = str_to_date(#{startDate}, '%Y-%m-%d %H:%i:%S'),
+          end_date    = str_to_date(#{endDate}, '%Y-%m-%d %H:%i:%S'),
+          anne_type   = GET_LOV_val(#{usercorpid},'ANNE_TYPE',#{anneType}),
+          anne_status   = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus}),
+          org_id	  = #{orgId},
+          anne_reader = GET_LOV_val(#{usercorpid},'ANNE_READER',#{anneReader}),
+          is_limited  = GET_LOV_val(#{usercorpid},'IS_LIMITED',#{isLimited})
+    WHERE ROW_ID = #{id}
+  </update>
+  
+  <update id="announceStatusUpdate" parameterType="com.hand.base.common.model.Announce">
+  	UPDATE LNK_ANNOUNCE
+  	   SET anne_status = GET_LOV_val(#{usercorpid},'ANNE_STATUS',#{anneStatus})
+  	 WHERE ROW_ID = #{id}
+  </update>
+  
+  <delete id="deleteAnnounceByAnnounceId" parameterType="com.hand.base.common.model.Announce">
+  	DELETE FROM LNK_ANNOUNCE WHERE ROW_ID = #{id}
+  </delete>
+  
+</mapper> -->

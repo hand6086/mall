@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.MenuMapper">
+  <resultMap type="com.hand.base.common.model.Menu" id="menu"></resultMap>
+  
+  <sql id="queryAllSql">
+  SELECT 
+    T1.ROW_ID AS id,
+    t1.created created,
+    T1.CREATED_BY AS createdBy,
+    DATE_FORMAT(t1.LAST_UPD, '%Y-%m-%d %H:%i:%S') AS lastUpdated,
+    T1.LAST_UPD_BY AS lastUpdatedBy,
+    T1.CORP_ID corpid,
+    t1.menu_name text,
+    '' state,
+    t1.menu_iconcls iconCls,
+    t1.menu_url menuUrl,
+    t1.menu_grade menuGrade,
+    t1.menu_icon menuIcon,
+    t1.menu_type menuType,
+    t1.sort_number sortNumber,
+    t1.parent_menu_id parentMenuId,
+    t2.menu_name parentMenuName,
+    t1.OAUTH oauthType,
+    t1.OAUTH_SQL oauthSql,
+    t1.comments comments,
+    t1.readonly_flag readonlyFlag,
+    t1.edit_flag editFlag,
+    t1.add_flag addFlag,
+    t1.delete_flag deleteFlag,
+    t1.export_flag exportFlag,
+    t1.platform_type platformType,
+    t1.universal_ind universalInd,
+    t1.fmcg_ind fmcgInd,
+    t1.high_tech_ind highTechInd,
+    t1.home_ind homeInd,
+    t1.fin_ind finInd,
+    t1.retail_ind retailInd,
+    t1.auto_ind autoInd
+
+
+  </sql>
+  
+  <sql id="fromTableSql">
+  	 FROM
+    LNK_MENU t1
+        LEFT JOIN
+    LNK_MENU t2 ON t1.PARENT_MENU_ID = t2.ROW_ID
+   WHERE
+   		 1 = 1
+  </sql>
+  
+  <sql id="whereAllSql">
+   	
+  		<if test="text != null and text != '' ">
+			and T1.menu_name = #{text}
+		</if>
+		<if test="menuUrl != null and menuUrl != '' ">
+			and T1.menu_url = #{menuUrl}
+		</if>
+		<if test="menuGrade != null and menuGrade != '' ">
+			and T1.menu_grade = #{menuGrade}
+		</if>
+		<if test="menuIcon != null and menuIcon != '' ">
+			and T1.menu_icon = #{menuIcon}
+		</if>
+		<if test="menuType != null and menuType != '' ">
+			and T1.menu_type = #{menuType}
+		</if>
+		<if test="parentMenuId != null and parentMenuId != '' ">
+			and T1.parent_menu_id = #{parentMenuId}
+		</if>
+		<if test="platformType != null and platformType != '' ">
+			and T1.platform_type = #{platformType}
+		</if>
+  </sql>
+  
+	<sql id="orderByAllSql">
+	ORDER BY t1.sort_number ASC
+	</sql>	
+	  <!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="menu"
+		parameterType="com.hand.base.common.model.Menu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+	
+	<select id="queryById" resultType="com.hand.base.common.model.Menu" parameterType="com.hand.base.common.model.Menu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and t1.row_id = #{id}
+	</select>
+	
+	
+  <select id="queryMenuListByTypeSelect" parameterType="com.hand.base.common.model.Menu" resultMap="menu">
+         <include refid="queryAllSql"/>
+	       ,t3.menu_read_only dutyReadonlyFlag,
+	       t3.menu_add dutyAddFlag,
+	       t3.menu_edit dutyEditFlag,
+	       t3.menu_del dutyDeleteFlag,
+	       t3.menu_export dutyExportFlag,
+	       t3.duty_id dutyId
+    from 
+       		LNK_MENU t1 
+       			left join 
+       		LNK_MENU t2 on t1.parent_menu_id = t2.row_id,
+       		LNK_INTER_DUTY_MENU t3,
+       		LNK_INTER_DUTY_USER t4
+       where 1=1 
+   <if test="menuType != null and menuType != '' ">
+			and T1.menu_type =#{menuType}
+	 </if>
+         and t3.menu_id = t1.row_id
+	     and t4.user_id = #{attr1}
+	     and t3.duty_id = t4.duty_id
+	     and t1.menu_grade = '1'
+	   <!-- <if test="usercorpid != '000' ">
+			and t1.menu_url != '/portal/enterprise/enterpriseList.jsp'
+	 	</if> -->
+   ORDER BY t1.sort_number ASC
+  </select>
+  
+    <select id="queryByMenuType" resultType="com.hand.base.common.model.Menu" parameterType="java.lang.String">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	 and t1.menu_grade = '0'
+	 and t1.menu_type = #{menuType}
+  </select>
+  
+  <select id="querySubItemListByDutyItemIdSelect" parameterType="com.hand.core.basic.query.QueryParams" resultMap="menu">
+	   select t1.row_id id,
+	       t1.created created,
+	       t1.menu_name as text,
+	       '' state,
+	       t1.menu_iconcls iconCls,
+	       ifnull(t1.menu_url, t2.menu_url) menuUrl,
+	       t1.menu_grade menuGrade,
+	       t1.menu_icon menuIcon,
+	       t1.menu_type menuType,
+	       t1.sort_number sortNumber,
+	       t1.parent_menu_id parentMenuId,
+	       t2.menu_name parentMenuName,
+	       case GET_LOV_VAL(#{corpid}, 'MENU_OAUTH', t1.OAUTH)
+	       WHEN 'other' then concat('other_',t1.row_id)
+	       ELSE t1.OAUTH END oauthType,
+	       '' oauthSql,
+	       t1.comments comments,
+		       t1.readonly_flag readonlyFlag,
+		       t1.edit_flag editFlag,
+		       t1.add_flag addFlag,
+		       t1.delete_flag deleteFlag,
+		       t1.export_flag exportFlag,
+		       t1.platform_type platformType,
+		       t1.universal_ind universalInd,
+		       t1.fmcg_ind fmcgInd,
+		       t1.high_tech_ind highTechInd,
+		       t1.home_ind homeInd,
+		       t1.fin_ind finInd,
+		       t1.retail_ind retailInd,
+		       t1.auto_ind autoInd,
+		       
+		       t3.menu_read_only dutyReadonlyFlag,
+		       t3.menu_add dutyAddFlag,
+		       t3.menu_edit dutyEditFlag,
+		       t3.menu_del dutyDeleteFlag,
+		       t3.menu_export dutyExportFlag,
+		       t3.duty_id dutyId
+       from 
+       		LNK_MENU t1 
+       			left join 
+       		LNK_MENU t2 on t1.parent_menu_id = t2.row_id,
+       		LNK_INTER_DUTY_MENU t3,
+       		LNK_INTER_DUTY_USER t4
+       where 1=1 
+		   and t1.menu_grade = '2'
+		   <if test="text != null and text != '' ">
+			and T1.menu_name = #{text}
+			</if>
+			<if test="menuUrl != null and menuUrl != '' ">
+				and T1.menu_url = #{menuUrl}
+			</if>
+			<if test="menuGrade != null and menuGrade != '' ">
+				and T1.menu_grade = #{menuGrade}
+			</if>
+			<if test="menuIcon != null and menuIcon != '' ">
+				and T1.menu_icon = #{menuIcon}
+			</if>
+			<if test="menuType != null and menuType != '' ">
+				and T1.menu_type = #{menuType}
+			</if>
+			<if test="parentMenuId != null and parentMenuId != '' ">
+				and T1.parent_menu_id = #{parentMenuId}
+			</if>
+			   AND T3.MENU_ID = t1.ROW_ID
+	           AND T3.DUTY_ID = T4.DUTY_ID
+	           AND T4.USER_ID = #{attr1}
+			 ORDER BY t1.sort_number ASC
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.common.model.Menu">
+	insert into LNK_MENU
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      row_id,
+      <if test="text != null and text != ''" >
+        menu_name,
+      </if>
+      <if test="menuUrl != null and menuUrl != ''" >
+        Menu_Url,
+      </if>
+      <if test="menuType != null and menuType != ''" >
+        Menu_Type,
+      </if>
+      <if test="sortNumber != null and sortNumber != ''" >
+        sort_number,
+      </if>
+      <if test="comments != null and comments != ''" >
+        Comments,
+      </if>
+      <if test="menuGrade != null and menuGrade != ''" >
+        menu_grade,
+      </if>
+      <if test="parentMenuId != null and parentMenuId != ''" >
+        parent_menu_id,
+      </if>
+      <if test="menuIcon != null and menuIcon != ''" >
+        menu_icon,
+      </if>
+      OAUTH,
+	  OAUTH_SQL,
+	  readonly_flag,
+      edit_flag,
+      add_flag,
+      delete_flag,
+      export_flag,
+      platform_type,
+      universal_ind,
+	  fmcg_ind,
+	  high_tech_ind,
+	  home_ind,
+	  fin_ind,
+	  retail_ind,
+	  auto_ind,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      s_sequence_pkg_get_next_rowid(),
+      <if test="text != null and text != ''" >
+        #{text,jdbcType=VARCHAR},
+      </if>
+      <if test="menuUrl != null and menuUrl != ''" >
+        #{menuUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="menuType != null and menuType != ''" >
+        #{menuType,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNumber != null and sortNumber != ''" >
+        #{sortNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="comments != null and comments != ''" >
+        #{comments,jdbcType=VARCHAR},
+      </if>
+      <if test="menuGrade != null and menuGrade != ''" >
+        #{menuGrade,jdbcType=VARCHAR},
+      </if>
+      <if test="parentMenuId != null and parentMenuId != ''" >
+        #{parentMenuId,jdbcType=VARCHAR},
+      </if>
+      <if test="menuIcon != null and menuIcon != ''" >
+        #{menuIcon,jdbcType=VARCHAR},
+      </if>
+       GET_LOV_val(#{usercorpid},'MENU_OAUTH', #{oauthType}),
+       #{oauthSql},
+       #{readonlyFlag},
+       #{editFlag},
+       #{addFlag},
+       #{deleteFlag},
+       #{exportFlag},
+       #{platformType},
+       #{universalInd},
+       #{fmcgInd},
+       #{highTechInd},
+       #{homeInd},
+       #{finInd},
+       #{retailInd},
+       #{autoInd},
+    </trim>
+  </insert> 
+  
+  <update id="update" parameterType="com.hand.base.common.model.Menu">
+		update LNK_MENU t
+		   set t.menu_name     = #{text},
+		       t.menu_url      = lnk_blank_str_to_null(#{menuUrl}),
+		       t.sort_number   = #{sortNumber},
+		       t.comments      = #{comments},
+		       t.menu_icon     = #{menuIcon},
+		       t.menu_type     = #{menuType},
+		       t.OAUTH         = GET_LOV_val(#{usercorpid}, 'MENU_OAUTH', #{oauthType}),
+		       t.OAUTH_SQL     = #{oauthSql},
+		       t.readonly_flag = #{readonlyFlag},
+		       t.edit_flag     = #{editFlag},
+		       t.add_flag      = #{addFlag},
+		       t.delete_flag   = #{deleteFlag},
+		       t.export_flag   = #{exportFlag},
+		       t.platform_type = #{platformType},
+		       t.universal_ind = #{universalInd},
+		       t.fmcg_ind	   = #{fmcgInd},
+		       t.high_tech_ind = #{highTechInd},
+		       t.home_ind	   = #{homeInd},
+		       t.fin_ind	   = #{finInd},
+		       t.retail_ind    = #{retailInd},
+		       t.auto_ind	   = #{autoInd}
+		 where t.row_id = #{id}
+  </update>
+  
+<select id="queryFstMenuList" parameterType="java.lang.String" resultMap="menu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and exists
+		 (select 1
+		          from LNK_INTER_DUTY_USER c4, LNK_INTER_DUTY_MENU c5, LNK_MENU c6
+		         where c5.duty_id = c4.duty_id
+		           and c5.menu_id = c6.row_id
+		           and c6.parent_menu_id = t1.row_id
+		           and c4.user_id = #{attr1})
+		   and t1.menu_grade = '0'
+		   and t1.platform_type = 'CRM'
+		    ORDER BY t1.sort_number ASC
+  </select>
+  
+  <select id="queryDmsMenuByUserId" parameterType="java.lang.String" resultMap="menu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		 and exists
+		 (select 1
+		          from LNK_INTER_DUTY_USER c4, LNK_INTER_DUTY_MENU c5
+		         where c5.duty_id = c4.duty_id
+		           and c5.menu_id = t1.row_id
+		           and c4.user_id = #{attr1})
+		   and t1.menu_grade = '1'
+		   and t1.platform_type = 'DMS'
+		    ORDER BY t1.sort_number ASC
+  </select>
+  
+    <select id="getMenuListByMenuTyepSelect" parameterType="com.hand.core.basic.query.QueryParams" resultMap="menu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	   and exists (select 1
+	          from LNK_INTER_DUTY_MENU t3, LNK_INTER_DUTY_USER t4
+	         where t4.user_id =#{attr1}
+	           and t3.duty_id = t4.duty_id
+	           and t3.menu_id = t1.row_id)
+	 ORDER BY t1.sort_number ASC
+  </select>
+  
+  <delete id="deleteById" parameterType="com.hand.base.common.model.Menu">
+  		delete from LNK_MENU where row_id = #{id}
+  </delete>
+  
+  <delete id="delMenuByParentId" parameterType="com.hand.base.common.model.Menu">
+  		delete from LNK_MENU where parent_menu_id = #{parentMenuId}
+  </delete>
+  
+</mapper>

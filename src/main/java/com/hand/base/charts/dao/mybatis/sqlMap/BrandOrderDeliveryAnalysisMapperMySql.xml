@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.BrandOrderDeliveryAnalysisMapper">
+	<resultMap type="com.hand.base.charts.model.BrandOrderDeliveryAnalysis" id="orderDelivery"></resultMap>
+
+	<sql id="queryAllSql">
+	SELECT
+			t3.row_id AS id,
+			t3.store_name AS merchName,
+			COUNT(1) AS orderNumber,
+			COUNT(
+				CASE
+				WHEN t1.attrib_48 = 'To Deliver' THEN
+					1
+				ELSE
+					NULL
+				END
+			) AS waitDelivery,
+			COUNT(
+				CASE
+				WHEN (
+					t1.attrib_48 = 'To Deliver'
+					AND ADDDATE(
+						t1.attrib_26,
+						INTERVAL 48 HOUR
+					) &gt;= NOW()
+				) THEN
+					1
+				ELSE
+					NULL
+				END
+			) AS unshippedDelivery,
+			COUNT(
+				CASE
+				WHEN (
+					t1.attrib_48 = 'To Deliver'
+					AND ADDDATE(
+						t1.attrib_26,
+						INTERVAL 48 HOUR
+					) &lt; NOW()
+				) THEN
+					1
+				ELSE
+					NULL
+				END
+			) AS unshippedDeliveryLong,
+			COUNT(
+				CASE
+				WHEN t1.attrib_48 = 'To Receive' THEN
+					1
+				ELSE
+					NULL
+				END
+			) AS waitSign,
+			COUNT(
+				CASE
+				WHEN t1.attrib_48 = 'Finished' THEN
+					1
+				ELSE
+					NULL
+				END
+			) AS completeNumber
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM
+			s_order_x t1
+		LEFT JOIN lnk_enterprise t3 ON t1.attrib_41 = t3.row_id
+	</sql>
+	
+	<sql id="whereAllSql">
+		WHERE
+			order_type = 'brand'
+		AND t1.attrib_41 IS NOT NULL
+		<if test="merchName != null and merchName != ''">
+			and t3.store_name LIKE CONCAT(CONCAT('%',#{merchName},'%'))
+		</if>
+		<if test="startTime != null and startTime != ''">
+			and t1.CREATED &gt;= #{startTime}
+		</if>
+					
+		<if test="endTime != null and endTime != ''">
+			and t1.CREATED &lt;= #{endTime}
+		</if>
+		GROUP BY
+			t3.store_name
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="orderDelivery" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="orderDelivery" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="queryById" resultMap="orderDelivery" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<select id="brandQueryById" resultMap="orderDelivery" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="orderDelivery" parameterType="com.hand.base.charts.model.BrandOrderDeliveryAnalysis">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

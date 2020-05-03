@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2oaccnt.dao.mybatis.mapper.AreaMapper">
+	<resultMap type="com.hand.base.o2oaccnt.model.Area" id="area"></resultMap>
+
+	<sql id="queryAllSql">
+		SELECT
+		T1.ROW_ID id
+		,T1.CREATED created 
+		,T1.CREATED_BY as createdBy
+		,DATE_FORMAT(T1.LAST_UPD, '%Y-%m-%d
+		%H:%i:%S') as lastUpdated
+		,T1.LAST_UPD_BY as lastUpdatedBy
+		,T1.`NAME` areaName /*区域名称*/
+		,T1.TYPE	areaType /*区域类型*/
+		,T1.CODE	areaCode /*区域编码*/
+		,T1.T_ATTR_02 isO2OArea /*是否O2O平台区域*/
+		,T1.PARENT_ID parentId /*父区域id*/
+		,T1.T_ATTR_04 attr04 /*关联真实名字的字段*/
+		,T2.`NAME`	parentAreaName /*父区域名称*/
+		,T2.TYPE	parentAreaType /*父区域类型*/
+		,T3.`NAME` actualCity	/*真实名字*/
+		,T3.TYPE actualCityType /*真实城市区域类型*/
+		,T4.ORG_NAME	orgOnName /*对应组织*/
+		,T1.T_ATTR_01 isO2ODistrict /*是否地配区域*/
+		,T1.T_ATTR_06 areaImgId  /*图片id*/
+		,t5.row_id orgId
+	</sql>
+
+
+	<sql id="fromTableSql">
+		FROM CX_O_AREA T1
+		LEFT JOIN CX_O_AREA T2 ON T1.PARENT_ID = T2.ROW_ID
+		LEFT JOIN CX_O_AREA T3 ON T3.ROW_ID = T1.T_ATTR_04
+		LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T1.T_ATTR_05
+		LEFT JOIN lnk_org_ext T5 ON T5.ROW_ID = T2.T_ATTR_05
+	</sql>
+
+	<sql id="whereAllSql">
+		WHERE 1 = 1
+	</sql>
+
+	<select id="queryById" resultMap="area" parameterType="com.hand.base.o2oaccnt.model.Area">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+		AND T1.ROW_ID=#{id}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="area"
+		parameterType="com.hand.base.o2oaccnt.model.Area">
+		<include refid="queryAllSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereAllSql" />
+	</select>
+	
+	<delete id="deleteById" parameterType="com.hand.base.o2oaccnt.model.Area">
+		DELETE FROM
+		CX_O_AREA WHERE row_id = #{id}
+	</delete>
+	
+	<update id="update" 
+	 parameterType="com.hand.base.o2oaccnt.model.Area">
+		UPDATE CX_O_AREA 
+		SET 
+		`NAME`	 		=#{areaName} /*区域名称*/
+		,TYPE			=GET_LOV_val(#{usercorpid}, 'TB_O2O_AREA_TYPE',#{areaType}) /*区域类型*/
+		,CODE			=#{areaCode} /*区域编码*/
+		,T_ATTR_02 		=#{isO2OArea} /*是否O2O平台区域*/
+		,PARENT_ID 	=#{parentId}
+		,T_ATTR_04 		=#{attr04} /*关联真实名字的字段*/
+		WHERE ROW_ID= #{id};
+		
+<!-- 		UPDATE CX_O_AREA 
+		SET 
+		`NAME`	 	=#{parentAreaName} /*父区域名称*/
+		,TYPE		=#{parentAreaType} /*父区域类型*/
+		WHERE ROW_ID = #{parentId};
+		
+		UPDATE CX_O_AREA 
+		SET 
+		`NAME` 	=#{actualCity}	/*真实名字*/
+		WHERE ROW_ID= #{attr04}; -->
+	</update>
+	
+	<insert id="insert" 
+	 parameterType="com.hand.base.o2oaccnt.model.Area">
+		insert into CX_O_AREA 
+		(row_id
+		,`NAME`
+		,TYPE
+		,CODE
+		,T_ATTR_02 
+		,PARENT_ID
+		,T_ATTR_04
+		,T_ATTR_01
+		) 
+		VALUES(
+		#{id}
+		,#{areaName}
+		,GET_LOV_val(#{usercorpid}, 'TB_O2O_AREA_TYPE',#{areaType}) /*区域类型*/
+		,#{areaCode} /*区域编码*/
+		,#{isO2OArea} /*是否O2O平台区域*/
+		,#{parentId}
+		,#{attr04} /*关联真实名字的字段*/
+		,#{isO2ODistrict}
+		)
+	</insert>	
+	
+	<select id="actualCityPickListPage" resultMap="area" parameterType="com.hand.base.o2oaccnt.model.Area">
+		SELECT
+		 t2.ROW_ID 	id 
+		,T2.NAME actualCity /*名称*/
+		,T2.CODE areaCode /*编码*/
+		,T1.NAME parentAreaName/*省/直辖市*/
+		,T1.T_ATTR_02 isO2OArea /*是否O2O平台区域*/
+		,T1.T_ATTR_01 isO2ODistrict/*是否地配区域*/
+		FROM CX_O_AREA 	T1,CX_O_AREA T2
+		WHERE  T2.PARENT_ID = T1.ROW_ID AND (T1.TYPE='省份' or T1.TYPE= 'Province' )
+		order by t2.CREATED desc
+	</select>
+
+	<select id="parentAreaPickListPage" resultMap="area" parameterType="com.hand.base.o2oaccnt.model.Area">
+		SELECT 
+			ROW_ID 	id 
+			,NAME 	parentAreaName /*名称*/
+			,TYPE	areaType /*类型*/
+			,CODE	areaCode /*编码*/
+		FROM CX_O_AREA 
+		WHERE TYPE ='城市' OR TYPE ='City' OR TYPE = '省份' OR TYPE = 'Province'
+		order by CREATED desc
+	</select>
+	
+	<update id="areaImageUpate" parameterType="com.hand.base.o2oaccnt.model.Area">
+	 	UPDATE CX_O_AREA t
+		   SET t.T_ATTR_06  = #{areaImgId}
+		 WHERE t.row_id = #{id}
+ 	</update>
+
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsMessMapper">
+	<resultMap type="com.hand.base.goods.model.GoodsSuit" id="goodsSuit"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d
+	%H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD,
+	'%Y-%m-%d
+	%H:%i:%S')
+	as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.ORDER_NUM orderNumber, #订单号
+	t2.NAME customerName, #消费者名称
+	t.T_ATTR_01 merchRate, #商品评级
+	t.CONTEXT context, #具体评价内容
+	t.IS_POSITIVE isPositive, #是否正面评价
+	t.TYPE type, #类型
+	t.ORDER_ID orderId,
+	t.CUSTOMER_ID customerId,
+	t.MERCH_ID merchId #link
+	</sql>
+
+	<sql id="fromSql">
+	from CX_O_ORD_MSG t
+	LEFT JOIN S_ORDER t1 on t1.row_id=t.ORDER_ID
+	LEFT JOIN lnk_accnt t2 on t2.row_id=t.CUSTOMER_ID
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and (t.TYPE='产品评价' OR t.TYPE='Product Evaluate')
+		and t.MERCH_ID=#{merchId}
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.GoodsSuit" resultMap="goodsSuit">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+  	</select>
+  	
+  	  	 	
+	<select id="queryById" resultType="com.hand.base.goods.model.GoodsSuit"
+		parameterType="com.hand.base.goods.model.GoodsSuit">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.goods.model.GoodsSuit">
+		insert into CX_O_ORD_MSG
+		  (ROW_ID, MERCH_RATE, T_ATTR_01, CONTEXT, IS_POSITIVE, TYPE, ORDER_ID, CUSTOMER_ID, MERCH_ID)
+		values
+		  (#{id},get_lov_name(#{usercorpid},'TB_O2O_APPRAISE_RATE',#{merchRate}),#{merchRate},#{context},#{isPositive},#{type},#{orderId},#{customerId},#{merchId})
+	</insert>
+	
+  
+	<update id="update" parameterType="com.hand.base.goods.model.GoodsSuit">
+		update CX_O_ORD_MSG t
+		   set t.MERCH_RATE = get_lov_name(#{usercorpid},'TB_O2O_APPRAISE_RATE',#{merchRate}), t.T_ATTR_01 = #{merchRate}, t.CONTEXT = #{context}
+		   , t.IS_POSITIVE = #{isPositive}, t.TYPE = #{type}
+		   , t.ORDER_ID = #{orderId}, t.CUSTOMER_ID = #{customerId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.GoodsSuit">
+		DELETE FROM CX_O_ORD_MSG WHERE ROW_ID = #{id}
+	</delete>
+</mapper>

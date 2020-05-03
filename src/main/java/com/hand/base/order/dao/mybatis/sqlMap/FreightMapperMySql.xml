@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.order.dao.mybatis.mapper.FreightMapper">
+	<resultMap type="com.hand.base.order.model.Freight" id="freight"></resultMap>
+	
+	<sql id="queryTableSql">
+		SELECT
+			t1.ROW_ID id,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.name name,
+			t1.way way,
+			t1.notes notes,
+			t2.name corpName,
+			round(t1.first_number) firstNumber,
+			round(t1.first_fee,2) firstFee,
+			round(t1.add_number) addNumber,
+			round(t1.add_fee,2) addFee,
+			t1.city_id cityId,
+			t3.name cityName,
+			t4.row_id orgId
+	</sql>
+	<sql id="brandQueryTableSql">
+		SELECT
+			t1.ROW_ID id,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.name name,
+			t1.way way,
+			t1.notes notes,
+			t2.name corpName,
+			round(t1.first_number) firstNumber,
+			round(t1.first_fee,2) firstFee,
+			round(t1.add_number) addNumber,
+			round(t1.add_fee,2) addFee,
+			t1.city_id cityId,
+			t3.name cityName,
+			t4.row_id orgId
+	</sql>
+	        
+	<sql id="fromTableSql">
+		from lnk_freight t1
+		left join lnk_enterprise t2 on t1.corp_id=t2.CODE
+		left join (CX_O_AREA t3  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T3.T_ATTR_05) on  t1.city_id = t3.row_id
+	</sql>
+	
+	<sql id="brandFromTableSql">
+		from lnk_freight t1
+		left join lnk_enterprise t2 on t1.corp_id=t2.CODE
+		left join (CX_O_AREA t3  LEFT JOIN lnk_org_ext T4 ON T4.ROW_ID = T3.T_ATTR_05) on  t1.city_id = t3.row_id
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1 = 1
+			and t1.corp_id = #{usercorpid}
+		<if test="cityId != '' and cityId != null">
+			and t1.city_id = #{cityId}
+		</if>
+		
+	</sql>
+	<sql id="brandWhereTableSql">
+		WHERE 1 = 1
+		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		</if>
+		
+		<if test="cityId != '' and cityId != null">
+			and t1.city_id = #{cityId}
+		</if>
+		
+		<if test="usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101'
+		 </if>
+		
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="brandQueryByExamplePage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		<include refid="brandQueryTableSql" />
+		<include refid="brandFromTableSql" />
+		<include refid="brandWhereTableSql" />
+		order by t1.CREATED desc
+	</select>
+	
+	<select id="queryCsPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+	SELECT
+		t1.row_id id,
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.o2o_display_name o2oDisplayName
+	FROM
+		s_prod_int_x t1
+	WHERE
+		t1.row_id IN (
+			SELECT
+				prod_id
+			FROM
+				cx_o_price_list
+			WHERE
+				freight_id = #{id}
+		)
+	</select>
+	
+	
+	<select id="brandQueryCsPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+	SELECT
+		t1.row_id id,
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.o2o_display_name o2oDisplayName
+	FROM
+		s_prod_int_x t1
+	WHERE
+		t1.row_id IN (
+			SELECT
+				prod_id
+			FROM
+				cx_o_price_list
+			WHERE
+				freight_id = #{id}
+		)
+	</select>
+	
+	<select id="queryMaPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		SELECT
+		t1.row_id id,
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		T3.row_id areaId,
+	    T3.NAME areaName
+	 	from 
+	    LNK_INTER_FREIGHT_YAREA t1 
+	  	left join LNK_FREIGHT t2 on t1.freight_id = t2.row_id
+	  	left join CX_O_AREA t3 on t1.area_id = t3.row_id
+	    where 1=1
+	    and t3.TYPE = 'Province'
+	    and t1.freight_id = #{freightId}
+	</select>
+	
+	<select id="brandQueryMaPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		SELECT
+		t1.row_id id,
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		T3.row_id areaId,
+	    T3.NAME areaName
+	 	from 
+	    LNK_INTER_FREIGHT_YAREA t1 
+	  	left join LNK_FREIGHT t2 on t1.freight_id = t2.row_id
+	  	left join CX_O_AREA t3 on t1.area_id = t3.row_id
+	    where 1=1
+	    and t3.TYPE = 'Province'
+	    and t1.freight_id = #{freightId}
+	</select>
+	
+	<select id="queryNmaPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		SELECT
+			t1.row_id id,
+			date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+			t1.CREATED_BY createdBy,
+			date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+			t1.LAST_UPD_BY lastUpdatedBy,
+			t1.CORP_ID corpid,
+			t1.area_id areaId,
+		    round(t1.first_number) firstNumber,
+			round(t1.first_fee,2) firstFee,
+			round(t1.add_number) addNumber,
+			round(t1.add_fee,2) addFee
+	 	from 
+	    	LNK_INTER_FREIGHT_NAREA t1
+	    where 1=1
+	   	 	and t1.freight_id = #{freightId}
+	   	 	<if test=" attr1 == 'queryById' ">
+	   	 	and t1.row_id = #{id}
+	   	 	</if>
+			<if test=" attr1 == 'updateNma' ">
+	   	 	and t1.row_id != #{id}
+	   	 	</if>
+	</select>
+	
+	<select id="brandQueryNmaPage" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		SELECT
+		t1.row_id id,
+		date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpdated,
+		t1.LAST_UPD_BY lastUpdatedBy,
+		t1.CORP_ID corpid,
+		T3.row_id areaId,
+	    T3.NAME areaName
+	 	from 
+	    LNK_INTER_FREIGHT_NAREA t1
+	  	left join LNK_FREIGHT t2 on t1.freight_id = t2.row_id
+	  	left join CX_O_AREA t3 on t1.area_id = t3.row_id
+	    where 1=1
+	    and t3.TYPE = 'Province'
+	    and t1.freight_id = #{freightId}
+	</select>
+	
+	<select id="countByCityIdAndName" parameterType="com.hand.base.order.model.Freight" resultType="java.lang.Integer">
+		select count(1) from lnk_freight t where 1 = 1 and corp_id = #{usercorpid} 
+		<if test="cityId != '' and cityId != null">
+			and city_id = #{cityId}
+		</if>
+		<if test="name != '' and name != null">
+			and name = #{name}
+		</if>
+		<if test="id != '' and id != null">
+			and row_id != #{id}
+		</if>
+	
+	</select>
+	
+	<select id="brandCountByCityIdAndName" parameterType="com.hand.base.order.model.Freight" resultType="java.lang.Integer">
+		select count(1) from lnk_freight t where 1 = 1 and corp_id = #{usercorpid} 
+		<if test="cityId != '' and cityId != null">
+			and city_id = #{cityId}
+		</if>
+		<if test="name != '' and name != null">
+			and name = #{name}
+		</if>
+		<if test="id != '' and id != null">
+			and row_id != #{id}
+		</if>
+	
+	</select>
+	
+	<insert id="insert" parameterType="com.hand.base.order.model.Freight">
+		INSERT INTO lnk_freight(
+			ROW_ID,
+			name,
+			way,
+			notes,
+			first_number,
+			first_fee,
+			add_number,
+			add_fee,
+			city_id
+		)
+		VALUES(
+			#{id},
+			#{name},
+			#{way},
+			#{notes},
+			#{firstNumber},
+			lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT}),
+			#{addNumber},
+			lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT}),
+			#{cityId}
+		)
+	</insert>
+	
+	<insert id="brandInsert" parameterType="com.hand.base.order.model.Freight">
+		INSERT INTO lnk_freight(
+			ROW_ID,
+			name,
+			way,
+			notes,
+			first_number,
+			first_fee,
+			add_number,
+			add_fee,
+			city_id
+		)
+		VALUES(
+			#{id},
+			#{name},
+			#{way},
+			#{notes},
+			#{firstNumber},
+			lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT}),
+			#{addNumber},
+			lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT}),
+			#{cityId}
+		)
+	</insert>
+	
+	<insert id="insertmailArea" parameterType="com.hand.base.order.model.Freight">
+		INSERT INTO LNK_INTER_FREIGHT_YAREA(
+			ROW_ID,
+			created,
+			CREATED_BY,
+	        LAST_UPD,
+			LAST_UPD_BY,
+			CORP_ID,
+			freight_id,
+			area_id
+			)
+			values
+			<foreach collection ="mailAreaAll" item="areaId" index= "index" separator =",">
+			(s_sequence_pkg_get_next_rowid(),
+			now(),
+			#{createdBy},
+			now(),
+			#{lastUpdatedBy},
+			#{usercorpid},
+			#{freightId},
+	        #{areaId}
+	        )
+	        </foreach >
+	</insert>
+	
+	<insert id="nomailAreaInsert" parameterType="com.hand.base.order.model.Freight">
+		INSERT INTO LNK_INTER_FREIGHT_NAREA(
+			ROW_ID,
+			freight_id,
+			area_id,
+			first_number,
+			first_fee,
+			add_number,
+			add_fee
+			)
+			values
+			(#{id},
+			#{freightId},
+	        #{areaId},
+	        #{firstNumber},
+			lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT}),
+			#{addNumber},
+			lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT})
+	        )
+	</insert>
+	
+	<update id="update" parameterType="com.hand.base.order.model.Freight">
+		update lnk_freight t
+		   set t.name = #{name},
+		       t.way = #{way},
+		       t.notes=#{notes}
+		       <if test="cityId != null and cityId != ''">
+		       ,city_id = #{cityId}
+		       </if>
+		       <if test="firstNumber != null and firstNumber != ''">
+		       ,first_number = #{firstNumber}
+		       </if>
+		       <if test="firstFee != null and firstFee != ''">
+			   ,first_fee = lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT})
+			   </if>
+		       <if test="addNumber != null and addNumber != ''">
+			   ,add_number = #{addNumber}
+			   </if>
+		       <if test="addFee != null and addFee != ''">
+			   ,add_fee = lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT})
+			   </if>
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="nomailAreaUpdate" parameterType="com.hand.base.order.model.Freight">
+		update LNK_INTER_FREIGHT_NAREA t
+		   set t.row_id = #{id}
+		       <if test="firstNumber != null and firstNumber != ''">
+		       ,first_number = #{firstNumber}
+		       </if>
+		       <if test="firstFee != null and firstFee != ''">
+			   ,first_fee = lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT})
+			   </if>
+		       <if test="addNumber != null and addNumber != ''">
+			   ,add_number = #{addNumber}
+			   </if>
+		       <if test="addFee != null and addFee != ''">
+			   ,add_fee = lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT})
+			   </if>
+		       <if test="areaId != null and areaId != ''">
+			   ,area_id = #{areaId}
+			   </if>
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.order.model.Freight">
+		update lnk_freight t
+		   set t.name = #{name},
+		       t.way = #{way},
+		       t.notes=#{notes}
+		       <if test="cityId != null or cityId != ''">
+		       ,city_id = #{cityId}
+		       </if>
+		       <if test="firstNumber != null or firstNumber != ''">
+		       ,first_number = #{firstNumber}
+		       </if>
+		       <if test="firstFee != null or firstFee != ''">
+			   ,first_fee = lnk_blank_str_to_null(#{firstFee,jdbcType=FLOAT})
+			   </if>
+		       <if test="addNumber != null or addNumber != ''">
+			   ,add_number = #{addNumber}
+			   </if>
+		       <if test="addFee != null or addFee != ''">
+			   ,add_fee = lnk_blank_str_to_null(#{addFee,jdbcType=FLOAT})
+			   </if>
+		 where t.row_id = #{id}
+	</update>
+		
+	<delete id="deleteById" parameterType="com.hand.base.order.model.Freight">
+		DELETE FROM lnk_freight WHERE ROW_ID = #{id}
+	</delete>
+	
+		
+	<delete id="brandDeleteById" parameterType="com.hand.base.order.model.Freight">
+		DELETE FROM lnk_freight WHERE ROW_ID = #{id}
+	</delete>
+		
+	<delete id="deleteYById" parameterType="com.hand.base.order.model.Freight">
+		DELETE FROM LNK_INTER_FREIGHT_YAREA WHERE freight_id = #{freightId} and area_id in 
+		<foreach collection="mailAreaAll" item="areaId" open="(" separator=", " close=")">
+	        #{areaId}
+	    </foreach>
+	</delete>
+		
+	<delete id="deleteNById" parameterType="com.hand.base.order.model.Freight">
+		DELETE FROM LNK_INTER_FREIGHT_NAREA WHERE row_id = #{id}
+	</delete>
+	
+	<select id="queryById" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		AND t1.ROW_ID = #{id}
+	</select>
+	<select id="brandQueryById" resultMap="freight" parameterType="com.hand.base.order.model.Freight">
+		<include refid="queryTableSql" />
+		<include refid="fromTableSql" />
+		<include refid="whereTableSql" />
+		AND t1.ROW_ID = #{id}
+	</select>
+</mapper>

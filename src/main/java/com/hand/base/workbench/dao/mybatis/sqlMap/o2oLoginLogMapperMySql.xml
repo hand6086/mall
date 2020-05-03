@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.workbench.dao.mybatis.mapper.o2oLoginLogMapper">
+	<resultMap type="com.hand.base.workbench.model.o2oLoginLog" id="o2oLoginLog"></resultMap>
+
+	<sql id="queryAllSql">
+		select
+		T.ROW_ID            as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY        as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY       as lastUpdatedBy,
+	    t.USER_ID userId,
+		t.OPEN_DATE openDate,
+		t.LOGIN_DATE loginDate,
+		t.LOGOUT_DATE logoutDate,
+		t.DEVICE_NUM deviceNum,
+		t.PHONE_TYPE phoneType,
+		t.SYSTEM_VERSION systemVersion,
+		t.LOCATION location,
+		t.T_ATTR_01 cityId
+
+	</sql>
+
+	<sql id="fromSql">
+		from CX_O_LN_LOG t
+  	</sql>
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.workbench.model.o2oLoginLog" resultMap="o2oLoginLog">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		order by t.CREATED desc
+  	</select>
+  	
+  	 	
+	<select id="queryById" resultType="com.hand.base.workbench.model.o2oLoginLog"
+		parameterType="com.hand.base.workbench.model.o2oLoginLog">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+  	
+  	<insert id="insert" parameterType="com.hand.base.workbench.model.o2oLoginLog">
+		insert into CX_O_LN_LOG
+		  (ROW_ID, USER_ID, OPEN_DATE,LOGIN_DATE,LOGOUT_DATE,DEVICE_NUM
+		  ,PHONE_TYPE,SYSTEM_VERSION,LOCATION)
+		values
+		  (#{id},#{userId},#{openDate},#{loginDate},#{logoutDate},#{deviceNum}
+		  ,#{phoneType},#{systemVersion},#{location})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.workbench.model.o2oLoginLog">
+		update CX_O_LN_LOG t
+		   set t.USER_ID = #{userId}, t.OPEN_DATE = #{openDate}, t.LOGIN_DATE = #{loginDate}
+		   , t.LOGOUT_DATE = #{logoutDate}, t.DEVICE_NUM = #{deviceNum}, t.PHONE_TYPE = #{phoneType}
+		   , t.SYSTEM_VERSION = #{systemVersion}, t.LOCATION = #{location}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.workbench.model.o2oLoginLog">
+		DELETE FROM CX_O_LN_LOG WHERE ROW_ID = #{id}
+	</delete>
+  	
+  
+</mapper>

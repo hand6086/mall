@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.basic.mapper.MvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <!-- 写法(一) -->
+  <resultMap type="com.hand.base.position.model.Position" id="position"></resultMap>
+  
+  <!-- 写法(二) -->
+  <!--
+  <resultMap type="java.util.HashMap" id="position">
+ 	<result property="id" column="id"/>
+ 	<result property="postnName" column="postnName"/>
+ 	<result property="deptName" column="deptName"/>
+ 	<result property="orgName" column="orgName"/>
+ 	<result property="positionType" column="positionType"/>
+ 	<result property="username" column="username"/>
+ 	<result property="fstName" column="fstName"/>
+ 	<result property="interId" column="interId"/>
+ 	<result property="isDefault" column="isDefault"/>
+ 	<result property="userId" column="userId"/>
+  </resultMap>
+  -->
+  
+  <select id="queryLeftListPage" resultMap="position" parameterType="com.hand.base.position.model.Position">
+		select t1.row_id id,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       t1.postn_name postnName,
+		       t2.org_name deptName,
+		       t3.org_name orgName,
+		        t1.postn_type positionType,
+		       t4.username username,
+		       t4.fst_name fstName
+		  from LNK_POSTN_EXT t1 left join LNK_EMP_INFO t4 on t1.user_id = t4.row_id
+		  	   left join LNK_ORG_EXT t2 left join 
+		  	   				LNK_ORG_EXT t3 on t2.org_id = t3.row_id
+		  	   on t1.dept_id = t2.row_id
+		 where 1=1
+		   and t1.corp_id = #{usercorpid}
+		   and not exists (select s1.postn_id
+		          from LNK_INTER_USER_POSTN s1
+		         where t1.row_id = s1.postn_id
+		           and s1.user_id = #{mvgParentId})
+  </select>
+  
+  <select id="queryRightListPage" resultMap="position" parameterType="com.hand.base.position.model.Position">
+		select t1.row_id interId,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       t1.postn_id id,
+		       t2.postn_Name postnName,
+		        t2.postn_type positionType,
+		       t4.org_name deptName,
+		       t5.org_name orgName,
+		       (case
+		         when t3.postn_id = t2.row_id then
+		          'Y'
+		         else
+		          'N'
+		       end) isDefault,
+		       t1.user_id userId
+		  from 
+		  LNK_INTER_USER_POSTN t1 left join LNK_EMP_INFO t3 on t1.user_id = t3.row_id,
+			  LNK_POSTN_EXT t2 left join 
+			  	   LNK_ORG_EXT t4 left join LNK_ORG_EXT t5 on t4.org_id = t5.row_id
+			  on t2.dept_id = t4.row_id
+		 where 1=1
+		   and t1.postn_id = t2.row_id
+		   and t1.corp_id = #{usercorpid}
+		   and t1.user_id = #{mvgParentId}
+  </select>
+  
+  <!-- 查询默认ID,备用方法,一般情况不需要用到；当默认的方法不满足时使用时可启用。by heqiqian 2016-10-31 -->
+  <!-- <select id="queryDefault" resultType="java.lang.String" parameterType="com.hand.base.mvg.model.Mvg">
+		SELECT t1.postn_id
+		  FROM lnk_emp_info t1, LNK_INTER_USER_POSTN t2, lnk_postn_ext t3
+		 where 1 = 1
+		   and t1.row_id = t2.user_id
+		   and t2.postn_id = t3.row_id
+		   and t1.postn_id = t3.row_id
+		   and t1.row_id = #{mvgParentId}
+  </select> -->
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into LNK_INTER_USER_POSTN
+		  (row_id,
+		   user_id,
+		   postn_id)
+		values
+		  (#{id},
+		   #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_USER_POSTN
+		 WHERE postn_id = #{mvgSubsetId}
+		   and user_id = #{mvgParentId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM LNK_INTER_USER_POSTN WHERE user_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

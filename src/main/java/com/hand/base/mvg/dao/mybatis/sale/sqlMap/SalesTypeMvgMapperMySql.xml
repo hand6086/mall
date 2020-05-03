@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.sale.mapper.SalesTypeMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.basic.model.ListOfValue" id="listOfValue"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="listOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+	SELECT
+		t1.row_id id,
+		t1.NAME name,/*促销形式*/
+		t1.val val
+	FROM
+		lnk_list_of_val t1
+	WHERE not exists (
+		  		select t2.type_id
+				from lnk_inter_type_sale t2
+				where t2.type_id = t1.row_id
+				and t2.sale_schema_id = #{mvgParentId}
+			  )
+	and t1.type = 'TB_O2O_CAMPAIGN_TYPE'
+	and t1.val != 'Coupon'
+	<!-- and t1.corp_id = #{usercorpid} -->
+  </select>
+  
+  <select id="queryRightListPage" resultMap="listOfValue" parameterType="com.hand.base.basic.model.ListOfValue">
+	select
+		t3.row_id id,
+		t3.NAME name,/*促销形式*/
+		t3.val val,
+		1 errorTimes,
+		(case when t2.type = t3.val then 'Y' else 'N' end) isDefault
+	from 
+		  lnk_inter_type_sale t1 left join LNK_SALE_SCHEMA t2 on t1.sale_schema_id = t2.row_id
+	left join lnk_list_of_val t3 on t1.type_id = t3.row_id
+	where 1=1
+		and t1.sale_schema_id = #{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+	INSERT INTO lnk_inter_type_sale 
+	   (row_id,
+	   type_id,
+	   sale_schema_id
+	   )
+	VALUES
+	  (#{id},
+	   #{mvgSubsetId},
+	   #{mvgParentId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		delete from lnk_inter_type_sale 
+		where sale_schema_id = #{mvgParentId} 
+		and type_id = #{mvgSubsetId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+  		delete from lnk_inter_type_sale 
+		where sale_schema_id = #{mvgParentId} 
+  </delete>
+  
+</mapper>

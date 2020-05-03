@@ -1,0 +1,217 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+	body{padding: 0;margin: 0;font-family: "微软雅黑";}
+	a{text-decoration: none;}
+		.content{margin: 0 auto;width: 100%;}
+		.navbar{width: 100%;
+    height: 72px;
+    line-height: 72px;
+    font-size: 15px;
+    background-color: #253544;
+    margin: 0 auto;
+    padding-top: 0px;
+    } 
+    .titleIcon{
+	height:57px;
+	width:101px;
+	float:left;
+	margin:7px 90px 0px 0px;
+	background:url(logo.png) no-repeat center 0;
+	background-size:100% 100%;
+}
+.navbarContent {
+    width: 1033px;
+    margin:0 auto;
+    height: 72px;
+    font-size: 20px;
+    }
+    .titleHref {
+    height: 62px;
+    width: 55px;
+    float: left;
+    margin-right: 40px;
+    text-align: center;
+    cursor: pointer;
+}
+.titleHref p {
+	margin: 0;
+
+}
+.titleHref a{font-size:20px;color:#FFF;font-family:Microsoft YaHei;}
+.hr{
+	background-color: #469ce7;
+	height: 3px;
+	padding: 0px;
+	display: none;
+}
+.roundedRectangle{
+	behavior: url(ie-css3.htc);
+	text-align: center;
+    font-size: 18px;
+    width: 150px;
+    height:40px;
+    line-height:40px;   
+    overflow:hidden;   
+    border: 1px solid rgba(153,204,255,.5);
+    background: rgba(255,255,255,.2);
+    padding: 0px;
+    margin: 14px 40px 0px 0px;
+    -ms-border-radius: 50px;
+    -webkit-border-radius: 50px;
+    -moz-border-radius: 50px;
+  	-o-border-radius: 50px;
+    float:right;
+    cursor:pointer;
+    position:relative;
+    border-radius: 50px;
+    transition:0.3s;
+}
+.linkTitle { 
+	color:#FFF; transition:0.3s; 
+	font-size:16px;
+}
+.linkTitle:hover { 
+	color:#469ce7; 
+}
+.saoyisao{width: 100%;height: 650px;}
+.saoyisaoContent{width: 1033px;height: 100%;margin: 0 auto;position:relative;}
+.saoyisao-left{width: 50%;height: 100%;position: absolute;left:0;background:url(phone.png) no-repeat 50% 70%;}
+.saoyisao-right{width: 50%;height: 100%;position: absolute;right:0;background: url(phone.png) no-repeat 50% 70%;}
+.hd{text-align: center;margin-top:50px;font-size:18px; }	
+.cont{width: 150px;position: absolute;top: 230px;left: 183px;}
+img{width: 150px;height: 150px;}
+.cont p{font-size:13px;color:#fff;text-align: center;}
+.cont a{display: block;width: 150px;height: 150px;}
+.rizhi{width: 100%;margin-bottom: 100px;}
+.rizhiContent{width: 1033px;margin: 0 auto;}
+.rizhi-hd{font-size:20px;font-weight: bold;}
+.banben-hd{font-size:20px;position: relative;}
+.banben-hd span{color: #999;}
+.banben-text{font-size:13px;line-height: 25px;}
+.title{font-size: 15px;}
+.banquan{width: 100%;}
+.banquanContent{width: 1033px;text-align: center;font-size: 14px;color: #999;margin: 0 auto;}
+.banquan a{color: #999;}
+.banben2-text{display: none;}
+.hd-icon{background: url(bottom.png) no-repeat 0;width:16px;height: 10px;background-size: 100%;display: block;position: absolute;left: 260px;top:12px;}
+</style>
+<script src="jquery.min.js"></script>
+
+</head>
+<body>
+	<div class="content">
+		<div class="navbar">
+			<div class="navbarContent">
+				<div class="titleIcon"></div>
+				<div id="titleHref1" class="titleHref" onclick="goProductPage()">
+					<p>
+						<a>产品</a>
+						<div id="hrProduct" class="hr"></div>
+					</p>
+				</div>
+				<div id="titleHref2" class="titleHref" onclick="goDownloadPage()">
+					<p>
+						<a>下载</a>
+						<div id="hrDownload" class="hr"></div>
+					</p>
+				</div>
+				<div id="roundedRectangle2" class="roundedRectangle" onclick="goLinkCrm()">
+						<a class="linkTitle" href="/login.jsp" target="_blank">企业CRM平台</a>
+				</div>
+				<div id="roundedRectangle1" class="roundedRectangle" onclick="goLinkDms()">
+						<a class="linkTitle" href="/partner/login.jsp" target="_blank">经销商订单平台</a>
+				</div>
+			</div>
+		</div>
+		<div class="saoyisao">
+			<div class="saoyisaoContent">
+				<div class="saoyisao-left">
+					<p class="hd">经销商管理平台移动端</p>
+					<div class="cont">
+						<a href="https://www.linkcrm.cn/linkapp/download.html" target="_blank"><img src="code1.png"></a>
+						<p>扫描二维码</p>
+						<p>下载手机客户端</p>
+					</div>
+				</div>
+				<div class="saoyisao-right">
+					<p class="hd">企业CRM平台移动端</p>
+					<div class="cont">
+						<a href="https://www.linkcrm.cn/linkapp/download.html" target="_blank"><img src="code2.png"></a>
+						<p>扫描二维码</p>
+						<p>下载手机客户端</p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="rizhi">
+		    <div class="rizhiContent">
+		    	<p class="rizhi-hd">更新日志</p>
+		    	<div class="banben">
+			    	<p class="banben-hd">Link 2.0&nbsp;&nbsp;&nbsp;<span>2017年1月9日</span></p>
+			    	<div class="banben-text banben1-text">
+						<p><span class="title">【行业解决方案】</span>针对餐饮、食品饮料、服装纺织、批发零售、房地产、物流行业开设 《行业精英学院》，学习经营管理，掌握营业额逆势上涨的秘诀。更多行业陆续开放中；</p>
+						<p><span class="title">【更高效的消息管理】</span>首屏透出消息已读未读状态；</p>
+						<p><span class="title">【红包新玩法】</span>节日红包——圣诞、元旦、春节、开工、元宵等节日主题红包限时开放，让你的祝福更有温度；</p>
+						<p><span class="title">【考勤极速打卡】</span>上班时间到达公司，打开钉钉即可自动打卡，再也不用担心忘记打卡；</p>
+						<p><span class="title">【智能办公电话】</span>只需两步选号开户，随时随地电话跟进客户，业务往来全记录，智能找人，省钱好用；</p>
+						<p><span class="title">【自定义角色】</span>企业通讯录支持设置经理、出纳、人事等角色标签，审批人可以设为某个角色，即使人员变动，也无需修改审批流程；</p>
+						<p><span class="title">【发图片可随心标注涂鸦】</span>聊天中的图片支持标注后发送，一图胜千语，沟通更高效；</p>
+						<p><span class="title">【会议升级】</span>电话／视频会议全面升级，最高支持30人；新增会议邀约，组织开会更从容；</p>
+					</div>
+				</div>
+				<div class="banben banben2">
+			    	<p class="banben-hd">Link 1.0&nbsp;&nbsp;&nbsp;<span>2017年1月4日</span><span class="hd-icon"></span></p>
+			    	<div class="banben-text banben2-text">
+						<p><span class="title">【行业解决方案】</span>针对餐饮、食品饮料、服装纺织、批发零售、房地产、物流行业开设 《行业精英学院》，学习经营管理，掌握营业额逆势上涨的秘诀。更多行业陆续开放中；</p>
+						<p><span class="title">【更高效的消息管理】</span>首屏透出消息已读未读状态；</p>
+						<p><span class="title">【红包新玩法】</span>节日红包——圣诞、元旦、春节、开工、元宵等节日主题红包限时开放，让你的祝福更有温度；</p>
+						<p><span class="title">【考勤极速打卡】</span>上班时间到达公司，打开钉钉即可自动打卡，再也不用担心忘记打卡；</p>
+						<p><span class="title">【智能办公电话】</span>只需两步选号开户，随时随地电话跟进客户，业务往来全记录，智能找人，省钱好用；</p>
+						<p><span class="title">【自定义角色】</span>企业通讯录支持设置经理、出纳、人事等角色标签，审批人可以设为某个角色，即使人员变动，也无需修改审批流程；</p>
+						<p><span class="title">【发图片可随心标注涂鸦】</span>聊天中的图片支持标注后发送，一图胜千语，沟通更高效；</p>
+						<p><span class="title">【会议升级】</span>电话／视频会议全面升级，最高支持30人；新增会议邀约，组织开会更从容；</p>
+					</div>
+				</div>
+		    </div>
+		</div>
+		<div class="banquan">
+			<div class="banquanContent">
+				<a href="http://www.hand-china.com" target="_blank">汉得信息</a><span>|</span>
+				<a href="http://www.hand-china.com/?page_id=916" target="_blank">联系我们</a>
+				<p>版权所有 1996-2017 上海汉得信息技术股份有限公司 保留全部权利 黔ICP备16004808号</p>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+
+	$('.banben2').bind("click",function(){
+		$('.hd-icon',$(this)).css('background','url(top.png) no-repeat 0');
+		$('.hd-icon',$(this)).css('background-size','100%');
+		if($('.banben2-text',$(this)).css('display') == 'block'){
+			$('.banben2-text',$(this)).css('display','');
+			$('.hd-icon',$(this)).css('background','url(bottom.png) no-repeat 0');
+		    $('.hd-icon',$(this)).css('background-size','100%');
+		} 
+		else {
+			$('.banben2-text',$(this)).css('display','block');
+		}
+	});
+	$('#titleHref1').hover(function(){
+        //$('#hrProduct').css({'background-color':'#469ce7','color':'#469ce7'})
+		//$('#hrProduct').show();
+        $('#hrProduct').css('display','block');
+    },function(){
+    	$('#hrProduct').css('display','none');
+    });
+	
+	$('#titleHref2').hover(function(){
+        $('#hrDownload').css('display','block');
+    },function(){
+    	$('#hrDownload').css('display','none');
+    });
+</script>
+</body>
+</html>

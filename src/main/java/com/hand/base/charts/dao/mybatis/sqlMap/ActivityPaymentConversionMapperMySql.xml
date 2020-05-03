@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.charts.dao.mybatis.mapper.ActivityPaymentConversionMapper">
+	<resultMap type="com.hand.base.charts.model.ActivityPaymentConversion" id="activityPaymentConversion"></resultMap>
+	
+	<sql id="queryAllSql">
+		SELECT
+			t1.row_id AS id,
+			t4.`name` as activityName,
+			IFNULL(SUM(a.pV),0) AS pV,
+			IFNULL(SUM(a.uV),0) AS uV,
+			COUNT(DISTINCT t2.row_id) as orderNumber,
+			COUNT(DISTINCT t2.accnt_id) as orderBuyersNumber,
+			round(sum(IFNULL(t2.attrib_17,0)), 2) AS orderSumMoney,
+			count(DISTINCT CASE WHEN t2.attrib_48 = 'Finished' OR t2.attrib_48 = 'To Appraise' THEN t2.accnt_id ELSE NULL END) AS paymentBuyersNumber,
+			round(sum(CASE WHEN t2.attrib_48 = 'Finished'OR t2.attrib_48 = 'To Appraise' THEN t2.attrib_17 ELSE 0 END),2) AS paymentSumMoney,
+			IFNULL(round(sum(CASE WHEN t2.attrib_48 = 'Finished'OR t2.attrib_48 = 'To Appraise' THEN t2.attrib_17 ELSE 0 END)
+			/ 
+			count(DISTINCT CASE WHEN t2.attrib_48 = 'Finished'OR t2.attrib_48 = 'To Appraise' THEN t2.accnt_id ELSE NULL END ), 2 ),0) AS paymentAveragePrice
+		
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM
+			CX_O_ORD_PMO t1
+		LEFT JOIN s_order_x t2 ON t1.order_id = t2.row_id
+		LEFT JOIN (cx_o_pmo_sp_ln t3 
+				LEFT JOIN cx_o_pmo_sp t4 on t4.row_id = t3.head_id
+				LEFT JOIN (
+					SELECT count(1) AS pV,count(DISTINCT t5.DEVICE_NO) AS uV,t5.`code` `code` from LNK_PAGE_FLOW t5
+					where 1=1
+						<if test="startTime != null and startTime != ''">
+							and t5.created &gt;= #{startTime}
+						</if>
+						<if test="endTime != null and endTime != ''">
+							and t5.created &lt;= #{endTime}
+						</if>
+					GROUP BY t5.code
+				)a on t3.merchandise_id = a.`code`
+		) ON t1.promotion_id = t3.row_id
+		where 
+				t1.promotion_type in('Limited Purchase','Second Kill','FightGroup')
+				AND t2.order_type = 'brand'
+				AND t4.row_id is not NULL
+		
+	</sql>
+	
+	<sql id="whereAllSql">
+			<if test="activityName != null and activityName != '' ">
+				and t4.`name` LIKE CONCAT(CONCAT('%',#{activityName},'%'))
+			</if>
+			<if test="startTime != null and startTime != ''">
+				and t2.created &gt;= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				and t2.created &lt;= #{endTime}
+			</if>
+		GROUP BY t1.promotion_type,t4.`name`
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="activityPaymentConversion"
+		parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="queryById" resultMap="activityPaymentConversion"
+		parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	<select id="brandQueryByExamplePage" resultMap="activityPaymentConversion"
+		parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		
+	</select>
+	
+	<select id="brandQueryById" resultMap="activityPaymentConversion"
+		parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="activityPaymentConversion"
+		parameterType="com.hand.base.charts.model.ActivityPaymentConversion">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+</mapper>

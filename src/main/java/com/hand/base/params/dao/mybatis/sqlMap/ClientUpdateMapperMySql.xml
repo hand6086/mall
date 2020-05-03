@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.params.dao.mybatis.mapper.ClientUpdateMapper">
+	<resultMap type="com.hand.base.params.model.ClientUpdate" id="clientUpdate"></resultMap>
+	<sql id="queryAllSql">
+		SELECT
+		t1.ROW_ID id,
+		t1.CREATED created,
+		t1.CREATED_BY createdBy,
+		date_format(t1.LAST_UPD,'%Y-%m-%d %H:%i:%s') lastUpd,
+		t1.LAST_UPD_BY lastUpdBy,
+		t1.DEVICE_TYPE deviceType,/*设备类型*/
+		t1.T_ATTR_01 tAttr01,/*APP类型*/
+		t1.VERSION_CODE versionCode,/*版本号*/
+		t1.VERSION_NAME versionName,/*版本名称*/
+		t1.T_ATTR_04 tAttr04,/*链接地址*/
+		t1.NEW_VER_DESCRIPTION newVerDescription,/*新版本描述*/
+		t1.FORCE_UPDATE forceUpdate,/*是否强制更新*/
+		date_format(t1.UPDATE_TIME,'%Y-%m-%d %H:%i:%s') updateTime /*更新时间*/
+	</sql>
+	 
+	<sql id="fromTableSql">
+		FROM
+			CX_O_CLIENT_UPD t1
+	</sql>
+	
+	<sql id="whereTableSql">
+		WHERE 1=1
+	</sql>
+	
+	<select id="queryByExamplePage" resultMap="clientUpdate" parameterType="com.hand.base.params.model.ClientUpdate">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="clientUpdate" parameterType="com.hand.base.params.model.ClientUpdate">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereTableSql"/>
+		AND t1.ROW_ID=#{id}
+	</select>
+    <insert id="insert" parameterType="com.hand.base.params.model.ClientUpdate">
+		INSERT INTO CX_O_CLIENT_UPD (
+			ROW_ID,
+			MODIFICATION_NUM,
+			CONFLICT_ID,
+			DB_LAST_UPD,
+			FORCE_UPDATE,
+			UPDATE_TIME,
+			DB_LAST_UPD_SRC,
+			DEVICE_TYPE,
+			NEW_VER_DESCRIPTION,
+			T_ATTR_01,
+			T_ATTR_02,
+			T_ATTR_03,
+			T_ATTR_04,
+			T_ATTR_05,
+			T_ATTR_06,
+			T_ATTR_07,
+			T_ATTR_08,
+			VERSION_CODE,
+			VERSION_NAME
+		)
+		VALUES(
+			#{id},
+			0,
+			'0',
+			now(),
+			#{forceUpdate},
+			#{updateTime},
+			'User',
+			#{deviceType},
+			#{newVerDescription},
+			#{tAttr01},
+			'',
+			'',
+			#{tAttr04},
+			'',
+			'',
+			'',
+			'',
+			#{versionCode},
+			#{versionName}
+		)
+    </insert>
+  
+    <update id="update" parameterType="com.hand.base.params.model.ClientUpdate">
+		UPDATE CX_O_CLIENT_UPD 
+		SET DEVICE_TYPE = #{deviceType},
+			T_ATTR_01 = #{tAttr01},
+			VERSION_CODE = #{versionCode},
+			VERSION_NAME = #{versionName},
+			T_ATTR_04 = #{tAttr04},
+			NEW_VER_DESCRIPTION = #{newVerDescription},
+			FORCE_UPDATE = #{forceUpdate},
+			UPDATE_TIME = STR_TO_DATE(#{updateTime},'%Y-%m-%d %H:%i:%s')
+		WHERE ROW_ID = #{id}
+    </update>
+    
+    <delete id="deleteById" parameterType="com.hand.base.params.model.ClientUpdate">
+		DELETE FROM CX_O_CLIENT_UPD WHERE ROW_ID = #{id}
+    </delete>
+</mapper>

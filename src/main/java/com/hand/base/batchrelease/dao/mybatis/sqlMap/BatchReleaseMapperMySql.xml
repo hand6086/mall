@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.batchrelease.dao.mybatis.mapper.BatchReleaseMapper">
+  <resultMap type="com.hand.base.batchrelease.model.BatchRelease" id="batchRelease"></resultMap>
+  <sql id="queryAllSql">
+	SELECT
+		row_id id,
+		CHECK_STATUS checkStatus,#校验状态
+		IMPORT_STATUS importStatus,
+		ERROR_MESSAGE errorMessage,
+		COUPON_CODE  couponCode,
+		TELEPHONE_NUMBER telephoneNumber
+	</sql>
+	
+	<sql id="fromTableSql">
+		FROM CX_O_PMO_CDTEMP
+	</sql>
+	
+	<sql id="whereAllSql">
+		where 1=1
+		<if test="createdBy != null and createdBy != '' ">
+			and created_by = #{createdBy}
+		 </if>
+	</sql>
+	
+	<delete id="allDelete" parameterType="java.lang.String">
+		delete from CX_O_PMO_CDTEMP where created_by = #{createdBy} and import_status != 'Import Ok'
+	</delete>
+	
+	<select id="queryById" resultMap="batchRelease"
+		parameterType="com.hand.base.batchrelease.model.BatchRelease">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and ROW_ID = #{id}
+	</select>
+	<select id="brandQueryById" resultMap="batchRelease"
+		parameterType="com.hand.base.batchrelease.model.BatchRelease">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		and ROW_ID = #{id}
+	</select>
+	
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="batchRelease"
+		parameterType="com.hand.base.batchrelease.model.BatchRelease">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>	
+		<include refid="whereAllSql"/>	
+		 AND (IMPORT_STATUS != 'Import Ok' OR IMPORT_STATUS IS NULL)
+		 order by CREATED desc
+	</select>
+	<!-- 根据条件查询记录 -->
+	<select id="brandQueryByExamplePage" resultMap="batchRelease"
+		parameterType="com.hand.base.batchrelease.model.BatchRelease">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>	
+		<include refid="whereAllSql"/>	
+		 AND (IMPORT_STATUS != 'Import Ok' OR IMPORT_STATUS IS NULL)
+		 order by CREATED desc
+	</select>
+	
+	<delete id="deleteById" parameterType="com.hand.base.batchrelease.model.BatchRelease">
+		DELETE FROM CX_O_PMO_CDTEMP WHERE ROW_ID = #{id}
+  	</delete>
+  
+	<insert id= "insert" parameterType="com.hand.base.batchrelease.model.BatchRelease">
+	 insert into 
+	 CX_O_PMO_CDTEMP
+	 (row_id
+	 ,org_id
+	 ,CHECK_STATUS
+	 ,IMPORT_STATUS
+	 ,ERROR_MESSAGE
+	 ,COUPON_CODE
+	 ,TELEPHONE_NUMBER)
+	 values(
+	 #{id}
+	 ,#{orgId}
+	 ,#{checkStatus}
+	 ,#{importStatus}
+	 ,#{errorMessage}
+	 ,#{couponCode}
+	 ,#{telephoneNumber}
+	 )
+	</insert>
+	
+	<insert id= "brandInsert" parameterType="com.hand.base.batchrelease.model.BatchRelease">
+	 insert into 
+	 CX_O_PMO_CDTEMP
+	 (row_id
+	 ,org_id
+	 ,CHECK_STATUS
+	 ,IMPORT_STATUS
+	 ,ERROR_MESSAGE
+	 ,COUPON_CODE
+	 ,TELEPHONE_NUMBER)
+	 values(
+	 #{id}
+	 ,#{orgId}
+	 ,#{checkStatus}
+	 ,#{importStatus}
+	 ,#{errorMessage}
+	 ,#{couponCode}
+	 ,#{telephoneNumber}
+	 )
+	</insert>
+	
+	<update id="update" parameterType="com.hand.base.batchrelease.model.BatchRelease">
+	 update CX_O_PMO_CDTEMP
+	 set 
+	 CHECK_STATUS 		=#{checkStatus}
+	 ,IMPORT_STATUS		=#{importStatus}
+	 ,ERROR_MESSAGE		=#{errorMessage}
+	 ,COUPON_CODE		=#{couponCode}
+	 ,TELEPHONE_NUMBER	=#{telephoneNumber}
+	 where row_id=#{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.batchrelease.model.BatchRelease">
+	 update CX_O_PMO_CDTEMP
+	 set 
+	 CHECK_STATUS 		=#{checkStatus}
+	 ,IMPORT_STATUS		=#{importStatus}
+	 ,ERROR_MESSAGE		=#{errorMessage}
+	 ,COUPON_CODE		=#{couponCode}
+	 ,TELEPHONE_NUMBER	=#{telephoneNumber}
+	 where row_id=#{id}
+	</update>
+
+	
+	<select id="runCouponCheck" statementType="CALLABLE">
+		CALL CHECK_COUPON(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			#{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      		#{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+ 	</select>
+
+	<select id="runCouponImport" statementType="CALLABLE">
+		CALL IMPORT_COUPON(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+			#{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      		#{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+ 	</select>
+	
+</mapper>

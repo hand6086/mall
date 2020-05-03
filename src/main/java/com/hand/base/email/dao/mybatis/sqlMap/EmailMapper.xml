@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.email.dao.mybatis.mapper.EmailMapper">
+  <resultMap type="com.hand.base.email.model.EmailInfo" id="emailInfo"></resultMap>
+  
+  <sql id="queryAllSql">
+  	SELECT
+		ROW_ID id,
+		TO_CHAR (CREATED,'yyyy-MM-dd HH24:MI:ss') created,
+		CREATED_BY createdBy,
+		TO_CHAR (LAST_UPD,'yyyy-MM-dd HH24:MI:ss') lastUpdated,
+		LAST_UPD_BY lastUpdatedBy,
+		CORP_ID corpid,
+		EMAIL_MSG emailMsg,
+		EMAIL_TITLE emailTitle,
+		TO_CHAR (SEND_TIME,'yyyy-MM-dd HH24:MI:ss') sendTime,
+		 STATUS  status
+  </sql>
+  
+  <sql id="fromTableSql">
+	FROM LNK_EMAIL_SEND_INFO
+   where corp_id = #{usercorpid}
+  </sql>
+  
+  <sql id="whereAllSql">
+  		<if test="status != null and status != '' ">
+			and  STATUS = #{status}
+		</if>
+		<if test="emailTitle != null and emailTitle != '' ">
+			and EMAIL_TITLE = #{emailTitle}
+		</if>
+		<if test="emailMsg != null and emailMsg != '' ">
+			and EMAIL_MSG = #{emailMsg}
+		</if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+	order by ROW_ID DESC
+  </sql>
+  
+  	<select id="queryById" resultMap="emailInfo"
+		parameterType="com.hand.base.email.model.EmailInfo">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.email.model.EmailInfo">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="emailInfo"
+		parameterType="com.hand.base.email.model.EmailInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="emailInfo"
+		parameterType="com.hand.base.email.model.EmailInfo">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>	
+  
+  <insert id="insert" parameterType="com.hand.base.email.model.EmailInfo">
+  	 insert into LNK_EMAIL_SEND_INFO
+      (ROW_ID,
+       EMAIL_MSG,
+       EMAIL_TITLE,
+       SEND_TIME,
+       STATUS)
+    values
+      (s_sequence_pkg.get_next_rowid(),
+       #{emailMsg},
+       #{emailTitle},
+       TO_DATE (#{sendTime},'yyyy-MM-dd HH24:MI:ss'),
+       GET_LOV_val(#{usercorpid},'EMAIL_HEADER_STATUS',#{status}))
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.email.model.EmailInfo">
+  	UPDATE LNK_EMAIL_SEND_INFO 
+  	  SET 
+  		EMAIL_MSG 		= #{emailMsg},
+       	EMAIL_TITLE		= #{emailTitle},
+	    SEND_TIME		= TO_DATE (#{sendTime},'yyyy-MM-dd HH24:MI:ss'),
+	    STATUS			= GET_LOV_val(#{usercorpid},'EMAIL_HEADER_STATUS',#{status})
+	  WHERE ROW_ID		= #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.email.model.EmailInfo">
+		DELETE FROM LNK_EMAIL_SEND_INFO WHERE ROW_ID = #{id}
+  </delete>
+</mapper>

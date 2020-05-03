@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.common.dao.mybatis.mapper.ObjMapper">
+  <resultMap type="com.hand.base.common.model.Obj" id="obj"></resultMap>
+  <resultMap type="com.hand.base.common.model.ObjItem" id="objItem"></resultMap>
+  
+  <insert id="objInsert" parameterType="com.hand.base.common.model.Obj">
+  		INSERT INTO CX_OBJECT
+		  (ROW_ID, OBJ_NAME, OBJ_TYPE, OBJ_DATE, OBJ_NUM, COMMENTS)
+		VALUES
+		  (#{id},#{objName},#{objType},#{objDate},#{objNum},#{comments})
+  </insert>
+  
+  <delete id="objDelete" parameterType="com.hand.base.common.model.Obj">
+  	DELETE FROM CX_OBJECT WHERE ROW_ID = #{id}
+  </delete>
+  
+  <select id="queryObjListPage" resultMap="obj" parameterType="com.hand.core.basic.query.QueryParams">
+  	  SELECT  row_id AS id
+		      ,t1.created created
+		      ,created_by AS createdby
+		      ,date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated
+		      ,last_upd_by AS lastupdatedby
+		      ,corp_id corpid
+		      ,obj_name objname
+		      ,obj_type objtype
+		      ,obj_date objdate
+		      ,obj_num objnum
+		      ,comments comments
+		FROM   cx_object
+
+  </select>
+  
+  <select id="queryObjItemListPage" resultMap="objItem" parameterType="com.hand.core.basic.query.QueryParams">
+  	  SELECT   row_id AS id
+		      ,t1.created created
+		      ,created_by AS createdby
+		      ,date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated
+		      ,last_upd_by AS lastupdatedby
+		      ,corp_id corpid
+		      ,obj_item_name objitemname
+		      ,obj_item_type objitemtype
+		      ,obj_item_date objitemdate
+		      ,obj_item_num objitemnum
+		      ,comments comments
+		      ,head_id headid
+		FROM   cx_object_item
+
+  </select>
+  
+  <select id="queryObjByIdSelect" resultType="com.hand.base.common.model.Obj" parameterType="com.hand.core.basic.query.QueryParams">
+  		SELECT 
+  		ROW_ID            as id,
+		t1.created created,
+		CREATED_BY        as createdBy,
+		date_format(t1.last_upd, '%Y-%m-%d %H:%i:%S') lastUpdated,
+		LAST_UPD_BY       as lastUpdatedBy,
+		CORP_ID corpid,
+		       OBJ_NAME    objName,
+		       OBJ_TYPE    objType,
+		       OBJ_DATE    objDate,
+		       OBJ_NUM     objNum,
+		       COMMENTS    comments
+		  FROM CX_OBJECT
+  
+  </select>
+  
+  <update id="objUpdate" parameterType="com.hand.base.common.model.Obj">
+  		UPDATE CX_OBJECT
+	     SET OBJ_NAME = #{objName},
+	         OBJ_TYPE = #{objType},
+	         OBJ_DATE = #{objDate},
+	         OBJ_NUM  = #{objNum},
+	         COMMENTS = #{comments}
+  		WHERE ROW_ID = #{id}
+  </update>
+  
+</mapper>

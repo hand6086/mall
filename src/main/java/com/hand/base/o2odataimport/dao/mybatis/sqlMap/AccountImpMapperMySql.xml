@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.o2odataimport.dao.mybatis.mapper.AccountImpMapper">
+  <resultMap type="com.hand.base.o2odataimport.model.AccountTemp" id="accountTemp"></resultMap>
+  	
+  	<sql id="queryAllSql">
+	select
+	T1.ROW_ID as id
+	,t1.created created
+	,T1.CREATED_BY as createdBy
+	,date_format(T1.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated
+	,T1.LAST_UPD_BY as lastUpdatedBy
+	,T1.CORP_ID  corpid
+	,T1.ORG_ID 			orgId/*组织id*/ 
+	,t1.CHECK_STATUS 	checkStatus/*校验状态*/	
+	,t1.IMPORT_STATUS 	impStatus/*导入状态*/
+	,t1.ERROR_MESSAGE 	errMessage/*错误信息*/
+	,t1.ACCT_CODE 		accntCode/*客户Siebel编码*/
+	,t1.ACCT_NAME 		accntName/*客户名称*/
+	,t1.TYPE 			type/*商户类型*/
+	,t1.DSR_TYPE 		dsrType/*配送网点类型*/
+	,t1.PROVINCE 		province
+	,t1.CITY 			city
+	,t1.DISTRICT		district
+	,t1.ADDRESS			address
+	,t1.CONTACT			contact
+	,t1.CELLPHONE		cellPhone
+	,t1.DSR_STATUS		dsrStatus  /*状态*/
+	,t1.GPS_LONGITUDE	gpsLong
+	,t1.GPS_LATITUDE	gpsLat
+	,t1.IS_FORCED_STORE isForcedStore /*是否兜底商户*/
+	,t1.IS_GP_STORE		isGpStore	/*是否团购商户*/
+	,t1.CHANNEL_TYPE	channelType	/*渠道类型*/
+  </sql>
+  
+  <sql id="fromTableSql">
+	from CX_O_ACCT_UPDT t1
+    WHERE t1.corp_id = #{usercorpid}
+    AND (t1.IMPORT_STATUS != 'Import Ok' OR t1.IMPORT_STATUS IS NULL)
+  </sql>
+  
+  <sql id="whereAllSql">
+  		<if test="impStatus != null and impStatus != '' ">
+			and  t1.IMPORT_STATUS = #{impStatus}
+		</if>
+  </sql>
+  
+  <sql id="orderByAllSql">
+	order by T1.CREATED DESC
+  </sql>
+  
+  	<select id="queryById" resultMap="accountTemp"
+		parameterType="com.hand.base.o2odataimport.model.AccountTemp">		
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+		
+	</select>
+
+	<!-- 记录总数 -->
+	<select id="countByExample" resultType="java.lang.Integer" 
+		parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+
+	<!-- 查询所有 -->
+	<select id="queryAllPage" resultMap="accountTemp"
+		parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="queryByExamplePage" resultMap="accountTemp"
+		parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+		<include refid="orderByAllSql"/>
+	</select>
+  	
+  <insert id="insert" parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+	insert into CX_O_ACCT_UPDT
+	(ROW_ID
+	,ORG_ID
+	,CHECK_STATUS 
+	,IMPORT_STATUS
+	,ERROR_MESSAGE 
+	,ACCT_CODE
+	,ACCT_NAME 
+	,TYPE
+	,DSR_TYPE
+	,PROVINCE 
+	,CITY 
+	,DISTRICT
+	,ADDRESS 
+	,CONTACT
+	,CELLPHONE 
+	,DSR_STATUS 
+	,GPS_LONGITUDE 
+	,GPS_LATITUDE
+	,IS_FORCED_STORE
+	,IS_GP_STORE 
+	,CHANNEL_TYPE
+	)
+	values
+	(#{id}
+	,#{orgId}
+	,#{checkStatus}/*校验状态*/
+	,#{impStatus}/*导入状态*/
+	,#{errMessage}/*错误信息*/
+	,#{accntCode}/*客户Siebel编码*/
+	,#{accntName}/*客户名称*/
+	,#{type}/*商户类型*/
+	,#{dsrType}/*配送网点类型*/
+	,#{province}
+	,#{city}
+	,#{district}
+	,#{address}
+	,#{contact}
+	,#{cellPhone}
+	,#{dsrStatus} /*状态*/
+	,if(#{gpsLong} ='',null,#{gpsLong})	
+	,if(#{gpsLat} ='',null,#{gpsLat})
+	,#{isForcedStore} /*是否兜底商户*/
+	,#{isGpStore} /*是否团购商户*/
+	,#{channelType} /*渠道类型*/
+	)
+  </insert>
+  
+  <update id="update" parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+	UPDATE CX_O_ACCT_UPDT
+	SET 
+	CHECK_STATUS 		=#{checkStatus}/*校验状态*/
+	,IMPORT_STATUS 		=#{impStatus}/*导入状态*/
+	,ERROR_MESSAGE 		=#{errMessage}/*错误信息*/
+	,ACCT_CODE			=#{accntCode}/*客户Siebel编码*/
+	,ACCT_NAME 			=#{accntName}/*客户名称*/
+	,TYPE				=#{type}/*商户类型*/
+	,DSR_TYPE 			=#{dsrType}/*配送网点类型*/
+	,PROVINCE 			=#{province}
+	,CITY 				=#{city}
+	,DISTRICT 			=#{district}
+	,ADDRESS 			=#{address}
+	,CONTACT			=#{contact}
+	,CELLPHONE 			=#{cellPhone}
+	,DSR_STATUS 		=#{dsrStatus} /*状态*/
+	<if test=" gpsLong != '' ">
+	,GPS_LONGITUDE		=#{gpsLong}/*GPS经度*/
+	</if>
+	<if test=" gpsLat != '' ">
+	,GPS_LATITUDE		=#{gpsLat}/*GPS纬度*/
+	</if>
+	,IS_FORCED_STORE	=#{isForcedStore} /*是否兜底商户*/
+	,IS_GP_STORE 		=#{isGpStore} /*是否团购商户*/
+	,CHANNEL_TYPE 		=#{channelType} /*渠道类型*/
+	
+	WHERE ROW_ID		= #{id}
+  </update>
+  
+  <delete id="deleteById" parameterType="com.hand.base.o2odataimport.model.AccountTemp">
+		DELETE FROM CX_O_ACCT_UPDT WHERE ROW_ID = #{id}
+  </delete>
+  
+  
+  <select id="runAccountCheck" statementType="CALLABLE">
+			CALL CHECK_O2OACC(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="runAccountInsert" statementType="CALLABLE">
+			CALL RUN_ACCNT_IMP_INSERT(#{returnStatus,mode=OUT,jdbcType=VARCHAR},#{msgData,mode=OUT,jdbcType=VARCHAR},
+				 #{param1,mode=IN,jdbcType=VARCHAR},#{param2,mode=IN,jdbcType=VARCHAR},#{param3,mode=IN,jdbcType=VARCHAR},
+      			 #{param4,mode=IN,jdbcType=VARCHAR},#{param5,mode=IN,jdbcType=VARCHAR})
+  </select>
+  
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.mvg.dao.mybatis.classify.mapper.ClassifyBannerMvgMapper">
+  <resultMap type="com.hand.base.mvg.model.Mvg" id="mvg"></resultMap>
+  <resultMap type="com.hand.base.brandWorkbench.model.Classify" id="classify"></resultMap>
+  
+  <select id="queryLeftListPage" resultMap="classify" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		select t1.row_id id,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       t1.name name
+		  FROM
+			lnk_brand_classify t1 
+		 where 1=1
+		   and t1.is_display = 'Y'
+		   and not exists ( select s1.row_id
+					          from lnk_inter_banner_classify s1
+					        where s1.classify_id = t1.row_id
+					        and s1.banner_id = #{mvgParentId})
+  </select>
+  
+  <select id="queryRightListPage" resultMap="classify" parameterType="com.hand.base.brandWorkbench.model.Classify">
+		select t1.classify_id id,
+		       date_format(t1.created,'%Y-%m-%d %H:%i:%S') created,
+		       (case
+		         when t2.classify_id = t3.row_id then
+		          'Y'
+		         else
+		          'N'
+		       end) isDefault,
+		       t3.name name
+		  from 
+		  lnk_inter_banner_classify t1 
+		  	left join CX_O_BANNER t2 on t1.banner_id = t2.row_id
+		  	left join lnk_brand_classify t3 on t1.classify_id = t3.row_id
+		 where 1=1
+		   and t3.is_display = 'Y'
+		   and t1.banner_id = #{mvgParentId}
+  </select>
+  
+  <insert id="insert" parameterType="com.hand.base.mvg.model.Mvg">
+		insert into lnk_inter_banner_classify
+		  (row_id,
+		   banner_id,
+		   classify_id)
+		values
+		  (#{id},
+		   #{mvgParentId},
+		   #{mvgSubsetId})
+  </insert>
+  
+  <delete id="deleteById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM lnk_inter_banner_classify
+		 WHERE classify_id = #{mvgSubsetId}
+		   and banner_id = #{mvgParentId}
+  </delete>
+  
+  <delete id="deleteAllById" parameterType="com.hand.base.mvg.model.Mvg">
+		DELETE FROM lnk_inter_banner_classify WHERE banner_id = #{mvgParentId}
+  </delete>
+  
+</mapper>

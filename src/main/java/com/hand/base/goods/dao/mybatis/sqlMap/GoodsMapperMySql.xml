@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.GoodsMapper">
+	<resultMap type="com.hand.base.goods.model.Goods" id="goods"></resultMap>
+
+	<sql id="queryAllSql">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t1.O2O_DISPLAY_NAME o2oDisplayName,
+	t1.O2O_INT_CODE o2oIntCode,
+	(select t6.path from cx_o_prod_pic t5 left join cx_o_img t6 on t6.row_id = t5.pic_id where t5.prod_id = t.row_id limit 1) linePath,
+	t2.NAME o2oProdSeries,
+	t1.O2O_FP_DISPLAY o2oFpDisplay,
+	t1.O2O_PRODUCT_INGREDIENT o2oProductIngredient,
+	t1.O2O_STORAGE_METHOD o2oStorageMethod,
+	t1.O2O_SHELF_LIFE o2oShelfLife,
+	t1.O2O_PROD_DESC o2oProdDesc,
+	round(t1.ATTRIB_18) o2oCaseNumber,
+	cast(t1.ATTRIB_19 as decimal(9,4)) o2oKlNumber,
+	t.NAME name,
+	t1.O2O_PROD_ID o2oProdId,
+	t.TYPE type,
+	t1.O2O_SHARE_TYPE o2oShareType,
+	t1.O2O_SHARE_THEME o2oShareTheme,
+	t1.O2O_SHARE_NOTES o2oShareNotes,
+	t1.O2O_SHARE_URL o2oShareUrl,
+	t.CFG_MODEL_ID cfgModelId,
+	t4.LOCKED_FLG vodLockedFlag,
+	t4.LOCKED_BY vodLockedBy,
+	date_format(t4.LOCKED_DT, '%Y-%m-%d %H:%i:%S') as vodLockedDate,
+	t.PROD_TYPE_CD prodDefTypeCode,
+	t2.status status,
+	t1.status goodsStatus,
+	t2.row_id prodSeriesId,
+	t2.type channelType,/*新增字段 频道类型*/
+	t1.O2O_PROD_CATEGORY o2oProdCategory,
+	t1.O2O_SHARE_PIC_ID picId,
+	t.BU_ID organization /*组织*/
+	</sql>
+	
+	<sql id="brandQueryAllSql">
+	select
+		T1.ROW_ID AS id,
+			date_format(
+				T1.CREATED,
+				'%Y-%m-%d %H:%i:%S'
+			) AS created,
+			(select tx.fst_name from lnk_emp_info tx where tx.row_id = T1.CREATED_BY) AS createdBy,
+			date_format(
+				T1.LAST_UPD,
+				'%Y-%m-%d %H:%i:%S'
+			) AS lastUpdated,
+			(select ty.fst_name from lnk_emp_info ty where ty.row_id = T1.LAST_UPD_BY) AS lastUpdatedBy,
+			(select store_name from lnk_enterprise where code = T1.corp_id) storeName,
+			t1.O2O_DISPLAY_NAME o2oDisplayName,
+			t1.O2O_INT_CODE o2oIntCode,
+			(
+				SELECT
+					t6.path
+				FROM
+					cx_o_prod_pic t5
+				LEFT JOIN cx_o_img t6 ON t6.row_id = t5.pic_id
+				WHERE
+					t5.prod_id = t1.row_id
+				LIMIT 1
+			) linePath,
+			t1.O2O_FP_DISPLAY o2oFpDisplay,
+			t1.O2O_PRODUCT_INGREDIENT o2oProductIngredient,
+			t1.O2O_STORAGE_METHOD o2oStorageMethod,
+			t1.O2O_SHELF_LIFE o2oShelfLife,
+			t1.O2O_PROD_DESC o2oProdDesc,
+			round(t1.ATTRIB_18) o2oCaseNumber,
+			cast(t1.ATTRIB_19 AS DECIMAL(9, 4)) o2oKlNumber,
+			t1. NAME NAME,
+			t1.O2O_PROD_ID o2oProdId,
+			t1.TYPE type,
+			date_format(t1.market_time,'%Y-%m-%d %H:%i') AS marketTime,
+			t1.O2O_SHARE_TYPE o2oShareType,
+			t1.O2O_SHARE_THEME o2oShareTheme,
+			t1.O2O_SHARE_NOTES o2oShareNotes,
+			t1.O2O_SHARE_URL o2oShareUrl,
+			t1.CFG_MODEL_ID cfgModelId,
+			t4.LOCKED_FLG vodLockedFlag,
+			t4.LOCKED_BY vodLockedBy,
+			date_format(
+				t4.LOCKED_DT,
+				'%Y-%m-%d %H:%i:%S'
+			) AS vodLockedDate,
+			t1.PROD_TYPE_CD prodDefTypeCode,
+			t1. STATUS goodsStatus,
+			t1.sale_status saleStatus,
+			/*新增字段 频道类型*/
+			t1.O2O_PROD_CATEGORY o2oProdCategory,
+			t1.O2O_SHARE_PIC_ID picId,
+			t1.BU_ID organization /*组织*/
+			,T1.GOODS_TYPE_ID        as goodsTypeId           /*商品分类*/
+			,(select name from lnk_brand_classify where row_id = T1.GOODS_TYPE_ID) as goodsType
+			,T1.BIG_GOODS_TYPE    as bigGoodsType        /*商品大类*/
+			,T1.MID_GOODS_TYPE    as midGoodsType        /*商品中类*/
+			,T1.SAMLL_GOODS_TYPE  as smallGoodsType      /*商品小类*/
+			,T1.PRODUCE_ADDR      as prduceAddr          /*生成地址*/
+			,T1.BRAND             as brand               /*商品品牌*/
+			,T1.TIME_PROMISE      as timePromise         /*时间承诺*/
+			,T1.PACKAGE_COUNT     as packageCount        /*包装数量*/
+			,T1.NO_REASON_RETURN_GOODS as noReasonReturnGoods /*7天无理由退换货*/
+			,T1.COMPENSATE_GOODS  as compensateGoods     /*假一赔十*/
+			,T1.ORIGINAL_PRICE    as originalPrice       /*原价*/
+			,T1.history_price    as historyPrice       /*一口价*/
+			,T1.STORE_DISPLAY    as storeDisplay      /*店铺内是否展示*/
+			,T1.GOODS_STOCK       as goodsStock          /*库存*/
+			,T1.GOODS_COMMENTS    as goodsComments       /*商品卖点说明*/
+			,T1.SHOP_ORDER        as shopOrder           /*店铺排位*/
+			,T1.TEMPLATE_ID       as templateId          /*模板ID*/
+			,(select name from lnk_freight where row_id = T1.TEMPLATE_ID) as templateName
+			,T1.BAR_CODE as productCode
+			,T1.DISPLAY_ORDER     as displayOrder        /*品牌馆热销产品展示顺序*/
+			,T1.IS_DISPLAY        as isDisplay           /*品牌馆热销产品是否展示*/
+	</sql>
+
+	<sql id="fromSql">
+	from S_PROD_INT t
+	LEFT JOIN S_PROD_INT_X t1 ON t.ROW_ID = t1.PAR_ROW_ID
+	LEFT JOIN CX_PROD_SERIES t2 ON t2.ROW_ID = t1.O2O_PROD_CATEGORY
+	LEFT JOIN S_VOD t4 ON t4.OBJECT_NUM = t.CFG_MODEL_ID
+  	</sql>
+  	
+  	<sql id="brandFromSql">
+	FROM S_PROD_INT_X t1
+		LEFT JOIN S_VOD t4 ON t4.OBJECT_NUM = t1.CFG_MODEL_ID
+  	</sql>
+  	
+  	
+  	<sql id="whereAllSql">
+  		where 1 = 1
+  		and t.SALES_SRVC_FLG = 'Y' 
+  		AND t1.ATTRIB_09 = 'N'
+  		<if test="usersystemRole!= 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		 </if>
+  	</sql>
+  	
+  	<sql id="brandWhereAllSql">
+  		where 1 = 1
+  		<if test="usersystemRole != 'super_administrator' ">
+			and t1.corp_id = #{usercorpid}
+		 </if>
+		 <if test="usersystemRole == 'super_administrator' ">
+			and t1.corp_id != '101'
+		 </if>
+  	</sql>
+  	
+  	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.Goods" resultMap="goods">
+  		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		<include refid="whereAllSql"/>
+		<if test="channelType != null and channelType != '' ">
+			and t2.type = 'brand'
+		</if>
+		<if test="o2oDisplayName != null and o2oDisplayName != ''">
+			and t1.O2O_DISPLAY_NAME LIKE CONCAT('%',#{o2oDisplayName},'%')
+		</if>
+		
+		<if test="o2oIntCode != null and o2oIntCode != ''">
+			and t1.O2O_INT_CODE LIKE CONCAT('%',#{o2oIntCode},'%')
+		</if>
+		
+		<if test="o2oProdSeries != null and o2oProdSeries != ''">
+			and t2.NAME LIKE CONCAT('%',#{o2oProdSeries},'%')
+		</if>
+  	</select>
+  	
+  	<select id="brandQueryByExamplePage" parameterType="com.hand.base.goods.model.Goods" resultMap="goods">
+  		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromSql"/>
+		<include refid="brandWhereAllSql"/>
+		
+		<if test="o2oDisplayName != null and o2oDisplayName != ''">
+			and t1.O2O_DISPLAY_NAME LIKE CONCAT('%',#{o2oDisplayName},'%')
+		</if>
+		
+		<if test="o2oIntCode != null and o2oIntCode != ''">
+			and t1.O2O_INT_CODE LIKE CONCAT('%',#{o2oIntCode},'%')
+		</if>
+		
+		<if test="productCode != null and productCode != ''">
+			and T1.BAR_CODE LIKE CONCAT('%',#{productCode},'%')
+		</if>
+		
+		<if test="o2oProdSeries != null and o2oProdSeries != ''">
+			and t2.NAME LIKE CONCAT('%',#{o2oProdSeries},'%')
+		</if>
+		
+		<if test="goodsType != null and goodsType != ''">
+			and T1.GOODS_TYPE_ID = #{goodsType}
+		</if>
+		
+		<if test="goodsStatus != null and goodsStatus != ''">
+			and t1.STATUS LIKE CONCAT('%',#{goodsStatus},'%')
+		</if>
+		
+		<if test="saleStatus != null and saleStatus != ''">
+			and t1.sale_status LIKE CONCAT('%',#{saleStatus},'%')
+		</if>
+		
+		<if test="attr3 != null and attr3 != ''">
+			and t1.market_time &gt;= #{attr3}
+		</if>
+		
+		<if test="attr4 != null and attr4 != ''">
+			and t1.market_time &lt;= #{attr4}
+		</if>
+		
+		order by t1.CREATED desc
+		
+		
+  	</select>
+  	
+  	<select id="queryById" resultType="com.hand.base.goods.model.Goods"
+		parameterType="com.hand.base.goods.model.Goods">		
+		<include refid="queryAllSql"/>
+		<include refid="fromSql"/>
+		where t.ROW_ID=#{id}
+	</select>
+	
+	<select id="brandQueryById" resultType="com.hand.base.goods.model.Goods"
+		parameterType="com.hand.base.goods.model.Goods">
+		<include refid="brandQueryAllSql"/>
+		<include refid="brandFromSql"/>
+		where T1.ROW_ID=#{id}
+		
+	</select>
+  	
+  	<insert id="brandInsert" parameterType="com.hand.base.goods.model.Goods">
+		INSERT INTO S_PROD_INT_X(
+		 ROW_ID              /*记录ID*/
+		 ,channel			 /*频道*/
+		<if test="productCode!=null and productCode!=''">
+		,BAR_CODE            /*商品条形码，69码*/
+		</if>
+		<if test="o2oProdCategory!=null and o2oProdCategory!=''">
+		,O2O_PROD_CATEGORY   /*商品系列表CX_PROD_SERIES的ROW_ID关联字段*/
+		</if>
+		<if test="o2oShareUrl!=null and o2oShareUrl!=''">
+		,O2O_SHARE_URL       /*URL*/
+		</if>
+		<if test="o2oShareNotes!=null and o2oShareNotes!=''">
+		,O2O_SHARE_NOTES     /*分享说明*/
+		</if>
+		<if test="o2oShareTheme!=null and o2oShareTheme!=''">
+		,O2O_SHARE_THEME     /*分享标题*/
+		</if>
+		<if test="o2oShareType!=null and o2oShareType!=''">
+		,O2O_SHARE_TYPE      /*分享方式*/
+		</if>
+		<if test="o2oKlNumber!=null and o2oKlNumber!=''">
+		,ATTRIB_19           /*千升数*/
+		</if>
+		<if test="o2oCaseNumber!=null and o2oCaseNumber!=''">
+		,ATTRIB_18           /*箱数*/
+		</if>
+		<if test="o2oProdDesc!=null and o2oProdDesc!=''">
+		,O2O_PROD_DESC       /*酒精度*/
+		</if>
+		<if test="o2oShelfLife!=null and o2oShelfLife!=''">
+		,O2O_SHELF_LIFE      /*保质期*/
+		</if>
+		<if test="o2oStorageMethod!=null and o2oStorageMethod!=''">
+		,O2O_STORAGE_METHOD  /*包装方式*/
+		</if>
+		<if test="o2oProductIngredient!=null and o2oProductIngredient!=''">
+		,O2O_PRODUCT_INGREDIENT/*原麦汁浓度*/
+		</if>
+		<if test="o2oFpDisplay!=null and o2oFpDisplay!=''">
+		,O2O_FP_DISPLAY      /*首页显示*/
+		</if>
+		<if test="o2oIntCode!=null and o2oIntCode!=''">
+		,O2O_INT_CODE        /*商品编码*/
+		</if>
+		<if test="o2oDisplayName!=null and o2oDisplayName!=''">
+		,O2O_DISPLAY_NAME    /*商品名称*/
+		</if>
+		<if test="goodsTypeId!=null and goodsTypeId!=''">
+		,GOODS_TYPE_ID          /*商品分类*/
+		</if>
+		<if test="bigGoodsType!=null and bigGoodsType!=''">
+		,BIG_GOODS_TYPE      /*商品大类*/
+		</if>
+		<if test="midGoodsType!=null and midGoodsType!=''">
+		,MID_GOODS_TYPE      /*商品中类*/
+		</if>
+		<if test="smallGoodsType!=null and smallGoodsType!=''">
+		,SAMLL_GOODS_TYPE    /*商品小类*/
+		</if>
+		<if test="prduceAddr!=null and prduceAddr!=''">
+		,PRODUCE_ADDR        /*生成地址*/
+		</if>
+		<if test="brand!=null and brand!=''">
+		,BRAND               /*商品品牌*/
+		</if>
+		<if test="timePromise!=null and timePromise!=''">
+		,TIME_PROMISE        /*时间承诺*/
+		</if>
+		<if test="packageCount!=null and packageCount!=''">
+		,PACKAGE_COUNT       /*包装数量*/
+		</if>
+		<if test="noReasonReturnGoods!=null and noReasonReturnGoods!=''">
+		,NO_REASON_RETURN_GOODS/*7天无理由退换货*/
+		</if>
+		<if test="compensateGoods!=null and compensateGoods!=''">
+		,COMPENSATE_GOODS    /*假一赔十*/
+		</if>
+		<if test="originalPrice!=null and originalPrice!=''">
+		,ORIGINAL_PRICE      /*原价*/
+		</if>
+		<if test="historyPrice!=null and historyPrice!=''">
+		,history_price      /*一口价*/
+		</if>
+		<if test="storeDisplay!=null and storeDisplay!=''">
+			,STORE_DISPLAY      /*店铺内是否展示*/
+		</if>
+		<if test="goodsStock!=null and goodsStock!=''">
+		,GOODS_STOCK         /*库存*/
+		</if>
+		<if test="goodsComments!=null and goodsComments!=''">
+		,GOODS_COMMENTS      /*商品卖点说明*/
+		</if>
+		<if test="shopOrder!=null and shopOrder!=''">
+		,SHOP_ORDER          /*店铺排位*/
+		</if>
+		<if test="templateId!=null and templateId!=''">
+		,TEMPLATE_ID         /*模板ID*/
+		</if>
+		<if test="saleStatus!=null and saleStatus!=''">
+		,SALE_STATUS         /*销售状态*/
+		</if>
+		<if test="goodsStatus!=null and goodsStatus!=''">
+		,STATUS              /*商品状态*/
+		</if>
+		) values (
+
+		 #{id}               /*记录ID*/
+		 ,'brand'
+		<if test="productCode!=null and productCode!=''">
+		,#{productCode}      /*商品条形码，69码*/
+		</if>
+		<if test="o2oProdCategory!=null and o2oProdCategory!=''">
+		,#{o2oProdCategory}  /*商品系列表CX_PROD_SERIES的ROW_ID关联字段*/
+		</if>
+		<if test="o2oShareUrl!=null and o2oShareUrl!=''">
+		,#{o2oShareUrl}      /*URL*/
+		</if>
+		<if test="o2oShareNotes!=null and o2oShareNotes!=''">
+		,#{o2oShareNotes}    /*分享说明*/
+		</if>
+		<if test="o2oShareTheme!=null and o2oShareTheme!=''">
+		,#{o2oShareTheme}    /*分享标题*/
+		</if>
+		<if test="o2oShareType!=null and o2oShareType!=''">
+		,GET_LOV_VAL(#{usercorpid},'TB_O2O_SHARE_TYPE',#{o2oShareType})/*分享方式*/
+		</if>
+		<if test="o2oKlNumber!=null and o2oKlNumber!=''">
+		,#{o2oKlNumber}      /*千升数*/
+		</if>
+		<if test="o2oCaseNumber!=null and o2oCaseNumber!=''">
+		,#{o2oCaseNumber}    /*箱数*/
+		</if>
+		<if test="o2oProdDesc!=null and o2oProdDesc!=''">
+		,#{o2oProdDesc}      /*酒精度*/
+		</if>
+		<if test="o2oShelfLife!=null and o2oShelfLife!=''">
+		,#{o2oShelfLife}     /*保质期*/
+		</if>
+		<if test="o2oStorageMethod!=null and o2oStorageMethod!=''">
+		,#{o2oStorageMethod} /*包装方式*/
+		</if>
+		<if test="o2oProductIngredient!=null and o2oProductIngredient!=''">
+		,#{o2oProductIngredient}/*原麦汁浓度*/
+		</if>
+		<if test="o2oFpDisplay!=null and o2oFpDisplay!=''">
+		,#{o2oFpDisplay}     /*首页显示*/
+		</if>
+		<if test="o2oIntCode!=null and o2oIntCode!=''">
+		,#{o2oIntCode}       /*商品编码*/
+		</if>
+		<if test="o2oDisplayName!=null and o2oDisplayName!=''">
+		,#{o2oDisplayName}   /*商品名称*/
+		</if>
+		<if test="goodsTypeId!=null and goodsTypeId!=''">
+		,#{goodsTypeId}        /*商品分类*/
+		</if>
+		<if test="bigGoodsType!=null and bigGoodsType!=''">
+		,#{bigGoodsType}     /*商品大类*/
+		</if>
+		<if test="midGoodsType!=null and midGoodsType!=''">
+		,#{midGoodsType}     /*商品中类*/
+		</if>
+		<if test="smallGoodsType!=null and smallGoodsType!=''">
+		,#{smallGoodsType}   /*商品小类*/
+		</if>
+		<if test="prduceAddr!=null and prduceAddr!=''">
+		,#{prduceAddr}       /*生成地址*/
+		</if>
+		<if test="brand!=null and brand!=''">
+		,#{brand}            /*商品品牌*/
+		</if>
+		<if test="timePromise!=null and timePromise!=''">
+		,#{timePromise}      /*时间承诺*/
+		</if>
+		<if test="packageCount!=null and packageCount!=''">
+		,#{packageCount}     /*包装数量*/
+		</if>
+		<if test="noReasonReturnGoods!=null and noReasonReturnGoods!=''">
+		,#{noReasonReturnGoods}/*7天无理由退换货*/
+		</if>
+		<if test="compensateGoods!=null and compensateGoods!=''">
+		,#{compensateGoods}  /*假一赔十*/
+		</if>
+		<if test="originalPrice!=null and originalPrice!=''">
+		,#{originalPrice}    /*原价*/
+		</if>
+		<if test="historyPrice!=null and historyPrice!=''">
+		,#{historyPrice}    /*一口价*/
+		</if>
+		<if test="storeDisplay!=null and storeDisplay!=''">
+		,#{storeDisplay}    /*店铺内是否展示*/
+		</if>
+		<if test="goodsStock!=null and goodsStock!=''">
+		,#{goodsStock}       /*库存*/
+		</if>
+		<if test="goodsComments!=null and goodsComments!=''">
+		,#{goodsComments}    /*商品卖点说明*/
+		</if>
+		<if test="shopOrder!=null and shopOrder!=''">
+		,#{shopOrder}        /*店铺排位*/
+		</if>
+		<if test="templateId!=null and templateId!=''">
+		,#{templateId}       /*模板ID*/
+		</if>
+		<if test="saleStatus!=null and saleStatus!=''">
+		,GET_LOV_VAL(#{usercorpid},'SALE_STATUS',#{saleStatus})/*销售状态*/
+		</if>
+		<if test="goodsStatus!=null and goodsStatus!=''">
+		,GET_LOV_VAL(#{usercorpid},'PRO_STATUS',#{goodsStatus})/*商品状态*/
+		</if>
+		)
+	</insert>
+	
+	<insert id="insert" parameterType="com.hand.base.goods.model.Goods">
+		insert into S_PROD_INT
+		  (ROW_ID, name, type, PART_NUM,PROD_TYPE_CD, CFG_MODEL_ID,SALES_SRVC_FLG)
+		values
+		  (#{id},#{name},#{type},#{o2oProductCode},#{prodDefTypeCode},#{id},'Y')
+	</insert>
+	
+	<insert id="prodIntXInsert" parameterType="com.hand.base.goods.model.Goods">
+		insert into S_PROD_INT_X
+		  (ROW_ID,PAR_ROW_ID, O2O_DISPLAY_NAME, O2O_INT_CODE, O2O_FP_DISPLAY, O2O_PRODUCT_INGREDIENT,
+		  O2O_STORAGE_METHOD, O2O_SHELF_LIFE, O2O_PROD_DESC, ATTRIB_18, ATTRIB_19,
+		  O2O_PROD_ID, O2O_SHARE_TYPE, O2O_SHARE_THEME, O2O_SHARE_NOTES, O2O_SHARE_URL,
+		  O2O_PROD_CATEGORY,ATTRIB_09,status)
+		values
+		  (#{id},#{id},#{o2oDisplayName},#{o2oIntCode},#{o2oFpDisplay},#{o2oProductIngredient},
+		  #{o2oStorageMethod},#{o2oShelfLife},#{o2oProdDesc},
+		  lnk_blank_str_to_null(#{o2oCaseNumber,jdbcType=FLOAT}),lnk_blank_str_to_null(#{o2oKlNumber,jdbcType=FLOAT}),
+		  #{o2oProdId},#{o2oShareType},#{o2oShareTheme},#{o2oShareNotes},#{o2oShareUrl},
+		  #{o2oProdCategory},'N',#{goodsStatus})
+	</insert>
+	
+	<insert id="vodInsert" parameterType="com.hand.base.goods.model.Goods">
+		insert into S_VOD
+		  (ROW_ID,OBJECT_NUM,vod_name,vod_type_cd,LOCKED_FLG,LOCKED_BY,LOCKED_DT)
+		values
+		  (S_SEQUENCE_PKG_GET_NEXT_ROWID(),#{id},#{o2oDisplayName},'ISS_PROD_DEF',#{vodLockedFlag},#{vodLockedBy},#{vodLockedDate})
+	</insert>
+  
+	<update id="update" parameterType="com.hand.base.goods.model.Goods">
+		update S_PROD_INT t
+		   set t.name = #{name}, t.type = #{type},t.PART_NUM=#{o2oProductCode}, t.PROD_TYPE_CD = #{prodDefTypeCode}, t.CFG_MODEL_ID = #{cfgModelId}
+		 where t.row_id = #{id}
+	</update>
+	
+	<update id="brandUpdate" parameterType="com.hand.base.goods.model.Goods">
+		UPDATE S_PROD_INT_X SET
+		 ROW_ID = #{id}
+		<if test="productCode!=null and productCode!=''">
+		,BAR_CODE            =#{productCode}      /*商品条形码，69码*/
+		</if>
+		<if test="o2oProdCategory!=null and o2oProdCategory!=''">
+		,O2O_PROD_CATEGORY   =#{o2oProdCategory}  /*商品系列表CX_PROD_SERIES的ROW_ID关联字段*/
+		</if>
+		<if test="o2oShareUrl!=null and o2oShareUrl!=''">
+		,O2O_SHARE_URL       =#{o2oShareUrl}      /*URL*/
+		</if>
+		<if test="o2oShareNotes!=null and o2oShareNotes!=''">
+		,O2O_SHARE_NOTES     =#{o2oShareNotes}    /*分享说明*/
+		</if>
+		<if test="o2oShareTheme!=null and o2oShareTheme!=''">
+		,O2O_SHARE_THEME     =#{o2oShareTheme}    /*分享标题*/
+		</if>
+		<if test="o2oShareType!=null and o2oShareType!=''">
+		,O2O_SHARE_TYPE      =GET_LOV_VAL(#{usercorpid},'TB_O2O_SHARE_TYPE',#{o2oShareType})/*分享方式*/
+		</if>
+		<if test="o2oKlNumber!=null and o2oKlNumber!=''">
+		,ATTRIB_19           =#{o2oKlNumber}      /*千升数*/
+		</if>
+		<if test="o2oCaseNumber!=null and o2oCaseNumber!=''">
+		,ATTRIB_18           =#{o2oCaseNumber}    /*箱数*/
+		</if>
+		<if test="o2oProdDesc!=null and o2oProdDesc!=''">
+		,O2O_PROD_DESC       =#{o2oProdDesc}      /*酒精度*/
+		</if>
+		<if test="o2oShelfLife!=null and o2oShelfLife!=''">
+		,O2O_SHELF_LIFE      =#{o2oShelfLife}     /*保质期*/
+		</if>
+		<if test="o2oStorageMethod!=null and o2oStorageMethod!=''">
+		,O2O_STORAGE_METHOD  =#{o2oStorageMethod} /*包装方式*/
+		</if>
+		<if test="o2oProductIngredient!=null and o2oProductIngredient!=''">
+		,O2O_PRODUCT_INGREDIENT=#{o2oProductIngredient}/*原麦汁浓度*/
+		</if>
+		<if test="o2oFpDisplay!=null and o2oFpDisplay!=''">
+		,O2O_FP_DISPLAY      =#{o2oFpDisplay}     /*首页显示*/
+		</if>
+		<if test="o2oIntCode!=null and o2oIntCode!=''">
+		,O2O_INT_CODE        =#{o2oIntCode}       /*商品编码*/
+		</if>
+		<if test="o2oDisplayName!=null and o2oDisplayName!=''">
+		,O2O_DISPLAY_NAME    =#{o2oDisplayName}   /*商品名称*/
+		</if>
+		<if test="goodsTypeId!=null and goodsTypeId!=''">
+		,GOODS_TYPE_ID          =#{goodsTypeId}        /*商品分类*/
+		</if>
+		<if test="bigGoodsType!=null and bigGoodsType!=''">
+		,BIG_GOODS_TYPE      =#{bigGoodsType}     /*商品大类*/
+		</if>
+		<if test="midGoodsType!=null and midGoodsType!=''">
+		,MID_GOODS_TYPE      =#{midGoodsType}     /*商品中类*/
+		</if>
+		<if test="smallGoodsType!=null and smallGoodsType!=''">
+		,SAMLL_GOODS_TYPE    =#{smallGoodsType}   /*商品小类*/
+		</if>
+		<if test="prduceAddr!=null and prduceAddr!=''">
+		,PRODUCE_ADDR        =#{prduceAddr}       /*生成地址*/
+		</if>
+		<if test="brand!=null and brand!=''">
+		,BRAND               =#{brand}            /*商品品牌*/
+		</if>
+		<if test="timePromise!=null and timePromise!=''">
+		,TIME_PROMISE        =#{timePromise}      /*时间承诺*/
+		</if>
+		<if test="packageCount!=null and packageCount!=''">
+		,PACKAGE_COUNT       =#{packageCount}     /*包装数量*/
+		</if>
+		<if test="noReasonReturnGoods!=null and noReasonReturnGoods!=''">
+		,NO_REASON_RETURN_GOODS=#{noReasonReturnGoods}/*7天无理由退换货*/
+		</if>
+		<if test="compensateGoods!=null and compensateGoods!=''">
+		,COMPENSATE_GOODS    =#{compensateGoods}  /*假一赔十*/
+		</if>
+		<if test="originalPrice!=null and originalPrice!=''">
+		,ORIGINAL_PRICE      =#{originalPrice}    /*原价*/
+		</if>
+		<if test="historyPrice!=null and historyPrice!=''">
+		,history_price      =#{historyPrice}    /*一口价*/
+		</if>
+		<if  test="storeDisplay!=null and storeDisplay!=''">
+		  ,STORE_DISPLAY      =#{storeDisplay}    /*店铺内是否展示*/
+		</if>
+		<if test="goodsStock!=null and goodsStock!=''">
+		,GOODS_STOCK         =#{goodsStock}       /*库存*/
+		</if>
+		<if test="goodsComments!=null and goodsComments!=''">
+		,GOODS_COMMENTS      =#{goodsComments}    /*商品卖点说明*/
+		</if>
+		<if test="shopOrder!=null and shopOrder!=''">
+		,SHOP_ORDER          =#{shopOrder}        /*店铺排位*/
+		</if>
+		<if test="templateId!=null and templateId!=''">
+		,TEMPLATE_ID         =#{templateId}       /*模板ID*/
+		</if>
+		<if test="saleStatus!=null and saleStatus!=''">
+		,SALE_STATUS         =GET_LOV_VAL(#{usercorpid},'SALE_STATUS',#{saleStatus})/*销售状态*/
+
+		 <if test="saleStatus=='SELLING'">
+		 ,market_time = now()
+		 </if>
+
+		</if>
+		<if test="goodsStatus!=null and goodsStatus!=''">
+		,STATUS              =GET_LOV_VAL(#{usercorpid},'PRO_STATUS',#{goodsStatus})/*商品状态*/
+		</if>
+		<if test="displayOrder!=null and displayOrder!=''">
+		,DISPLAY_ORDER       =#{displayOrder}     /*品牌馆热销产品展示顺序*/
+		</if>
+		<if test="isDisplay!=null and isDisplay!=''">
+		,IS_DISPLAY          =#{isDisplay}        /*品牌馆热销产品是否展示*/
+		</if>
+		WHERE ROW_ID=#{id}
+	</update>
+	
+	<update id="prodIntXUpdate" parameterType="com.hand.base.goods.model.Goods">
+		update S_PROD_INT_X t
+		   set t.O2O_DISPLAY_NAME = #{o2oDisplayName}, t.O2O_INT_CODE = #{o2oIntCode}, 
+		   t.O2O_FP_DISPLAY = #{o2oFpDisplay}, t.O2O_PRODUCT_INGREDIENT = #{o2oProductIngredient},
+		   t.O2O_STORAGE_METHOD = #{o2oStorageMethod}, t.O2O_SHELF_LIFE = #{o2oShelfLife}, 
+		   t.O2O_PROD_DESC = #{o2oProdDesc}, t.ATTRIB_18 = lnk_blank_str_to_null(#{o2oCaseNumber,jdbcType=FLOAT}),
+		   t.ATTRIB_19 = lnk_blank_str_to_null(#{o2oKlNumber,jdbcType=FLOAT}), t.O2O_PROD_ID = #{o2oProdId},
+		   t.O2O_SHARE_TYPE = #{o2oShareType}, t.O2O_SHARE_THEME = #{o2oShareTheme}, 
+		   t.O2O_SHARE_NOTES = #{o2oShareNotes}, t.O2O_SHARE_URL = #{o2oShareUrl},
+		   t.O2O_PROD_CATEGORY = #{o2oProdCategory}, t.O2O_SHARE_PIC_ID = #{picId}, t.status = #{goodsStatus}
+		 where t.row_id = #{id}
+	</update>
+	
+	<delete id="deleteById" parameterType="com.hand.base.goods.model.Goods">
+		DELETE FROM S_PROD_INT WHERE ROW_ID = #{id}
+	</delete>
+  	
+  	
+  	<update id="goodsShareUpdate" parameterType="com.hand.base.goods.model.Goods">
+	 	UPDATE S_PROD_INT_X
+		SET O2O_SHARE_PIC_ID = #{picId}
+		where ROW_ID = #{id}
+    </update>
+    
+  	<update id="goodsImageUpdate" parameterType="com.hand.base.goods.model.Goods">
+	 	UPDATE CX_O_PROD_PIC
+		SET PIC_ID = #{picId}
+		where ROW_ID = #{id}
+    </update>
+    
+    <select id="queryDetailById" resultType="com.hand.base.goods.model.Goods"
+		parameterType="com.hand.base.goods.model.Goods">	
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	#定义
+	t.NAME name, /*产品*/
+	t.DESC_TEXT description,/*说明*/
+	t.TYPE type, /*类型*/
+	t.PART_NUM part, /*产品编码*/
+	t2.UNITS unitOfMeasure, /*单位*/
+	t.APPLY_EC_RULE_FLG prePickCD, /*检查资格*/
+	t.INCLSV_ELIG_RL_FLG inclEligFlag, /*包含资格*/
+	t.PRICE_TYPE_CD priceType, /*价格类型*/
+	t.STATUS_CD versionStatus, /*状态*/
+	t.ORDERABLE_FLG orderable, /*可订购*/
+	t.CRT_AST_REC_FLG trackAsAssetFlag, /*作为资产追踪*/
+	t.BU_ID organization, /*组织*/
+	t.PROD_TYPE_CD productDefTypeCode, /*结构类型*/
+	t.SALES_PROD_FLG salesProductFlag, /*销售产品*/
+	t.SALES_SRVC_FLG salesServiceFlag /*服务产品*/
+	
+	
+	from S_PROD_INT t
+	LEFT JOIN (S_PROD_INT_X t1 LEFT JOIN CX_UNITS_X t2 on t2.ROW_ID=t1.X_ATTRIB_66) 
+	on t.row_id=t1.par_row_id
+	where t.row_id=#{id}
+  	</select>
+  	
+  	<update id="detailUpdate" parameterType="com.hand.base.goods.model.Goods">
+		update S_PROD_INT t
+		   set t.NAME = #{name}, t.DESC_TEXT = #{description}
+		   , t.TYPE = #{type}, t.PART_NUM = #{part}
+		   , t.APPLY_EC_RULE_FLG = #{prePickCD}, t.INCLSV_ELIG_RL_FLG = #{inclEligFlag}
+		   , t.PRICE_TYPE_CD = #{priceType}, t.STATUS_CD = #{versionStatus}
+		   , t.ORDERABLE_FLG = #{orderable}, t.CRT_AST_REC_FLG = #{trackAsAssetFlag}
+		   , t.BU_ID = #{organization}, t.PROD_TYPE_CD = #{productDefTypeCode}
+		   , t.SALES_PROD_FLG = #{salesProductFlag}, t.SALES_SRVC_FLG = #{salesServiceFlag}
+		 where t.row_id = #{id}
+	</update>
+	
+  	<update id="unitDetailUpdate" parameterType="com.hand.base.goods.model.Goods">
+		update S_PROD_INT_X
+		   set
+		   <if test="unitId != '' and unitId != null ">
+		   		X_ATTRIB_66 = #{unitId}
+		   </if> 
+		   <if test="o2oProdSeries == '产品组合' ">
+		    	ATTRIB_09 = 'Y',
+		   	 	O2O_PROD_CATEGORY = (select row_id from CX_PROD_SERIES where name='产品组合')
+		   </if> 
+		 where par_row_id = #{id}
+	</update>
+  	
+    <select id="queryProdCodeByPage" parameterType="com.hand.base.goods.model.Goods" resultMap="goods">
+	select
+	T.ROW_ID as id,
+	date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as
+	created,
+	T.CREATED_BY as createdBy,
+	date_format(T.LAST_UPD, '%Y-%m-%d
+	%H:%i:%S') as lastUpdated,
+	T.LAST_UPD_BY as lastUpdatedBy,
+	t.NAME name,
+	t.PART_NUM part,
+	t.TYPE type,
+	t2.UNITS unitOfMeasure
+	FROM
+	S_PROD_INT t
+	LEFT JOIN S_PROD_INT_X t1 on t1.PAR_ROW_ID=t.row_id
+	LEFT JOIN CX_UNITS_X t2 on t2.ROW_ID = t1.X_ATTRIB_66
+	where T.TYPE IN ('Finished Bear','成品') AND T.SALES_SRVC_FLG = 'N'
+  	</select>
+  	
+  	<select id="queryUnit" parameterType="com.hand.base.goods.model.Goods" resultMap="goods">
+		SELECT 
+		      T1.LAST_UPD lastUpdated,
+		      T1.CREATED created,
+		      T1.LAST_UPD_BY lastUpdatedBy,
+		      T1.CREATED_BY createdBy,
+		      T1.ROW_ID id,
+		      T1.UNITS unitOfMeasure
+		   FROM 
+		       CX_UNITS_X T1
+  	</select>
+</mapper>

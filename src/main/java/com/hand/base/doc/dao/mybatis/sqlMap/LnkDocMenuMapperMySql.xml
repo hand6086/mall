@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hand.base.doc.dao.mybatis.mapper.LnkDocMenuMapper">
+	<resultMap type="com.hand.base.doc.model.LnkDocMenu"
+		id="lnkDocMenu"></resultMap>
+	
+	<sql id="queryAllSql">
+	SELECT 
+		 T1.ROW_ID            as id                  /*记录编号*/
+		,T1.CREATED           as created             /*创建时间*/
+		,T1.CREATED_BY        as createdBy           /*创建者ID*/
+		,date_format(T1.LAST_UPD, 'yyyy-mm-dd hh24:mi:ss') as lastUpdated         /*最后更新时间*/
+		,T1.LAST_UPD_BY       as lastUpdatedBy       /*最后更新者ID*/
+		,T1.CORP_ID           as corpid              /*公司账套*/
+		,T1.MENU_NAME         as menuName            /*菜单名称*/
+		,T1.MENU_ICON         as menuIcon            /*菜单图标*/
+
+	</sql>
+	
+	<sql id="fromTableSql">
+	FROM LNK_DOC_MENU T1
+	WHERE 1=1
+
+
+	</sql>
+	
+	<sql id="whereAllSql">
+	
+	
+
+	</sql>
+	
+	<sql id="orderByAllSql">
+	
+	</sql>	
+	
+	<!-- 记录总数 -->
+	<select id="queryCountByExample" resultType="java.lang.Integer" parameterType="com.hand.base.doc.model.LnkDocMenu">
+		SELECT count(1)
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryByExamplePage" resultMap="lnkDocMenu"
+		parameterType="com.hand.base.doc.model.LnkDocMenu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+	<select id="queryById" resultMap="lnkDocMenu"
+		parameterType="com.hand.base.doc.model.LnkDocMenu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		and T1.ROW_ID=#{id}
+	</select>
+	
+	<select id="queryAll" resultMap="lnkDocMenu"
+		parameterType="com.hand.base.doc.model.LnkDocMenu">
+		<include refid="queryAllSql"/>
+		<include refid="fromTableSql"/>
+		<include refid="whereAllSql"/>
+	</select>
+	
+		
+
+	<insert id="insert" parameterType="com.hand.base.doc.model.LnkDocMenu">
+		INSERT INTO LNK_DOC_MENU(
+		 ROW_ID              /*记录ID*/
+		,MENU_NAME           /*菜单名称*/
+		,MENU_ICON           /*菜单图标*/
+		) values (
+
+		 #{id}               /*记录ID*/
+		,#{menuName}         /*菜单名称*/
+		,#{menuIcon}         /*菜单图标*/
+		)
+	</insert>
+
+	<update id="update" parameterType="com.hand.base.doc.model.LnkDocMenu">
+		UPDATE LNK_DOC_MENU SET
+		 MENU_NAME           =#{menuName}         /*菜单名称*/
+		,MENU_ICON           =#{menuIcon}         /*菜单图标*/
+		WHERE ROW_ID=#{id}
+	</update>
+	<delete id="deleteById" parameterType="com.hand.base.doc.model.LnkDocMenu">
+		DELETE FROM LNK_DOC_MENU WHERE ROW_ID=#{id}
+	</delete>
+</mapper>
