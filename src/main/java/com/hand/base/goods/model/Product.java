@@ -3,6 +3,8 @@ package com.hand.base.goods.model;
 import com.hand.base.basic.model.BasicModel;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 商品
@@ -54,6 +56,16 @@ public class Product extends BasicModel {
 	 * 描述
 	 */
 	private String comments;
+
+	private List<ProductDetail> productDetails = new ArrayList<>();
+
+	public List<ProductDetail> getProductDetails() {
+		return productDetails;
+	}
+
+	public void setProductDetails(List<ProductDetail> productDetails) {
+		this.productDetails = productDetails;
+	}
 
 	public String getProductName() {
 		return productName;

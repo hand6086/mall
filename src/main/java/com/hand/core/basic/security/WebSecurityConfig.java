@@ -67,7 +67,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 					"/action/portal/category/**",
 					"/action/portal/manager/zcInsert",
 					"/action/portal/homeManage/smsHomeLogo",
-					"/action/portal/product/list"
+					"/action/portal/product/list",
+					"/action/portal/productNav/queryAll"
 					).permitAll()
 			.antMatchers("/portal/**").hasRole("USER")	
 			.antMatchers("/action/**").hasRole("USER")

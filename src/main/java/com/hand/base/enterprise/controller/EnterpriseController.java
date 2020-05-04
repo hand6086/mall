@@ -272,11 +272,7 @@ public class EnterpriseController extends BasicController<Enterprise>{
 		User user = UserUtil.getUser(session);
 		try{
 			Enterprise record = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				record = getBasicService().queryById(entity);
-			}else{
-				record = getBasicService().brandQueryById(entity);
-			}
+			record = getBasicService().queryById(entity);
 			if(record !=null){
 				String realPath = AppConstants.portalSharePicHttpDir;
 				record.setpIdentifiCard(realPath+record.getpIdentifiCard());

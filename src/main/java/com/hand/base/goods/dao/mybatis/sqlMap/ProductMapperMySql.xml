@@ -4,6 +4,80 @@
 <mapper namespace="com.hand.base.goods.dao.mybatis.mapper.ProductMapper">
 	<resultMap type="com.hand.base.goods.model.Product" id="product"></resultMap>
 
+	<resultMap type="com.hand.base.goods.model.Product" id="productCollection">
+		<id column="id" property="id"/>
+		<result column="created" property="created"/>
+		<result column="createdBy" property="createdBy"/>
+		<result column="lastUpdated" property="lastUpdated"/>
+		<result column="lastUpdatedBy" property="lastUpdatedBy"/>
+		<result column="productName" property="productName"/>
+		<result column="provinceId" property="provinceId"/>
+		<result column="cityId" property="cityId"/>
+		<result column="districtId" property="districtId"/>
+		<result column="price" property="price"/>
+		<result column="comments" property="comments"/>
+		<collection property="productDetails" ofType="com.hand.base.goods.model.ProductDetail">
+			<id column="lineId" property="id"/>
+			<result column="productPicType" property="productPicType"/>
+			<result column="productPicId" property="productPicId"/>
+			<result column="productPic" property="productPic"/>
+		</collection>
+	</resultMap>
+
+	<select id="queryList" parameterType="com.hand.base.goods.model.Product" resultMap="productCollection">
+		select
+		T.ROW_ID as id,
+		date_format(T.CREATED,'%Y-%m-%d %H:%i:%S') as created,
+		T.CREATED_BY as createdBy,
+		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
+		T.LAST_UPD_BY as lastUpdatedBy,
+		T.product_name as productName,
+		T.province_id as provinceId,
+		T.city_id as cityId,
+		T.district_id as districtId,
+		T.price as price,
+		T.comments as comments,
+		t2.row_id as lineId,
+		t2.product_pic_type as productPicType,
+		t2.product_pic_id as productPicId,
+		t3.path as productPic
+		from lnk_product T
+		left join (lnk_product_detail t2 left join cx_o_img t3 on t2.product_pic_id = t3.row_id) on t.row_id = t2.product_id
+		where 1 = 1
+		<if test="provinceId != null and provinceId != '' ">
+			and T.province_id = #{provinceId}
+		</if>
+		<if test="cityId != null and cityId != '' ">
+			and T.city_id = #{cityId}
+		</if>
+		<if test="districtId != null and districtId != '' ">
+			and T.district_id = #{districtId}
+		</if>
+		<if test="productName != null and productName != '' ">
+			and T.product_name = #{productName}
+		</if>
+		limit #{startRows}, #{endRowS}
+	</select>
+
+	<select id="queryListCount" parameterType="com.hand.base.goods.model.Product" resultType="Integer">
+		select
+		count(1) as total
+		from lnk_product T
+		where 1 = 1
+		<if test="provinceId != null and provinceId != '' ">
+			and T.province_id = #{provinceId}
+		</if>
+		<if test="cityId != null and cityId != '' ">
+			and T.city_id = #{cityId}
+		</if>
+		<if test="districtId != null and districtId != '' ">
+			and T.district_id = #{districtId}
+		</if>
+		<if test="productName != null and productName != '' ">
+			and T.product_name = #{productName}
+		</if>
+	</select>
+
 	<sql id="queryAllSql">
 	select
 		T.ROW_ID as id,
@@ -44,7 +118,6 @@
 		</if>
   	</sql>
 
-  	
   	<select id="queryByExamplePage" parameterType="com.hand.base.goods.model.Product" resultMap="product">
   		<include refid="queryAllSql"/>
 		<include refid="fromSql"/>

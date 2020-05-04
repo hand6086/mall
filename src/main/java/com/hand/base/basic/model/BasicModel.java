@@ -101,45 +101,6 @@ public class BasicModel implements Serializable{
 	public void setStoreName(String storeName) {
 		this.storeName = storeName;
 	}
-	private String brandQuery = "0";
-	
-	private String brandUpdate = "0";
-	
-	private String brandInsert = "0";
-	
-	private String brandUpsert = "0";
-	
-	public String getBrandUpdate() {
-		return brandUpdate;
-	}
-
-	public void setBrandUpdate(String brandUpdate) {
-		this.brandUpdate = brandUpdate;
-	}
-
-	public String getBrandInsert() {
-		return brandInsert;
-	}
-
-	public void setBrandInsert(String brandInsert) {
-		this.brandInsert = brandInsert;
-	}
-
-	public String getBrandUpsert() {
-		return brandUpsert;
-	}
-
-	public void setBrandUpsert(String brandUpsert) {
-		this.brandUpsert = brandUpsert;
-	}
-
-	public String getBrandQuery() {
-		return brandQuery;
-	}
-
-	public void setBrandQuery(String brandQuery) {
-		this.brandQuery = brandQuery;
-	}
 
 	public void setCreatedId(String createdId) {
 		this.createdId = createdId;
@@ -324,6 +285,12 @@ public class BasicModel implements Serializable{
 	public Integer getEndRow() {
 		if (page > 0)
 			endRow = page * rows;
+		return endRow;
+	}
+
+	public Integer getEndRowS() {
+		if (page > 0)
+			endRow = page * rows - 1;
 		return endRow;
 	}
 	

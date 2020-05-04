@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hand.base.goods.dao.mybatis.mapper.ProductNavMapper">
+	<resultMap type="com.hand.base.goods.model.ProductNav" id="productNav"></resultMap>
+
+	<resultMap type="com.hand.base.goods.model.ProductNav" id="productNavCollection">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="parentId" property="parentId"/>
+		<collection property="children" ofType="com.hand.base.goods.model.ProductNavChild">
+			<id column="childId" property="id"/>
+			<result column="childName" property="name"/>
+			<result column="childParentId" property="parentId"/>
+		</collection>
+	</resultMap>
+
+	<select id="queryAll" resultMap="productNavCollection">
+		SELECT
+			t1.row_id as id,
+			t1.`name` as name,
+			t1.parent_id as parentId,
+			t2.row_id as childId,
+			t2.`name` as childName,
+			t2.parent_id as childParentId
+		FROM
+			cx_o_area t1 inner join cx_o_area t2 on t1.row_id = t2.parent_id
+		and t1.parent_id = '1-7DSX1D'
+	</select>
+
+</mapper>

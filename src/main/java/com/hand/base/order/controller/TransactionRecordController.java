@@ -54,11 +54,7 @@ public class TransactionRecordController extends BasicController<TransactionReco
 			//导出全部 不分页
 			t.setPageFlag(false);
 			List<TransactionRecord> list = null;
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				list = transactionRecordService.queryByExamplePage(t);
-			}else{
-				list = transactionRecordService.brandQueryByExamplePage(t);
-			}
+			list = transactionRecordService.queryByExamplePage(t);
 			for(TransactionRecord transactionRecord : list){
 				transactionRecord.setPaymentNumber("=\""+transactionRecord.getPaymentNumber()+"\"");
 			}

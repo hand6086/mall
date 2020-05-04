@@ -10,6 +10,10 @@ import java.util.List;
 
 
 public interface ProductService extends BasicService<Product> {
+
+    List<Product> queryList(Product record) throws Exception;
+
+    Integer queryListCount(Product record) throws Exception;
 	
 	
 }

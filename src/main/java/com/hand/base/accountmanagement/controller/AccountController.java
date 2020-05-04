@@ -264,11 +264,7 @@ public class AccountController extends BasicController<Account> {
 			Account t = (Account) BasicModel.transformClass(entity, qps);
 			//List<Account> list = accountService.queryCashingOrderPage(t);
 			List<Account> list = new ArrayList<Account>();
-			if("101".equals(user.getUsercorpid()) && "0".equals(entity.getBrandQuery())){
-				list = accountService.queryCashingOrderPage(t);
-			}else{
-				list = accountService.brandQueryCashingOrderPage(t);
-			}
+			list = accountService.queryCashingOrderPage(t);
 			result.put("rows", list);
 			result.put("total", getCount(((BasicModel) entity), list.size()));
 		} catch (Exception e) {
