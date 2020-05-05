@@ -60,7 +60,7 @@ public class LoginController{
 	private EnterpriseService enterpriseService;
 	/**
 	 * 设置【内部用户】和【外部用户】登录的公共必要信息
-	 * @param user 设置信息的登录用户
+	 * @param  设置信息的登录用户
 	 */
 	private User loginSettings(HttpSession session, HttpServletRequest request,HttpServletResponse response) throws Exception{
 		SecurityContext securityContext = (SecurityContext) session.getAttribute("SPRING_SECURITY_CONTEXT");
@@ -84,16 +84,16 @@ public class LoginController{
 		
 		
 		
-		int errorTimes = getLoginErrorTimes(user.getUsername());
+		/*int errorTimes = getLoginErrorTimes(user.getUsername());
 		if(errorTimes >= 5){
 			throw new Exception("登录错误次数过多！");
-		}
+		}*/
 		
 		setLoginErrorTimes(user.getUsername(), 0);//清空登录错误次数
 		// addOnlineEmp(user, session, request);//添加到在线用户列表
 		loginService.lastLoginDateUpdate(user);//更新最后登录时间
 		
-		String ip = IpUtil.getIpAddress(request);//IpUtil获取IP地址
+		/*String ip = IpUtil.getIpAddress(request);//IpUtil获取IP地址
 		LoginLog record = new LoginLog();
 		record.setLockFlag('N');
 		String userAgent = request.getHeader("User-Agent");
@@ -103,7 +103,7 @@ public class LoginController{
         record.setIpAddress(ip);
         record.setUserAgent(userAgent);
         record.setUserSource("CRM");//crm用户登录
-		loginLogService.addLoginSuccessLog(record);
+		loginLogService.addLoginSuccessLog(record);*/
 		
 		// 添加添加页面公共参数
 		AppContext actx = new AppContext();
