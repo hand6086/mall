@@ -1,5 +1,5 @@
 # 默认的profile为dev，其他环境通过指定启动参数使用不同的profile，比如：  
-#   测试环境：java -jar my-spring-boot.jar --spring.profiles.active=test  
+#   开发环境：java -jar my-spring-boot.jar --spring.profiles.active=dev
 spring:
   profiles:  
     active: dev
@@ -36,6 +36,7 @@ server:
   jsp-servlet:
     init-parameters:
       devlelopment: true
+  context-path: /mall
 
 #mybatis config
 mybatis:
@@ -77,15 +78,15 @@ application:
     url: http://172.16.2.139
   uploadfile:
     portal:
-      share: C://app/platform/share/portal
-      httpshare: http://localhost:8080/share/mobile
+      share: /app/share/portal
+      httpshare: http://47.105.146.145/share/portal
     pic:
-      share: /app/server/pic
-      httpshare: http://172.16.2.139/qingpi/pic
+      share: /app/share/pic
+      httpshare: http://47.105.146.145/share/pic
   io:
     temporary:
-      share: D://LINK-CRM/lnkcrm-core-qp/src/main/webapp/share/io # 导出功能，生成的csv的存放路径
-      httpshare: http://localhost:8082/share/io
+      share: /app/share/io # 导出功能，生成的csv的存放路径
+      httpshare: http://47.105.146.145/share/io
 
     
 

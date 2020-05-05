@@ -45,33 +45,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/static/**", 
 					"/index.html", 
 					"/action/portal/login/nonSession",
-					"/action/portal/storeregister/*",
-					"/action/portal/sms/*",
 					"/portal/handler.jsp",
-					"/action/portal/chart/test",
 					"/action/portal/token/login",
-					"/action/portal/order/platformOrder/queryByOrderNum",
-					"/action/portal/order/platformOrder/batchQueryCount",
-					"/action/portal/order/platformOrder/batchQuery",
-					"/action/portal/order/platformOrder/queryLogisticsCompany",
-					"/action/portal/order/platformOrder/updateOrderLogistics",
-					"/doc/**",
-					"/action/portal/lnkDocMenu/**",
-					"/action/portal/lnkDocMenuLine/**",
-					"/action/portal/lnkDocParam/**",
-					"/action/portal/lnkDocResult/**",
-					"/action/portal/user/resetPassword",
-					"/action/portal/user/checkUserInfo",
-					"/action/portal/rcstoken/**",
-					"/action/portal/manager/getManagerId",
-					"/action/portal/category/**",
-					"/action/portal/manager/zcInsert",
 					"/action/portal/homeManage/smsHomeLogo",
 					"/action/portal/product/list",
 					"/action/portal/productNav/queryAll"
 					).permitAll()
-			.antMatchers("/portal/**").hasRole("USER")	
-			.antMatchers("/action/**").hasRole("USER")
 			.and()
 		.addFilterBefore(loginAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 		.formLogin()

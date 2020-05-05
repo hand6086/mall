@@ -20,10 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -58,9 +55,22 @@ public class PortalProductController extends BasicController<Product> {
 
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> list(@RequestBody  Product record, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+	public Map<String, Object> list(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		try{
+			Product record = new Product();
+
+			String pageParam = request.getParameter("page");
+			String rows = request.getParameter("rows");
+			String provinceId = request.getParameter("provinceId");
+			String cityId = request.getParameter("cityId");
+			String districtId = request.getParameter("districtId");
+			record.setProvinceId(provinceId);
+			record.setCityId(cityId);
+			record.setDistrictId(districtId);
+			record.setRows(rows == null ? 10 : Integer.valueOf(rows));
+			record.setPage(null == pageParam ? 1 : Integer.valueOf(pageParam));
+
 			Integer total = productService.queryListCount(record);
 			record.setTotal(total);
 
