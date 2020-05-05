@@ -12,7 +12,7 @@
 		date_format(T.LAST_UPD, '%Y-%m-%d %H:%i:%S') as lastUpdated,
 		T.LAST_UPD_BY as lastUpdatedBy,
 		T.product_pic_id as productPicId,
-		T2.path as productPic,
+		get_http_path(T2.path) as productPic,
 		T.product_pic_type as productPicType,
 		T.comments as comments,
 		T.product_id as productId

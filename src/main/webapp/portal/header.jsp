@@ -157,7 +157,6 @@ function toFirstLower(value){
 <script src="<%=staticPath%>/static/js/jquery.easyui.validate.js"></script>
 <script src="<%=staticPath%>/static/js/jquery.hdatagrid.columns.drap.js"></script>
 <script src="<%=staticPath%>/static/js/jquery.cookie.js" type="text/javascript"></script>
-<script src="<%=staticPath%>/static/js/jquery.image.js"></script>
 <script type="text/javascript">
 
 /**

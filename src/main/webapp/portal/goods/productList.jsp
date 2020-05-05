@@ -24,16 +24,6 @@
     top: 0;
     opacity: 0;
 }
-.form-table{
-	margin: 5px auto; 
-	width: 100%;
-}
-.td-label {
-	width:120px;
-	font-size: 14px;
-	text-align: right;
-	height: 30px;
-}
 .td-content input{
 	width:180px;
 }
@@ -81,7 +71,7 @@
 		   <thead>
 		   <tr>
 			   <th field="productPicId" width="150px" >图片Id</th>
-			   <th field="productPic" width="300px" >图片</th>
+			   <th field="productPic" width="300px" formatter="linePathFormatter">图片</th>
 			   <th field="productPicType" width="150px" lov="PRODUCT_PIC_TYPE" editor="{type:'combobox',options:{valueField:'val',
 																			textField:'name',
 																			data : getLovArray('PRODUCT_PIC_TYPE'),
@@ -91,7 +81,9 @@
 		   </tr>
 		   </thead>
 	   </table>
+
 	</div>
+
 	<script type="text/javascript">
 		var procutName = null;
 	    $datagrid = $('#product-table');
@@ -119,11 +111,7 @@
 				}
 			},
 			
-			onLoadSuccess: function (data) {
-	            //调用图片展示组件
-	            $('div.small_pic a').fancyZoom({scaleImg: true, closeOnClick: true});
-	        },
-	        
+
 			onInsertOrUpdateAction:function(row,successFun,errFun,that){
 				$.post("${AppContext.ctxPath}/action/portal/product/upsert",row,
 				function(data) {
@@ -179,7 +167,10 @@
 			parentGridId : 'product-table',
 			parentGridField : 'id',
 			linkGridField : 'productId',
-
+			onLoadSuccess: function (data) {
+				//调用图片展示组件
+				$('div.small_pic a').fancyZoom();
+			},
 			onInsertOrUpdateAction:function(row,successFun,errFun,that){
 				row.productId = $datagrid.datagrid('getSelected').id;
 				$.post("${AppContext.ctxPath}/action/portal/productDetail/upsert",row,
@@ -246,34 +237,14 @@
 		});
 
 		
-		function linePathFormatter(val,row)
-		{   
+		function linePathFormatter(val,row){
 			var imgUrl_A = "<div class=\"small_pic\"><a href=\"#bigImg\"> <img height=\"50\" src=\"";
 			var imgUrl_B = "\" /></a></div>";
 			if(val)
 			{
-				return imgUrl_A +row.linePath +imgUrl_B;
-			} 
-			return imgUrl_A + "${AppContext.ctxPath}/static/images/404.jpg" + imgUrl_B;
-		}
-		
-		//失效
-		function Invalid(){
-			var row = $datagrid.datagrid('getSelected');
-			if(row.goodsStatus=="Inactive"){
-				$datagrid.hdatagrid('changeAndSaveRowValue',{id:row.id,goodsStatus:"Active"});
-			}else{
-				$datagrid.hdatagrid('changeAndSaveRowValue',{id:row.id,goodsStatus:"Inactive"});
+				return imgUrl_A + row.productPic + imgUrl_B;
 			}
-			var index = $datagrid.hdatagrid('getRowIndex', row);
-            $datagrid.datagrid('selectRow',index);
-		}
-
-		
-		function goodsNameFormatter(val,row){
-		     if(val != null){
-					return "<a href='###' onClick='openGoodsDetailWin(\""+row.id+"\")'>"+val+"</a>";
-		     }
+			return imgUrl_A + "${AppContext.ctxPath}/static/images/404.jpg" + imgUrl_B;
 		}
 
 
@@ -343,6 +314,7 @@
 			$datagrid.hdatagrid('getCurrentRow').cityId = selectRow.id;
 			return selectRow.name;
 		}
+
 	</script>
 </body>
 </html>

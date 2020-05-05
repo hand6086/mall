@@ -1,8 +1,8 @@
 # 默认的profile为dev，其他环境通过指定启动参数使用不同的profile，比如：  
 #   开发环境：java -jar my-spring-boot.jar --spring.profiles.active=dev
 spring:
-  profiles:  
-    active: dev
+  profiles:
+    active: local
   datasource:
     driverClassName: com.mysql.jdbc.Driver
     max-active: 20
@@ -31,6 +31,7 @@ spring:
   application:
     name: mall
 
+
 server:
   port: 8082
   jsp-servlet:
@@ -50,11 +51,25 @@ multipart:
   enabled: true
   max-file-size: 5MB
   max-request-size: 5MB
-application:
-  doc:
-    url: http://172.16.2.139
-  database: mysql
 
+---
+spring:
+  profiles: local
+  datasource:
+    url: jdbc:mysql://39.102.83.1:3306/demo?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+    username: root
+    password: mayi123456
+  redis:
+    host: 47.88.27.158
+    password: mayi123456
+    port: 6379
+
+application:
+  database: mysql
+  static:
+    url: http://127.0.0.1:8082/mall
+  doc:
+    url: http://127.0.0.1:8082/mall
 ---
 spring:
   profiles: dev
@@ -67,10 +82,6 @@ spring:
     password: mayi123456
     port: 6379
 
-
-logging:
-  config: classpath:log4j2.xml
-  
 application:
   static:
     url: http://47.105.146.145/mall
