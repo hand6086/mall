@@ -73,9 +73,9 @@ logging:
   
 application:
   static:
-    url: http://127.0.0.1:8082
+    url: http://47.105.146.145/mall
   doc:
-    url: http://172.16.2.139
+    url: http://47.105.146.145/mall
   uploadfile:
     portal:
       share: /app/share/portal

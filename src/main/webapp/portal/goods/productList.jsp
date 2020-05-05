@@ -237,7 +237,7 @@
 						var file = $("#file");
 						file.after(file.clone().val(""));
 						file.remove();
-						$datagrid.datagrid('reload');
+						$subdatagrid.datagrid('reload');
 						window.parent.operationtip('图片上传成功！', 'info');
 					}
 				}
