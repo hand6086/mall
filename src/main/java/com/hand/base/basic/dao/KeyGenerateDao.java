@@ -18,15 +18,8 @@ public class KeyGenerateDao {
 	private JdbcTemplate jdbcTemplate;
 	
 	public String keyGenerate(){
-		String id = null;
-		String sql = "";
-		if(StringUtils.equals(AppConstants.key_applicationDatabase, "mysql")){
-			sql = "select s_sequence_pkg_get_next_rowid() as result";
-		}else if(StringUtils.equals(AppConstants.key_applicationDatabase, "oracle")){
-			sql = "select s_sequence_pkg.get_next_rowid() as result from dual";
-		}
-		
-		id = (String)jdbcTemplate.queryForObject(sql,String.class);
+		String sql = "select s_sequence_pkg_get_next_rowid() as result";
+		String id = (String)jdbcTemplate.queryForObject(sql,String.class);
 		logger.debug("生成的Sequence = ["+id+"]");
 		return id;
 	}

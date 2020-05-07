@@ -163,7 +163,6 @@ public class StoreController extends BasicController<Store>{
 			
 			Enterprise enterprise =new Enterprise();
 			StoreInfo store=list.get(0);
-			enterprise.setUserId(user.getId());
 			//enterprise.setCorpid("101");
 			enterprise.setName(store.getCompanyName());
 			enterprise.setCode(keyGenService.corpIdGenerate());
@@ -171,8 +170,6 @@ public class StoreController extends BasicController<Store>{
 			enterprise.setRow_status("NEW");
 			
 			enterpriseService.upsert(enterprise);
-			enterpriseService.dutyInsert(enterprise);
-			enterpriseService.defaultMenuInsert(enterprise);
 			//enterpriseService.dutyUser(enterprise);
 			//enterpriseService.dutyUpdate(enterprise);
 			result.put("success", true);

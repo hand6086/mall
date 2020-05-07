@@ -15,7 +15,8 @@
 		get_http_path(T2.path) as productPic,
 		T.product_pic_type as productPicType,
 		T.comments as comments,
-		T.product_id as productId
+		T.product_id as productId,
+		T.seq as seq
 	</sql>
 
 	<sql id="fromSql">
@@ -45,14 +46,14 @@
 
 	<insert id="insert" parameterType="com.hand.base.goods.model.ProductDetail">
 		insert into lnk_product_detail
-		  (ROW_ID, product_pic_id, product_pic_type, comments,product_id)
+		  (ROW_ID, product_pic_id, product_pic_type, comments,product_id,seq)
 		values
-		  (#{id},#{productPicId},#{productPicType},#{comments},#{productId})
+		  (#{id},#{productPicId},#{productPicType},#{comments},#{productId},#{seq})
 	</insert>
 
 	<update id="update" parameterType="com.hand.base.goods.model.ProductDetail">
 		update lnk_product_detail t
-		   set t.product_pic_id = #{productPicId}, t.product_pic_type = #{productPicType},t.comments=#{comments},t.product_id=#{productId}
+		   set t.product_pic_id = #{productPicId}, t.product_pic_type = #{productPicType},t.comments=#{comments},t.product_id=#{productId},t.seq=#{seq}
 		 where t.row_id = #{id}
 	</update>
 	

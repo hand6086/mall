@@ -67,9 +67,9 @@ spring:
 application:
   database: mysql
   static:
-    url: http://127.0.0.1:8082/mall
+    url: http://47.105.146.145/share
   doc:
-    url: http://127.0.0.1:8082/mall
+    url: http://47.105.146.145/share
 ---
 spring:
   profiles: dev
@@ -84,9 +84,9 @@ spring:
 
 application:
   static:
-    url: http://47.105.146.145/mall
+    url: http://47.105.146.145/share
   doc:
-    url: http://47.105.146.145/mall
+    url: http://47.105.146.145/share
   uploadfile:
     portal:
       share: /app/share/portal

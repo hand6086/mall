@@ -77,7 +77,8 @@
 																			data : getLovArray('PRODUCT_PIC_TYPE'),
 
 																			editable:false}}">图片类型</th>
-			   <th field="comments" width="200px" editor="{type:'textbox'}" >说明</th>
+			   <th field="seq" width="200px" editor="{type:'textbox'}" >排序</th>
+			   <th field="comments" width="200px" editor="{type:'textbox'}">说明</th>
 		   </tr>
 		   </thead>
 	   </table>
@@ -137,18 +138,7 @@
 						});
 					}
 				});
-			},
-
-			onInitNewData:function(that){
-				return {
-					vodLockedFlag: 'Y',
-					vodLockedBy : appCtx.username,
-					vodLockedDate : appCtx.sysdate(),
-					type : 'Finished Bear',
-					o2oShareType : 'Screenshot',
-					prodDefTypeCode : 'Simple'
-				};
-			},
+			}
 		});
 
 		$subdatagrid.hdatagrid({
